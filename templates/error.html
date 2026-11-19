@@ -1,0 +1,17 @@
+{% extends "_base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="error-wrap" role="alert">
+  <span class="code-line">ERROR {{ status }} · {{ key|upper }}</span>
+  <h1>{{ title }}</h1>
+  <p class="lead">{{ body }}</p>
+  <div class="actions">
+    {% if action == 'signin' %}<a class="btn" href="/oauth/login">Sign in with Whop <span class="arrow" aria-hidden="true">→</span></a>
+    {% elif action == 'onboarding' %}<a class="btn" href="/onboarding">Back to activation</a>
+    {% elif action == 'support' and site.support_email %}<a class="btn" href="mailto:{{ site.support_email }}">Email support</a>
+    {% else %}<a class="btn" href="/">Go to activation</a>{% endif %}
+    {% if key == 'no_membership' and site.checkout_url %}<a class="btn secondary" href="{{ site.checkout_url }}">Become a member</a>{% endif %}
+    {% if action != 'support' and site.support_email %}<a class="btn secondary" href="mailto:{{ site.support_email }}">Contact support</a>{% endif %}
+  </div>
+</section>
+{% endblock %}

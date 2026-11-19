@@ -21,6 +21,8 @@ from member_lookup import resolve_member, verified_subscription_by_member
 from customer_communications import process_pending
 from purchaser_intake import handle_queued_event, import_membership
 from security import verify_webhook,hash_token,require_admin
+import customer_errors
+import email_templates
 
 cfg=Config(); engine=Engine(cfg)
 ROOT=Path(__file__).parent
@@ -55,8 +57,9 @@ def deliver_code(email,code):
         # Render's free tier blocks common SMTP ports; HTTPS email delivery
         # works without opening network ports. The sender must be verified.
         payload={'from':cfg.resend_from,'to':[email],
-                 'subject':'StartUpTrading activation verification',
-                 'text':f'Your StartUpTrading activation code is {code}. It expires in 10 minutes. If you did not request it, ignore this email.'}
+                 'subject':f'{code} is your StartUpTrading activation code',
+                 'text':f'Your StartUpTrading activation code is {code}. It expires in 10 minutes. If you did not request it, ignore this email.',
+                 'html':email_templates.code_email(code,cfg.support_email)}
         try:
             with httpx.Client(timeout=12) as client:
                 response=client.post('https://api.resend.com/emails',json=payload,
@@ -67,8 +70,9 @@ def deliver_code(email,code):
             raise HTTPException(503,'Email delivery is temporarily unavailable')
         return
     if not all([cfg.smtp_host,cfg.smtp_from]): raise HTTPException(503,'Email service not configured. Please contact support.')
-    msg=EmailMessage();msg['Subject']='StartUpTrading activation verification';msg['From']=cfg.smtp_from;msg['To']=email
+    msg=EmailMessage();msg['Subject']=f'{code} is your StartUpTrading activation code';msg['From']=cfg.smtp_from;msg['To']=email
     msg.set_content(f'Your StartUpTrading activation code is {code}. It expires in 10 minutes. If you did not request it, ignore this email.')
+    msg.add_alternative(email_templates.code_email(code,cfg.support_email),subtype='html')
     try:
         if cfg.smtp_port==465:
             with smtplib.SMTP_SSL(cfg.smtp_host,cfg.smtp_port,timeout=12) as server:
@@ -94,8 +98,17 @@ def csrf(token): return hashlib.sha256(('csrf:'+token).encode()).hexdigest()
 def check_csrf(request,token,provided):
     if not hmac.compare_digest(csrf(token),provided): raise HTTPException(403,'Invalid form security token')
 
-def page(request,template,**kw):
-    return templates.TemplateResponse(request,template,kw)
+def site_links():
+    return {'support_email':cfg.support_email,'discord_url':cfg.discord_url,'checkout_url':cfg.checkout_url,
+            'whop_hub_url':cfg.whop_hub_url,'setup_url':cfg.indicator_setup_url,
+            'affiliate':cfg.affiliate_url or 'https://ninjatrader.com/'}
+
+def page(request,template,status_code=200,**kw):
+    return templates.TemplateResponse(request,template,{'site':site_links(),**kw},status_code=status_code)
+
+def render_error(request,key,status):
+    title,body,action=customer_errors.MESSAGES[key]
+    return page(request,'error.html',status_code=status,status=status,key=key,title=title,body=body,action=action)
 
 async def event_worker():
     # One worker process only (Render Docker default is one Uvicorn worker).
@@ -134,6 +147,7 @@ async def lifespan(app):
 app=FastAPI(title='StartUpTrading Licensing Bridge',docs_url=None,redoc_url=None,lifespan=lifespan)
 app.mount('/static',StaticFiles(directory=str(ROOT/'static')),name='static')
 templates=Jinja2Templates(directory=str(ROOT/'templates'))
+customer_errors.install(app,lambda request,key,status:render_error(request,key,status))
 
 @app.middleware('http')
 async def secure_headers(request,call_next):
@@ -151,7 +165,7 @@ def health():
 
 @app.get('/',response_class=HTMLResponse)
 def index(request:Request):
-    return page(request,'index.html',affiliate=cfg.affiliate_url,admin_preview_enabled=cfg.admin_test_enabled and preview_allowlist_configured())
+    return page(request,'index.html',indicators=INDICATORS,affiliate=cfg.affiliate_url,admin_preview_enabled=cfg.admin_test_enabled and preview_allowlist_configured())
 
 
 def preview_allowlist_configured():
@@ -495,7 +509,41 @@ def onboarding(request:Request):
     c,token=session_customer(request)
     with connect(cfg) as db:
         licenses=[dict(r) for r in db.execute('SELECT * FROM licenses WHERE customer_id=? ORDER BY product_id',(c['id'],))]
-    return page(request,'onboarding.html',c=c,csrf=csrf(token),indicators=INDICATORS,licenses=licenses,affiliate=cfg.affiliate_url)
+    error=customer_errors.message_for(request.query_params.get('error',''))
+    message=request.query_params.get('message','')
+    return page(request,'onboarding.html',c=c,csrf=csrf(token),indicators=INDICATORS,licenses=licenses,
+                affiliate=cfg.affiliate_url,error=error,message=message,view=onboarding_view(c,licenses))
+
+ACTIVE_STATES={'created','renewed','unchanged'}
+LICENSE_LABELS={'created':'Active','renewed':'Active','unchanged':'Active','expired':'Expired',
+                'already_expired':'Expired','absent':'Not active','error':'Needs attention'}
+
+def onboarding_view(c,licenses):
+    """Work out which step the member is on and how to describe their indicators."""
+    by_pid={int(l['product_id']):l for l in licenses}
+    items=[]
+    for pid,name in INDICATORS.items():
+        row=by_pid.get(pid)
+        state=row['state'] if row else None
+        if state in ACTIVE_STATES: tone='ok'
+        elif state=='error': tone='warn'
+        elif state in ('expired','already_expired','absent'): tone='off'
+        else: tone='wait'
+        label=LICENSE_LABELS.get(state,'Activating' if c['verified'] else 'Waiting for step 2')
+        items.append({'pid':pid,'name':name,'label':label,'tone':tone})
+    if not c['buyer_email_verified']: step=1
+    elif not c['verified'] and not c['nt_email']: step=2
+    elif not c['verified']: step=3
+    else: step=4
+    all_active=all(i['tone']=='ok' for i in items)
+    visual={1:1,2:2,3:2,4:3}[step]
+    stepper=[]
+    for n,label in enumerate(['Membership','NinjaTrader email','Indicators'],1):
+        if n<visual or (n==3 and all_active and step==4):stepper.append((label,'done'))
+        elif n==visual:stepper.append((label,'current'))
+        else:stepper.append((label,''))
+    return {'step':step,'visual_step':visual,'stepper':stepper,'indicators':items,'all_active':all_active,
+            'ineligible':c['status']=='ineligible','code_pending':bool(c['nt_email'] and not c['verified'])}
 
 @app.post('/onboarding/buyer-code')
 def buyer_code(request:Request,csrf_token:str=Form(...)):
