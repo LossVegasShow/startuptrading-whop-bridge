@@ -16,6 +16,7 @@ class Whop:
     def __init__(self,m):self.m=m
     async def membership(self,id):return self.m
     async def memberships_for_user(self,userid):return [self.m] if userid==self.m.get("user_id") else []
+    async def find_subscription_for_user(self,mid,userid):return self.m if mid==self.m.get("id") and userid==self.m.get("user_id") else None
     async def user(self,id):return {'email':'whopbuyer@example.org'}
     async def resolve_membership(self,m):return m
 

@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS crm_sync (
   revision INTEGER NOT NULL DEFAULT 1, synced_revision INTEGER NOT NULL DEFAULT 0, fingerprint TEXT NOT NULL DEFAULT '',
   attempts INTEGER NOT NULL DEFAULT 0, next_attempt_at INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL DEFAULT 0, last_error TEXT);
+CREATE TABLE IF NOT EXISTS funnel_events (
+  id INTEGER PRIMARY KEY, event_name TEXT NOT NULL, occurred_at INTEGER NOT NULL,
+  source_key TEXT UNIQUE, details TEXT NOT NULL DEFAULT '');
+CREATE INDEX IF NOT EXISTS idx_funnel_event_name ON funnel_events(event_name);
 CREATE TABLE IF NOT EXISTS message_outbox (
   customer_id INTEGER NOT NULL, kind TEXT NOT NULL, target_email TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending', provider_message_id TEXT,
@@ -171,3 +175,14 @@ def queue_activation_email(db,cid):
     db.execute("""INSERT INTO message_outbox(customer_id,kind,target_email,updated_at)
         VALUES(?,'activation',?,?) ON CONFLICT(customer_id,kind) DO NOTHING""",(cid,c['nt_email'],int(time.time())))
     return True
+
+
+def track_funnel_event(db, event_name, source_key=None, details=''):
+    """Anonymous aggregate events; never store IP, user agent or credentials."""
+    allowed={'visitor','checkout_initiated','conversion_confirmed','activation_opened'}
+    if event_name not in allowed: raise ValueError('Unknown funnel event')
+    if source_key is not None and (not isinstance(source_key,str) or len(source_key)>180):
+        raise ValueError('Invalid event correlation key')
+    db.execute("""INSERT INTO funnel_events(event_name,occurred_at,source_key,details)
+        VALUES(?,?,?,?) ON CONFLICT(source_key) DO NOTHING""",
+        (event_name,int(time.time()),source_key,str(details)[:180]))

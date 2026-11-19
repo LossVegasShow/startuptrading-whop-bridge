@@ -19,6 +19,8 @@ def member(uid=USER, plan=None):
 class ListOnlyWhop:
     async def memberships_for_user(self,uid):
         return [member()] if uid==USER else []
+    async def find_subscription_for_user(self,mid,uid):
+        return member() if mid==MID and uid==USER else None
     async def membership(self,mid):
         raise AssertionError('Direct membership endpoint must not be called in admin intake')
     async def user(self,uid):return {'email':'confirmed-buyer@example.org'}
@@ -56,7 +58,7 @@ def test_user_mismatch_fails_without_write(tmp_path,monkeypatch):
 def test_ineligible_plan_fails_without_write(tmp_path,monkeypatch):
     client,cfg,data=setup(tmp_path,monkeypatch)
     class WrongPlan(ListOnlyWhop):
-        async def memberships_for_user(self,uid):return [member(plan='plan_wrong')]
+        async def find_subscription_for_user(self,mid,uid):return member(plan='plan_wrong')
     monkeypatch.setattr(app.engine,'whop',WrongPlan())
     r=client.post('/admin-test/intake',data=data)
     assert r.status_code==409

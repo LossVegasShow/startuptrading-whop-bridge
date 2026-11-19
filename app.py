@@ -2,7 +2,7 @@
 Works with a Whop link and verified buyer email; embedded Whop SSO adapter is NOT claimed.
 """
 import asyncio,hashlib,hmac,json,os,secrets, smtplib,ssl,time,base64
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 import httpx
 from email.message import EmailMessage
 from contextlib import asynccontextmanager
@@ -13,7 +13,7 @@ from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from config import Config,INDICATORS,EVENTS,PLANS
-from store import connect,customer,audit,request_crm_sync
+from store import connect,customer,audit,request_crm_sync,track_funnel_event
 from engine import Engine
 from clients import membership_entitlement,IntegrationError
 from diagnostics import run_checks
@@ -126,6 +126,11 @@ async def event_worker():
 
 @asynccontextmanager
 async def lifespan(app):
+    if cfg.license_writes and not (cfg.allowed_test_email and cfg.allowed_test_membership):
+        raise RuntimeError('Refusing license writes without both test allowlists')
+    for required in ('index.html','activate.html','onboarding.html','admin_test.html','admin.html','invite.html','result.html'):
+        if not (ROOT/'templates'/required).is_file():
+            raise RuntimeError(f'Missing required application template: {required}')
     with connect(cfg):pass
     task=asyncio.create_task(event_worker()) if cfg.run_reconciler else None
     yield
@@ -140,18 +145,49 @@ async def secure_headers(request,call_next):
     resp=await call_next(request)
     resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='no-referrer'
     resp.headers['X-Content-Type-Options']='nosniff';resp.headers['X-Frame-Options']='DENY'
-    resp.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    resp.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data: https:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     return resp
 
 @app.get('/health')
 def health():
     return {'status':'ok','mode':'single_test_membership' if cfg.license_writes else 'observe_only',
             'whop_configured':bool(cfg.whop_api_key),'webhook_configured':bool(cfg.whop_webhook_secret),
-            'ninjatrader_configured':bool(cfg.nt_cid and cfg.nt_sec), 'reconciler_enabled':cfg.run_reconciler}
+            'ninjatrader_configured':bool(cfg.nt_cid and cfg.nt_sec), 'reconciler_enabled':cfg.run_reconciler, 'release':'audit-rc1'}
+
+def approved_external_url(url, domains=None):
+    """Fail closed: customer navigation must have a real verified HTTPS target."""
+    if not url or not isinstance(url,str):return ''
+    parsed=urlsplit(url)
+    if parsed.scheme!='https' or not parsed.netloc or parsed.username or parsed.password:
+        return ''
+    host=(parsed.hostname or '').lower()
+    if domains and not any(host==d or host.endswith('.'+d) for d in domains):return ''
+    return url
+
+def track_public(event):
+    # Analytics failures must never interrupt checkout or onboarding.
+    try:
+        with connect(cfg) as db:track_funnel_event(db,event)
+    except Exception:pass
 
 @app.get('/',response_class=HTMLResponse)
 def index(request:Request):
-    return page(request,'index.html',affiliate=cfg.affiliate_url,admin_preview_enabled=cfg.admin_test_enabled and preview_allowlist_configured())
+    track_public('visitor')
+    images={pid:approved_external_url(getattr(cfg,'indicator_image_'+str(pid),'')) for pid in INDICATORS}
+    videos={pid:approved_external_url(getattr(cfg,'indicator_demo_'+str(pid),'')) for pid in INDICATORS}
+    return page(request,'index.html',checkout_ready=bool(approved_external_url(cfg.whop_checkout_url,('whop.com',))),
+                indicators=INDICATORS,images=images,videos=videos,
+                jack_photo=approved_external_url(cfg.jack_photo_url),jack_bio=approved_external_url(cfg.jack_bio_url),
+                support_ready=bool(approved_external_url(cfg.direct_support_url)),
+                discord_ready=bool(approved_external_url(cfg.discord_join_url)))
+
+@app.get('/checkout')
+def checkout():
+    url=approved_external_url(cfg.whop_checkout_url,('whop.com',))
+    if not url:
+        return HTMLResponse('Whop checkout is not configured. Please contact StartUpTrading support.',status_code=503)
+    track_public('checkout_initiated')
+    return RedirectResponse(url,status_code=303)
 
 
 def preview_allowlist_configured():
@@ -243,8 +279,6 @@ async def admin_intake_target(membership_id,expected_user_id,member_id):
         if member_id:
             m=await verified_subscription_by_member(cfg,member_id,membership_id,expected_user_id)
         else:
-            # Legacy intake callers retain the prior strict lookup; operators
-            # should supply mber_ to use the confirmed working API route.
             m=await engine.whop.find_subscription_for_user(membership_id,expected_user_id)
     except (IntegrationError,httpx.RequestError) as exc:
         raise HTTPException(502,'Whop subscription listing unavailable; check Render logs') from exc
@@ -442,10 +476,10 @@ async def oauth_callback(code:str='',state:str='',error:str=''):
         token=secrets.token_urlsafe(36)
         with connect(cfg) as db:
             db.execute('INSERT INTO admin_test_sessions(token_hash,whop_user_id,verified_email,expires_at) VALUES(?,?,?,?)',
-                       (hash_token(token),userid,email if person.get('email_verified') is True else None,int(time.time())+3600))
+                       (hash_token(token),userid,email if person.get('email_verified') is True else None,int(time.time())+28800))
         response=RedirectResponse('/admin-test',303)
         response.set_cookie('sut_admin_preview',token,httponly=True,
-             secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=3600)
+             secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=28800)
         return response
     try: memberships=await engine.whop.memberships_for_user(userid)
     except IntegrationError:raise HTTPException(502,'Whop membership could not be checked')
@@ -473,7 +507,7 @@ async def oauth_callback(code:str='',state:str='',error:str=''):
         session=secrets.token_urlsafe(36)
         db.execute('INSERT INTO sessions(token_hash,customer_id,expires_at) VALUES(?,?,?)',
                    (hash_token(session),cid,int(time.time())+86400*14))
-    response=RedirectResponse('/onboarding',303)
+    response=RedirectResponse('/activate',303)
     response.set_cookie('sut_session',session,httponly=True,
         secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=1209600)
     return response
@@ -486,7 +520,7 @@ def accept_invite(request:Request,invite_token:str):
         db.execute('UPDATE invites SET used_at=? WHERE token_hash=?',(int(time.time()),hash_token(invite_token)))
         session=secrets.token_urlsafe(36)
         db.execute('INSERT INTO sessions(token_hash,customer_id,expires_at) VALUES(?,?,?)',(hash_token(session),row['customer_id'],int(time.time())+86400*14))
-    resp=RedirectResponse('/onboarding',status_code=303)
+    resp=RedirectResponse('/activate',status_code=303)
     resp.set_cookie('sut_session',session,httponly=True,secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=1209600)
     return resp
 
@@ -495,14 +529,31 @@ def onboarding(request:Request):
     c,token=session_customer(request)
     with connect(cfg) as db:
         licenses=[dict(r) for r in db.execute('SELECT * FROM licenses WHERE customer_id=? ORDER BY product_id',(c['id'],))]
-    return page(request,'onboarding.html',c=c,csrf=csrf(token),indicators=INDICATORS,licenses=licenses,affiliate=cfg.affiliate_url)
+    return page(request,'activate.html',c=c,csrf=csrf(token),indicators=INDICATORS,licenses=licenses,
+                registration_url=approved_external_url(cfg.affiliate_url,('ninjatrader.com',)) or 'https://account.ninjatrader.com/',
+                indicator_setup_url=approved_external_url(cfg.indicator_setup_url),
+                discord_url=approved_external_url(cfg.discord_join_url),
+                support_url=approved_external_url(cfg.direct_support_url),
+                support_email=cfg.support_email if '@' in cfg.support_email else '',
+                license_writes=cfg.license_writes)
+
+@app.get('/activate',response_class=HTMLResponse)
+def activate(request:Request):
+    try:
+        result=onboarding(request)
+    except HTTPException as exc:
+        if exc.status_code==403:
+            return RedirectResponse('/oauth/login',status_code=303)
+        raise
+    track_public('activation_opened')
+    return result
 
 @app.post('/onboarding/buyer-code')
 def buyer_code(request:Request,csrf_token:str=Form(...)):
     c,token=session_customer(request);check_csrf(request,token,csrf_token)
     with connect(cfg) as db: code=issue_code(db,c['id'],'buyer',c['buyer_email'])
     deliver_code(c['buyer_email'],code)
-    return RedirectResponse('/onboarding?message=buyer_sent',303)
+    return RedirectResponse('/activate?message=buyer_sent',303)
 
 @app.post('/onboarding/buyer-verify')
 def buyer_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...)):
@@ -510,7 +561,7 @@ def buyer_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...)):
     with connect(cfg) as db:
         if not verify_code(db,c['id'],'buyer',code):raise HTTPException(400,'Invalid or expired verification code')
         db.execute('UPDATE customers SET buyer_email_verified=1,status=?,updated_at=? WHERE id=?',('buyer_verified',int(time.time()),c['id']))
-    return RedirectResponse('/onboarding?message=buyer_verified',303)
+    return RedirectResponse('/activate?message=buyer_verified',303)
 
 @app.post('/onboarding/nt-code')
 def nt_code(request:Request,csrf_token:str=Form(...),nt_email:str=Form(...),path:str=Form(...)):
@@ -533,7 +584,7 @@ def nt_code(request:Request,csrf_token:str=Form(...),nt_email:str=Form(...),path
         db.execute('UPDATE customers SET nt_email=?,verified=0,onboarding_path=?,updated_at=? WHERE id=?',(email,path,int(time.time()),c['id']))
         code=issue_code(db,c['id'],'nt',email)
     deliver_code(email,code)
-    return RedirectResponse('/onboarding?message=nt_sent',303)
+    return RedirectResponse('/activate?message=nt_sent',303)
 
 @app.post('/onboarding/nt-verify')
 async def nt_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...)):
@@ -557,14 +608,14 @@ async def nt_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...))
     try:await engine.reconcile(c['id'])
     except IntegrationError as exc:
         with connect(cfg) as db:audit(db,c['id'],'reconcile_retry_needed',str(exc)[:140])
-    return RedirectResponse('/onboarding?message=nt_verified',303)
+    return RedirectResponse('/activate?message=nt_verified',303)
 
 @app.post('/onboarding/refresh')
 async def customer_refresh(request:Request,csrf_token:str=Form(...)):
     c,token=session_customer(request);check_csrf(request,token,csrf_token)
     try:await engine.reconcile(c['id'])
     except IntegrationError:pass
-    return RedirectResponse('/onboarding?message=refreshed',303)
+    return RedirectResponse('/activate?message=refreshed',303)
 
 @app.get('/admin',response_class=HTMLResponse)
 def admin(request:Request):

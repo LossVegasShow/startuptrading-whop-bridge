@@ -6,7 +6,7 @@ from a fresh authenticated Whop API lookup. No NinjaTrader license is created he
 import time
 from clients import IntegrationError, membership_entitlement, membership_plan_id
 from config import BUSINESS_ID, PRODUCT_ID, PLANS
-from store import connect, request_crm_sync, audit
+from store import connect, request_crm_sync, audit, track_funnel_event
 
 
 def member_email(record):
@@ -93,6 +93,8 @@ async def import_membership(cfg,whop, membership_id, *, verified_membership=None
             action='created'
             audit(db,cid,'buyer_captured_from_whop','Pending account linking; no license issued')
         request_crm_sync(db,cid)
+        if ent:
+            track_funnel_event(db,'conversion_confirmed','membership:'+membership_id,'verified_whop_entitlement')
     return {'state':action,'customer_id':cid}
 
 

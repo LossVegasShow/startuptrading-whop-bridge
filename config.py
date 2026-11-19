@@ -4,10 +4,7 @@ from dataclasses import dataclass
 
 BUSINESS_ID = 'biz_a1txPozoELC3Yc'
 PRODUCT_ID = 'prod_Nr8ggb93WCyC1'
-PLANS = {
-    'plan_qSXeS0xoDapGU': 'Monthly · $99',
-    'plan_B84PWLvXemyFX': 'Annual · $495'
-}
+PLANS = {'plan_qSXeS0xoDapGU': 'Monthly · $99', 'plan_B84PWLvXemyFX': 'Annual · $495'}
 INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner and Momentum Selector', 2205:'TSMS & Fibs'}
 EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_period_end_changed','membership.updated','payment.succeeded','payment.failed'}
 
@@ -52,3 +49,15 @@ class Config:
     ghl_custom_fields_json: str = os.getenv('GHL_CUSTOM_FIELDS_JSON','')
     indicator_setup_url: str = os.getenv('INDICATOR_SETUP_URL','')
     support_email: str = os.getenv('SUPPORT_EMAIL','')
+
+    whop_checkout_url: str = os.getenv('WHOP_CHECKOUT_URL','').strip()
+    jack_bio_url: str = os.getenv('JACK_BIO_URL','').strip()
+    jack_photo_url: str = os.getenv('JACK_PHOTO_URL','').strip()
+    discord_join_url: str = os.getenv('DISCORD_JOIN_URL','').strip()
+    direct_support_url: str = os.getenv('DIRECT_SUPPORT_URL','').strip()
+    indicator_demo_2067: str = os.getenv('INDICATOR_DEMO_2067','').strip()
+    indicator_demo_2071: str = os.getenv('INDICATOR_DEMO_2071','').strip()
+    indicator_demo_2205: str = os.getenv('INDICATOR_DEMO_2205','').strip()
+    indicator_image_2067: str = os.getenv('INDICATOR_IMAGE_2067','').strip()
+    indicator_image_2071: str = os.getenv('INDICATOR_IMAGE_2071','').strip()
+    indicator_image_2205: str = os.getenv('INDICATOR_IMAGE_2205','').strip()
