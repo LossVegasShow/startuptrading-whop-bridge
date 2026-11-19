@@ -48,9 +48,13 @@ def test_unique_verified_email_in_db(tmp_path):
  try:
   with connect(web.cfg) as db:db.execute('UPDATE customers SET verified=1 WHERE membership_id=?',('mem_b',))
   assert False,'duplicate verified email should be blocked'
- except sqlite3.IntegrityError:pass
+ except Exception as exc:
+  # SQLite raises sqlite3.IntegrityError, PostgreSQL psycopg UniqueViolation.
+  assert isinstance(exc,sqlite3.IntegrityError) or type(exc).__name__=='UniqueViolation',exc
 
 def test_legacy_sqlite_migration_preserves_customer(tmp_path):
+ import os,pytest
+ if os.getenv('SUT_TEST_FORCE_DATABASE_URL'):pytest.skip('SQLite-only migration path')
  import sqlite3
  from store import SCHEMA
  path=tmp_path/'legacy.sqlite'

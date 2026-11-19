@@ -61,9 +61,21 @@ CREATE TABLE IF NOT EXISTS message_outbox (
 # useful for local development/tests but must not be used for real hosted signups.
 POSTGRES_SCHEMA = SCHEMA.replace('id INTEGER PRIMARY KEY,', 'id BIGSERIAL PRIMARY KEY,')
 
+class PgRow(dict):
+    """A PostgreSQL row that behaves like sqlite3.Row: readable by column name
+    AND by position (row['id'] or row[0]). Without this, code written against
+    SQLite (e.g. `fetchone()[0]`) raised KeyError only in production."""
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
+    def keys(self):
+        return list(super().keys())
+
+
 class PostgresResult:
     def __init__(self, rows, rowcount, lastrowid=None):
-        self._rows=rows
+        self._rows=[PgRow(r) for r in rows]
         self.rowcount=rowcount
         self.lastrowid=lastrowid
     def fetchone(self):
@@ -100,9 +112,13 @@ class PostgresConnection:
             inserted=rows[0]['id'] if insert_id and rows else None
             return PostgresResult(rows,cursor.rowcount,inserted)
 
+# Test-only: run the whole test suite against PostgreSQL even though individual
+# tests configure SQLite. Never set this in production.
+TEST_FORCE_DATABASE_URL=os.getenv('SUT_TEST_FORCE_DATABASE_URL','')
+
 @contextmanager
 def connect(cfg:Config):
-    url=getattr(cfg,'database_url','')
+    url=TEST_FORCE_DATABASE_URL or getattr(cfg,'database_url','')
     if url:
         import psycopg
         from psycopg.rows import dict_row
