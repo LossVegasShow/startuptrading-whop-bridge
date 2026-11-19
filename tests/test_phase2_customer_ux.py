@@ -25,9 +25,13 @@ def setup(tmp_path, **cols):
            'updated_at': int(time.time())}
     row.update(cols)
     with connect(web.cfg) as db:
+        # Start clean: on PostgreSQL (shared database) earlier setups would collide.
+        for table in ('sessions', 'codes', 'licenses', 'customers'):
+            db.execute(f'DELETE FROM {table}')
         db.execute(f"INSERT INTO customers({','.join(row)}) VALUES({','.join('?' * len(row))})", tuple(row.values()))
+        cid = db.execute('SELECT id FROM customers WHERE membership_id=?', (row['membership_id'],)).fetchone()['id']
         db.execute('INSERT INTO sessions(token_hash,customer_id,expires_at) VALUES(?,?,?)',
-                   (web.hash_token('u' * 40), 1, int(time.time()) + 3600))
+                   (web.hash_token('u' * 40), cid, int(time.time()) + 3600))
     return {'sut_session': 'u' * 40}, web.csrf('u' * 40)
 
 
