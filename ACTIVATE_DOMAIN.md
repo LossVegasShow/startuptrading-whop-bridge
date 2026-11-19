@@ -1,5 +1,10 @@
 # Move the activation app to `activate.startuptrading.com`
 
+> ⏸ **On hold:** waiting on DNS (Namecheap) access. This runbook is group A of
+> the **"Waiting on access"** reminder at the top of `PLAN.md`. Until then the
+> app keeps running at `https://startuptrading-whop-bridge.onrender.com`;
+> nothing needs to change.
+
 The activation app (Render service `startuptrading-whop-bridge`) currently
 answers at `startuptrading-whop-bridge.onrender.com`. This moves it to
 **`https://activate.startuptrading.com`**, a trustworthy address to put in Whop,

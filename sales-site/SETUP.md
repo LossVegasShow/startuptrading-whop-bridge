@@ -1,10 +1,9 @@
 # Sales site: GoHighLevel + Namecheap setup
 
-> ⏸ **On hold:** GoHighLevel access hasn't been granted yet, so the GHL steps
-> (2, 2b, 3, the `@`/`www` records in 4, and 6) are deferred to the end of the
-> build. See "Deferred: waiting on GoHighLevel access" in `PLAN.md`. Moving the
-> activation app to `activate.startuptrading.com` doesn't need GHL: follow
-> `ACTIVATE_DOMAIN.md` now.
+> ⏸ **On hold:** the owner doesn't have GoHighLevel or DNS (Namecheap)
+> access yet, so everything in this guide is parked until access is granted.
+> The consolidated reminder list is **"Waiting on access"** at the top of
+> `PLAN.md` (groups A–C).
 
 The sales page lives on **GoHighLevel (GHL)**. The member activation app stays
 on **Render**. **Namecheap** DNS points the domain at both:
