@@ -220,14 +220,30 @@ licenses succeed. **It doesn't need a rebuild.**
       period, then indicators deactivate automatically" matches policy.
 - [ ] Get NinjaTrader vendor confirmation of the production token endpoint.
 
-### Phase 3: Test the full lifecycle (needs Jack's test account)
-- [ ] One real test membership: buy → activate → all three indicators work
-      **inside NinjaTrader** → cancel with time left (access kept) → expire
-      (access removed) → resubscribe (access restored).
-- [ ] Duplicate and out-of-order webhook replays create no duplicate licenses.
-- [ ] Rollout gate: one test account → an allowlist of 5–10 friendly members →
-      everyone. This needs a reviewed production-write setting to replace the
-      single-account test switch.
+### Phase 3: Test the full lifecycle ✅ prep done, ⏳ needs Jack's test accounts
+- [x] Runbook: **`LIFECYCLE_TEST.md`**. Prerequisites, Render settings, a
+      10-step test matrix with expected results, a results table, vendor
+      questions and an emergency stop.
+- [x] Read-only **lifecycle snapshot** at `/admin/lifecycle/<id>` (Snapshot
+      button in `/admin`). It shows Whop vs database vs NinjaTrader side by
+      side with a per-indicator `ok` / `mismatch` verdict.
+- [x] Offline dress rehearsal of every step (`tests/test_phase3_rehearsal.py`):
+      purchase, duplicate, renewal, cancel-at-period-end, expiry, restore, a
+      Whop outage (no revoke), a partial NinjaTrader failure (no success email),
+      and the allowlist gate.
+- [x] `NT_AUTH_URL` setting, so the vendor's demo-vs-live answer needs no code
+      change.
+- [x] Staged-rollout gate: `LICENSE_WRITE_ALLOWLIST` (exact membership + email
+      pairs) for the 5–10-member stage after the single-account test.
+- [ ] **Finding:** returning customers who rejoin with a new Whop membership
+      are blocked (email "linked to another account" / license "not
+      bridge-owned"). Proposed fix in `LIFECYCLE_TEST.md` section 6, which
+      **needs approval**.
+- [ ] **(Jack / you)** Test Whop membership, test NinjaTrader account, vendor
+      answers (`LIFECYCLE_TEST.md` sections 0 and 5), then run the test.
+- [ ] Rollout: one test account → `LICENSE_WRITE_ALLOWLIST` with 5–10
+      friendly members → everyone (the last step needs a reviewed
+      "all members" mode, not built yet).
 
 ### Phase 4: Sales site and copy ✅ page built, ⏳ needs assets, sign-off and DNS
 - [x] Sales page in `sales-site/`: one source, built into a paste-ready

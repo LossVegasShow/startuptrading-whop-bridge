@@ -19,6 +19,7 @@ from clients import membership_entitlement,IntegrationError
 from diagnostics import run_checks
 from member_lookup import resolve_member, verified_subscription_by_member
 from customer_communications import process_pending
+import lifecycle
 from purchaser_intake import handle_queued_event, import_membership
 from security import verify_webhook,hash_token,require_admin
 import customer_errors
@@ -673,6 +674,13 @@ async def admin_invite(request:Request,membership_id:str=Form(...),buyer_email:s
         audit(db,cid,'invitation_created','Admin invitation; buyer email must be verified')
     url=cfg.public_base_url+'/activate/'+quote(token)
     return page(request,'invite.html',url=url,recipient=buyer_email)
+
+@app.get('/admin/lifecycle/{cid}')
+async def admin_lifecycle(request:Request,cid:int):
+    # Read-only: Whop membership GET + NinjaTrader license-list GET, no writes.
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    try:return JSONResponse(await lifecycle.snapshot(cfg,engine,cid))
+    except IntegrationError as exc:raise HTTPException(404,str(exc))
 
 @app.post('/admin/reconcile/{cid}')
 async def admin_reconcile(request:Request,cid:int):
