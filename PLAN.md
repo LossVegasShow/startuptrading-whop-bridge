@@ -13,6 +13,38 @@ membership ends. The sales site should look modern and credible, not templated.
 
 ---
 
+## ⏸ Deferred: waiting on GoHighLevel access (do at the end of the build)
+
+> **Reminder:** the GoHighLevel (GHL) admins haven't granted access yet. These
+> tasks are parked until access is given, and are lowest priority, for the end
+> of the product build. When access arrives, work through this list in order.
+> Everything here is already built and committed; it only needs setting up in GHL.
+
+1. **Publish the sales page:** create the GHL site, page path `/`, and paste
+   `sales-site/dist/ghl-embed.html` into a Code element (`sales-site/SETUP.md`
+   step 2). Rebuild first (`python sales-site/build.py`) if anything changed.
+2. **Publish the thank-you page:** page path `/welcome`, paste
+   `sales-site/dist/welcome-embed.html`, add the Purchase pixel / conversion
+   code to its header tracking (`SETUP.md` step 2b).
+3. **Connect `startuptrading.com` in GHL** and add the `@` / `www` records GHL
+   shows into Namecheap (`SETUP.md` steps 3–4, root and www only).
+4. **Only after `/welcome` is live:** set Whop's post-purchase redirect to
+   `https://startuptrading.com/welcome` (`SETUP.md` step 2b.5). Until then
+   leave Whop's redirect as it is, so hosted-checkout buyers don't hit a
+   missing page. (The embedded checkout only exists on the GHL page, so it
+   can't send anyone to `/welcome` before then.)
+5. **Run the sales-site launch checks** in `SETUP.md` step 6 (embed loads,
+   Annual toggle, test purchase lands on `/welcome`, tracking fires).
+6. **CRM sync (Phase 5):** create a GHL API key and location ID, set
+   `GHL_API_KEY`, `GHL_LOCATION_ID` and `GHL_CUSTOM_FIELDS_JSON` in Render, and
+   build the "paid but never activated" reminder sequence.
+
+**Not blocked by GHL, so it can be done now:** the Namecheap `activate` CNAME,
+the Render custom domain `activate.startuptrading.com`, `PUBLIC_BASE_URL`, and
+the Whop OAuth redirect URI and webhook URL (`SETUP.md` steps 4.4 and 5).
+
+---
+
 ## 1. Findings from the code review
 
 ### Why `startuptrading-whop-bridge` fails to deploy
@@ -180,8 +212,12 @@ licenses succeed. **It doesn't need a rebuild.**
       scoped, and there are no profit or guarantee phrases.
 - [ ] **(You/Jack)** Work through `sales-site/COPY_REVIEW.md` (claims,
       assets, decisions).
-- [ ] **(You)** Follow `sales-site/SETUP.md`: GHL page, GHL domain,
-      Namecheap DNS, Render custom domain, Whop redirect and webhook URLs.
+- [ ] **(You, now)** `activate.startuptrading.com`: Namecheap `activate`
+      CNAME, Render custom domain, `PUBLIC_BASE_URL`, Whop OAuth redirect and
+      webhook (`SETUP.md` steps 4.4 and 5). Doesn't need GHL.
+- [ ] ⏸ **Deferred until GHL access:** publish the sales and thank-you pages,
+      connect the domain in GHL, Whop redirect to `/welcome`, launch checks.
+      See "Deferred: waiting on GoHighLevel access" at the top.
 - [x] Monthly/Annual toggle and an embedded Whop checkout in Pricing: buyers
       pay on the page, then Whop redirects them straight to activation. The
       `embed_checkout` switch falls back to hosted-checkout buttons.
@@ -190,7 +226,9 @@ licenses succeed. **It doesn't need a rebuild.**
       install steps, plus support. Hook for purchase-conversion tracking.
 
 ### Phase 5: Launch operations
-- [ ] Connect GoHighLevel, with a "paid but never activated" reminder sequence.
+- [ ] ⏸ **Deferred until GHL access:** connect GoHighLevel CRM sync, with a
+      "paid but never activated" reminder sequence (see the deferred list at
+      the top).
 - [ ] Error alerts (Sentry or Render notifications) and a tested Postgres
       backup restore.
 - [ ] Launch to a small group first. Track paid → activated rate, activation
