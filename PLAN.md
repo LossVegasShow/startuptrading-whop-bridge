@@ -235,10 +235,13 @@ licenses succeed. **It doesn't need a rebuild.**
       change.
 - [x] Staged-rollout gate: `LICENSE_WRITE_ALLOWLIST` (exact membership + email
       pairs) for the 5–10-member stage after the single-account test.
-- [ ] **Finding:** returning customers who rejoin with a new Whop membership
-      are blocked (email "linked to another account" / license "not
-      bridge-owned"). Proposed fix in `LIFECYCLE_TEST.md` section 6, which
-      **needs approval**.
+- [x] Returning members who rejoin with a new Whop membership can reclaim
+      their NinjaTrader link and licenses: same Whop user only, old membership
+      confirmed ended with Whop, inbox re-verified, one transaction, audited
+      (`returning_member.py`, `LIFECYCLE_TEST.md` section 6).
+- [x] Security fix: wrong one-time codes are now actually counted. The error
+      used to roll back the attempt counter, so the 5-try limit never applied.
+      Both the membership and NinjaTrader codes are fixed and tested.
 - [ ] **(Jack / you)** Test Whop membership, test NinjaTrader account, vendor
       answers (`LIFECYCLE_TEST.md` sections 0 and 5), then run the test.
 - [ ] Rollout: one test account → `LICENSE_WRITE_ALLOWLIST` with 5–10

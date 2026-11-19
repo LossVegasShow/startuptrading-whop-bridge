@@ -20,6 +20,7 @@ from diagnostics import run_checks
 from member_lookup import resolve_member, verified_subscription_by_member
 from customer_communications import process_pending
 import lifecycle
+import returning_member
 from purchaser_intake import handle_queued_event, import_membership
 from security import verify_webhook,hash_token,require_admin
 import customer_errors
@@ -582,8 +583,11 @@ def buyer_code(request:Request,csrf_token:str=Form(...)):
 def buyer_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...)):
     c,token=session_customer(request);check_csrf(request,token,csrf_token)
     with connect(cfg) as db:
-        if not verify_code(db,c['id'],'buyer',code):raise HTTPException(400,'Invalid or expired verification code')
-        db.execute('UPDATE customers SET buyer_email_verified=1,status=?,updated_at=? WHERE id=?',('buyer_verified',int(time.time()),c['id']))
+        ok=verify_code(db,c['id'],'buyer',code)
+        if ok:
+            db.execute('UPDATE customers SET buyer_email_verified=1,status=?,updated_at=? WHERE id=?',('buyer_verified',int(time.time()),c['id']))
+    # Raise only after the transaction commits, so the failed attempt is counted.
+    if not ok:raise HTTPException(400,'Invalid or expired verification code')
     return RedirectResponse('/onboarding?message=buyer_verified',303)
 
 @app.post('/onboarding/nt-code')
@@ -602,8 +606,11 @@ def nt_code(request:Request,csrf_token:str=Form(...),nt_email:str=Form(...),path
         prior=db.execute('SELECT 1 FROM licenses WHERE customer_id=? LIMIT 1',(c['id'],)).fetchone()
         if prior:
             raise HTTPException(409,'Existing indicator licenses require support review before relinking')
-        conflict=db.execute('SELECT id FROM customers WHERE lower(nt_email)=? AND id!=? AND verified=1',(email,c['id'])).fetchone()
-        if conflict:raise HTTPException(409,'That NinjaTrader email is linked to another account; contact support')
+        holder=returning_member.holder_of(db,email,c['id'])
+        # A returning member (same Whop user, earlier membership) may reclaim their
+        # own NinjaTrader link; the transfer itself is checked again at verify time.
+        if holder and not returning_member.same_whop_user(holder,c):
+            raise HTTPException(409,'That NinjaTrader email is linked to another account; contact support')
         db.execute('UPDATE customers SET nt_email=?,verified=0,onboarding_path=?,updated_at=? WHERE id=?',(email,path,int(time.time()),c['id']))
         code=issue_code(db,c['id'],'nt',email)
     deliver_code(email,code)
@@ -612,26 +619,59 @@ def nt_code(request:Request,csrf_token:str=Form(...),nt_email:str=Form(...),path
 @app.post('/onboarding/nt-verify')
 async def nt_verify(request:Request,csrf_token:str=Form(...),code:str=Form(...)):
     c,token=session_customer(request);check_csrf(request,token,csrf_token)
+    # Returning member: if the email is held by this same Whop user's earlier
+    # membership, confirm with Whop that it has ended BEFORE using up the code.
+    with connect(cfg) as db:
+        pending=db.execute('SELECT nt_email FROM customers WHERE id=?',(c['id'],)).fetchone()
+        holder=returning_member.holder_of(db,pending['nt_email'],c['id']) if pending and pending['nt_email'] else None
+    if holder:
+        if not returning_member.same_whop_user(holder,c):
+            raise HTTPException(409,'That NinjaTrader email is already linked')
+        try:await returning_member.confirm_holder_ended(engine,holder)
+        except returning_member.StillActiveElsewhere:
+            raise HTTPException(409,'That NinjaTrader account is still active on another membership; contact support')
+        except IntegrationError:
+            raise HTTPException(502,'Whop membership could not be checked')
+    if holder:
+        # Hold the old record's sync lease so its reconcile can't run mid-transfer.
+        try:
+            with returning_member.HolderLease(engine,holder['id']):
+                _nt_verify_link(c,code,holder)
+        except returning_member.TransferBusy:
+            raise HTTPException(409,'Wait a minute and try again: a license sync is in progress')
+    else:
+        _nt_verify_link(c,code,None)
+    try:await engine.reconcile(c['id'])
+    except IntegrationError as exc:
+        with connect(cfg) as db:audit(db,c['id'],'reconcile_retry_needed',str(exc)[:140])
+    return RedirectResponse('/onboarding?message=nt_verified',303)
+
+def _nt_verify_link(c,code,expected_holder):
     with connect(cfg) as db:
         if not c['buyer_email_verified']:
             raise HTTPException(403,'Membership email must be verified first')
         current=db.execute('SELECT nt_email,verified FROM customers WHERE id=?',(c['id'],)).fetchone()
         if not current or not current['nt_email'] or current['verified']:
             raise HTTPException(409,'Account linking is not pending')
-        duplicate=db.execute('SELECT id FROM customers WHERE lower(nt_email)=lower(?) AND id!=? AND verified=1',(current['nt_email'],c['id'])).fetchone()
-        if duplicate:raise HTTPException(409,'That NinjaTrader email is already linked')
+        holder=returning_member.holder_of(db,current['nt_email'],c['id'])
+        # The holder must be exactly the one confirmed with Whop above (or none).
+        if holder and (not expected_holder or holder['id']!=expected_holder['id']):
+            raise HTTPException(409,'That NinjaTrader email is already linked')
         prior=db.execute('SELECT 1 FROM licenses WHERE customer_id=? LIMIT 1',(c['id'],)).fetchone()
         if prior:raise HTTPException(409,'Existing licenses require support review')
         code_row=db.execute('SELECT target_email FROM codes WHERE customer_id=? AND purpose=?',(c['id'],'nt')).fetchone()
         if not code_row or code_row['target_email']!=current['nt_email']:
             raise HTTPException(409,'Verification request does not match linked email')
-        if not verify_code(db,c['id'],'nt',code):raise HTTPException(400,'Invalid or expired verification code')
-        db.execute('UPDATE customers SET verified=1,status=?,updated_at=? WHERE id=?',('pending',int(time.time()),c['id']))
-        request_crm_sync(db,c['id'])
-    try:await engine.reconcile(c['id'])
-    except IntegrationError as exc:
-        with connect(cfg) as db:audit(db,c['id'],'reconcile_retry_needed',str(exc)[:140])
-    return RedirectResponse('/onboarding?message=nt_verified',303)
+        ok=verify_code(db,c['id'],'nt',code)
+        if ok and holder:
+            try:returning_member.transfer(db,holder['id'],c['id'],current['nt_email'])
+            except IntegrationError as exc:raise HTTPException(409,str(exc))
+        elif ok:
+            db.execute('UPDATE customers SET verified=1,status=?,updated_at=? WHERE id=?',('pending',int(time.time()),c['id']))
+            request_crm_sync(db,c['id'])
+    # Raise only after the transaction commits, so the failed attempt is counted
+    # (raising inside it rolled the attempt counter back, defeating the 5-try limit).
+    if not ok:raise HTTPException(400,'Invalid or expired verification code')
 
 @app.post('/onboarding/refresh')
 async def customer_refresh(request:Request,csrf_token:str=Form(...)):
