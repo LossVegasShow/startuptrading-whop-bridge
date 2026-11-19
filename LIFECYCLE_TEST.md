@@ -71,7 +71,7 @@ NinjaTrader Desktop shows, and anything odd.
 | 5 | **Cancel at period end:** cancel the membership in Whop, choosing *at the end of the billing period*. | `whop.status: canceling`, `cancel_at_period_end: true`, still `entitled: true`, `overall: consistent`. **No writes.** | Indicators still work. |
 | 6 | **Expire:** end the membership now in Whop (terminate / cancel immediately). | Before reconcile: `mismatch: NOT entitled, but the NinjaTrader license is still active`. After: `consistent`, `no active license (expired …)`. | **Key check:** after restarting NinjaTrader, all three indicators are no longer usable. Note how long this took. |
 | 7 | **Restore the same membership:** reactivate it in Whop if Whop allows (for example payment recovery or "uncancel"). | `consistent`, `active until <new paid-through>`. Still exactly 3 license rows (reused, not duplicated). | Indicators work again after a restart. |
-| 8 | **Rejoin with a new purchase:** after expiry, buy again (new `mem_…`). | **Known gap, see section 6.** Expect the activation page to say the NinjaTrader email is linked to another account. | Record exactly what happens. |
+| 8 | **Rejoin with a new purchase:** after expiry, buy again (new `mem_…`). Add the new `mem_…` to the write allowlist (`ALLOWED_TEST_MEMBERSHIP` or `LICENSE_WRITE_ALLOWLIST`), then activate with the same NinjaTrader email. | Old record `status: transferred`, `verified: 0`. New record holds the 3 license rows; `overall: consistent`, `active until <new paid-through>`. Audit: `ninjatrader_link_transferred_in`. See section 6. | Indicators work again after a restart. No new licenses: the same ones were extended. |
 | 9 | **Webhook check:** in Whop → Developer → Webhooks, send a test event. In `/admin`, check webhook deliveries. | Event recorded; no license change for a test event. | — |
 | 10 | **Clean up:** set `LICENSE_WRITES_ENABLED=false`. Refund the test purchase if it was paid. | `write_gate.allowed: false`. | — |
 
@@ -115,21 +115,29 @@ indicators actually stop working in NinjaTrader.
 6. If a customer changes the email on their NinjaTrader account, what happens to
    licenses issued to the old email?
 
-## 6. Known gap: rejoining with a new membership (step 8)
+## 6. Rejoining with a new membership (step 8)
 
 When a membership fully ends and the person buys again, Whop issues a **new
-`mem_…` ID**. The bridge creates a new customer record for it, and then:
+`mem_…` ID**, so the bridge creates a new customer record. The bridge now lets
+that person reclaim their NinjaTrader link (`returning_member.py`), but only
+when **all** of these hold:
 
-- the activation page refuses the same NinjaTrader email ("linked to another
-  account"), because the old, expired customer record still holds it; and
-- even past that, the engine won't touch the existing NinjaTrader license
-  ("not bridge-owned"), because it belongs to the old record.
+1. both records belong to the **same Whop user**, and the new one was signed
+   in through Whop;
+2. Whop confirms, live, that the **old membership has ended** (a paying
+   membership never loses its licenses);
+3. they've just verified the NinjaTrader inbox with a code;
+4. no license sync for the old record is running.
 
-So **a returning customer can't reactivate without manual support.**
+The email link and license rows then move to the new record in one database
+transaction, audited on both. The engine extends the **same** NinjaTrader
+licenses (no new ones) to the new paid-through date.
 
-**Proposed fix (needs approval before building):** when a newly verified,
-*eligible* membership and an older, *ineligible* customer record belong to the
-**same Whop user** (proven by OAuth) and use the same NinjaTrader email,
-transfer the email link and license ownership from the old record to the new
-one, with an audit entry. Different Whop users would still be refused, so one
-person can never take over another's licenses.
+What the customer sees in the other cases:
+
+| Situation | Result |
+|---|---|
+| Email held by a **different** Whop user | "That NinjaTrader email is already linked": contact support (unchanged) |
+| Old membership **still active** | "That NinjaTrader account is active on another membership": contact support. The code isn't used up. |
+| Whop unreachable | "We couldn't reach Whop": try again. Nothing moves. |
+| A sync on the old record is running | "One moment": try again in a minute |
