@@ -33,10 +33,35 @@ def test_no_unfilled_template_tokens():
 def test_every_join_button_uses_configured_checkout():
     cfg, embed, _ = rendered()
     joins = re.findall(r'<a[^>]*data-checkout[^>]*>', embed)
-    assert len(joins) >= 4
+    assert len(joins) >= 5
+    annual = [t for t in joins if 'data-plan="annual"' in t]
+    assert len(annual) == 1
     for tag in joins:
-        assert f'href="{cfg["checkout_url"]}"' in tag, tag
-    assert cfg['checkout_url'].startswith('https://whop.com/')
+        expected = cfg['checkout_url_annual'] if tag in annual else cfg['checkout_url']
+        assert f'href="{expected}"' in tag, tag
+    for key in ('checkout_url', 'checkout_url_annual'):
+        assert cfg[key].startswith('https://whop.com/checkout/plan_'), key
+    assert cfg['checkout_url'] != cfg['checkout_url_annual']
+
+
+def test_annual_numbers_are_consistent():
+    cfg, embed, _ = rendered()
+    monthly, annual = float(cfg['price_monthly']), float(cfg['price_annual'])
+    assert f'{annual / 12:.2f}' == cfg['price_annual_per_month']
+    assert str(round((1 - annual / (monthly * 12)) * 100)) == cfg['annual_savings_pct']
+    # Plan IDs must be the ones the licensing bridge accepts.
+    import sys
+    sys.path.insert(0, str(SITE.parent))
+    from config import PLANS
+    for key in ('checkout_url', 'checkout_url_annual'):
+        plan = re.search(r'(plan_[A-Za-z0-9]+)', cfg[key]).group(1)
+        assert plan in PLANS, (key, plan)
+
+
+def test_billing_toggle_is_css_only():
+    _, embed, _ = rendered()
+    assert 'id="sut-bill-m" checked' in embed and 'id="sut-bill-y"' in embed
+    assert embed.count('class="sut-amount sut-y"') == 1 and embed.count('class="sut-amount sut-m"') == 1
 
 
 def test_embed_is_a_fragment_for_ghl():

@@ -1,8 +1,12 @@
 {
   "checkout_url": "https://whop.com/checkout/plan_qSXeS0xoDapGU/",
+  "checkout_url_annual": "https://whop.com/checkout/plan_B84PWLvXemyFX/",
   "activation_url": "https://activate.startuptrading.com/",
   "support_email": "support@startuptrading.com",
   "price_monthly": "99",
+  "price_annual": "495",
+  "price_annual_per_month": "41.25",
+  "annual_savings_pct": "58",
   "discord_name": "StartUpTrading Discord",
   "youtube_url": "",
   "terms_url": "",

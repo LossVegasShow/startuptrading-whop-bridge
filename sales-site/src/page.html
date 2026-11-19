@@ -145,12 +145,22 @@
     <div>
       <p class="sut-eyebrow">05 · Pricing</p>
       <h2>One plan. Everything included.</h2>
-      <p class="sut-lead">No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
+      <p class="sut-lead">Everything, on either billing period. No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
     </div>
     <div class="sut-price">
+      <!-- Billing toggle: CSS-only (radio + sibling selectors), no script needed. -->
+      <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-m" checked>
+      <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-y">
+      <div class="sut-toggle" role="group" aria-label="Billing period">
+        <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
+        <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save {{annual_savings_pct}}%</em></label>
+      </div>
       <div class="sut-price-head">
         <span class="sut-tag">StartUpTrading membership</span>
-        <p class="sut-amount"><b>${{price_monthly}}</b><span>/month</span></p>
+        <p class="sut-amount sut-m"><b>${{price_monthly}}</b><span>/month</span></p>
+        <p class="sut-amount sut-y"><b>${{price_annual}}</b><span>/year</span></p>
+        <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
+        <p class="sut-per sut-y">Works out to ${{price_annual_per_month}}/month, billed once a year.</p>
       </div>
       <ul class="sut-ticks">
         <li>ATR Order Automation</li>
@@ -160,9 +170,10 @@
         <li>Walkthroughs, education and setup help</li>
         <li>Automatic licensing to your NinjaTrader account</li>
       </ul>
-      <a class="sut-btn sut-btn-lg sut-btn-block" href="{{checkout_url}}" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <p class="sut-fine">Billed monthly through Whop. Cancel anytime.</p>
-      <!-- Annual plan ($495/yr) intentionally not shown until approved. -->
+      <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="{{checkout_url}}" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="{{checkout_url_annual}}" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <p class="sut-fine sut-m">${{price_monthly}} billed monthly through Whop. Cancel anytime.</p>
+      <p class="sut-fine sut-y">${{price_annual}} billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
     </div>
   </div>
 </section>
@@ -193,6 +204,7 @@
       <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
       <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
+      <details><summary>Is there an annual plan?</summary><p>Yes: ${{price_annual}} a year, which works out to ${{price_annual_per_month}} a month (about {{annual_savings_pct}}% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section.</p></details>
       <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
       <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
     </div>
