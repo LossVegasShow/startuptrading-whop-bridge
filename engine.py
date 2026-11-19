@@ -89,7 +89,22 @@ class Engine:
                     selected=matched
                 else:
                     if matched:
-                        raise IntegrationError('Pre-existing license is not bridge-owned; manual review required')
+                        # A license the bridge didn't create, e.g. a one-time purchase on
+                        # startuptrading.com. Never modify or revoke it. If it's lifetime or
+                        # lasts at least as long as the membership, the member already has
+                        # this indicator: record it as owned separately and move on.
+                        old=parse_utc(matched.get('expirationDateUTC'))
+                        covers=old is None or not entitlement or old>=parse_utc(entitlement['paid_through'])
+                        if not covers:
+                            raise IntegrationError('Pre-existing license expires before the membership; manual review required')
+                        with connect(self.cfg) as db:
+                            db.execute("""INSERT INTO licenses(customer_id,product_id,license_id,expiration,state,updated_at)
+                                VALUES(?,?,NULL,?,'owned_separately',?) ON CONFLICT(customer_id,product_id)
+                                DO UPDATE SET license_id=NULL,expiration=excluded.expiration,state='owned_separately',
+                                updated_at=excluded.updated_at""",(cid,pid,matched.get('expirationDateUTC'),int(time.time())))
+                            audit(db,cid,'ninjatrader_owned_separately',f'{pid}/{matched.get("id")}')
+                        changes.append({'product_id':pid,'action':'owned_separately'})
+                        continue
                     selected=None
                 if entitlement:
                     desired=entitlement['paid_through']

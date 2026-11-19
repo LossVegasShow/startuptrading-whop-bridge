@@ -122,7 +122,14 @@ async def snapshot(cfg, engine, cid):
     }
 
     products = []
+    owned = {int(r['product_id']) for r in db_licenses if r['state'] == 'owned_separately'}
     for pid, name in INDICATORS.items():
+        if pid in owned and out['ninjatrader']['readable'] and remote.get(pid):
+            row = remote[pid][0]
+            products.append({'product_id': pid, 'name': name, 'status': 'ok',
+                             'detail': f'owned separately (one-time purchase), not managed by the membership; '
+                                       f'expires {row.get("expirationDateUTC") or "never"}'})
+            continue
         if expected is None:
             v = {'status': 'unknown', 'detail': 'Whop membership could not be read'}
         elif not out['ninjatrader']['readable']:

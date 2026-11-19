@@ -31,7 +31,7 @@ Annual plan: `plan_B84PWLvXemyFX`
 
 ## Licensing safety and account paths
 
-Three vendor products: `2067` (ATR Order Automation), `2071` (Trend Scanner and Momentum Selector), `2205` (TSMS & Fibs). No other products will be managed.
+Three vendor products: `2067` (ATR Order Automation), `2071` (Trend Scanner & Market Selector), `2205` (TSMS & Fibs). No other products will be managed.
 
 Customer chooses (a) existing NinjaTrader account, or (b) create an account using the **configurable** NinjaTrader registration/referral link and return. Jack's affiliate arrangement is unconfirmed. Do not claim commission or invent his link. A missing referral URL uses NinjaTrader's official account page.
 

@@ -110,8 +110,10 @@ async def send_activation_email(cfg,cid):
         # Recheck licensing and membership state before triggering an actual email.
         if c['status']!='eligible' or not c['verified'] or row['target_email']!=c['nt_email']:
             return 'blocked'
-        rows=db.execute('SELECT product_id,license_id,expiration FROM licenses WHERE customer_id=?',(cid,)).fetchall()
-        if {int(x['product_id']) for x in rows if x['license_id'] and x['expiration']==c['paid_through']}!=set(INDICATORS):return 'blocked'
+        rows=db.execute('SELECT product_id,license_id,expiration,state FROM licenses WHERE customer_id=?',(cid,)).fetchall()
+        covered={int(x['product_id']) for x in rows
+                 if (x['license_id'] and x['expiration']==c['paid_through']) or x['state']=='owned_separately'}
+        if covered!=set(INDICATORS):return 'blocked'
         result=db.execute("UPDATE message_outbox SET status='sending',updated_at=? WHERE customer_id=? AND kind='activation' AND status IN ('pending','retry')",
                           (int(time.time()),cid))
         if result.rowcount!=1:return 'not_pending'

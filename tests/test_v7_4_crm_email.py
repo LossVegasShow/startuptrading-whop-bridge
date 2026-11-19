@@ -37,7 +37,10 @@ def test_email_queued_once_only_after_three_licenses(tmp_path):
 
 def test_failed_license_not_treated_as_activation(tmp_path):
     e,cfg=setup(tmp_path)
-    e.nt.data[2067].append({'id':999,'email':'test@example.com','expirationDateUTC':'2030-01-01T00:00:00Z'})
+    # A license the bridge didn't create that ends BEFORE the membership is ambiguous
+    # (manual review), so activation must not be announced. (One that lasts at least
+    # as long counts as owned separately; see tests/test_owned_separately.py.)
+    e.nt.data[2067].append({'id':999,'email':'test@example.com','expirationDateUTC':'2001-01-01T00:00:00Z'})
     try:asyncio.run(e.reconcile(1))
     except Exception:pass
     with connect(cfg) as db:assert db.execute('SELECT COUNT(*) FROM message_outbox').fetchone()[0]==0
