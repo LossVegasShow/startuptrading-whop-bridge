@@ -39,9 +39,10 @@ membership ends. The sales site should look modern and credible, not templated.
    `GHL_API_KEY`, `GHL_LOCATION_ID` and `GHL_CUSTOM_FIELDS_JSON` in Render, and
    build the "paid but never activated" reminder sequence.
 
-**Not blocked by GHL, so it can be done now:** the Namecheap `activate` CNAME,
-the Render custom domain `activate.startuptrading.com`, `PUBLIC_BASE_URL`, and
-the Whop OAuth redirect URI and webhook URL (`SETUP.md` steps 4.4 and 5).
+**Not blocked by GHL, so it can be done now:** moving the activation app to
+`activate.startuptrading.com`. Follow `ACTIVATE_DOMAIN.md` (Namecheap CNAME →
+Render custom domain → Whop redirect URI → `PUBLIC_BASE_URL` → Whop webhook),
+checking each step with `python scripts/check_activate_domain.py`.
 
 ---
 
@@ -212,9 +213,13 @@ licenses succeed. **It doesn't need a rebuild.**
       scoped, and there are no profit or guarantee phrases.
 - [ ] **(You/Jack)** Work through `sales-site/COPY_REVIEW.md` (claims,
       assets, decisions).
-- [ ] **(You, now)** `activate.startuptrading.com`: Namecheap `activate`
-      CNAME, Render custom domain, `PUBLIC_BASE_URL`, Whop OAuth redirect and
-      webhook (`SETUP.md` steps 4.4 and 5). Doesn't need GHL.
+- [x] Code prep for `activate.startuptrading.com`: optional
+      `CANONICAL_REDIRECT` moves visitors off the old onrender.com address
+      (never webhooks, health or the OAuth callback); `/health` reports the
+      configured host; `scripts/check_activate_domain.py` verifies each step.
+- [ ] **(You, now)** Follow `ACTIVATE_DOMAIN.md`: Namecheap CNAME, Render
+      custom domain, Whop redirect URI, `PUBLIC_BASE_URL`, Whop webhook.
+      Doesn't need GHL.
 - [ ] ⏸ **Deferred until GHL access:** publish the sales and thank-you pages,
       connect the domain in GHL, Whop redirect to `/welcome`, launch checks.
       See "Deferred: waiting on GoHighLevel access" at the top.

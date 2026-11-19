@@ -7,7 +7,7 @@ import httpx
 from email.message import EmailMessage
 from contextlib import asynccontextmanager
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -149,6 +149,30 @@ app.mount('/static',StaticFiles(directory=str(ROOT/'static')),name='static')
 templates=Jinja2Templates(directory=str(ROOT/'templates'))
 customer_errors.install(app,lambda request,key,status:render_error(request,key,status))
 
+# Paths that must keep answering on every hostname: Whop webhooks and the OAuth
+# callback (Whop may still deliver to the old address during the switch), and
+# health checks.
+CANONICAL_EXEMPT=('/webhooks','/health','/oauth/callback')
+
+def canonical_target(request):
+    """URL on PUBLIC_BASE_URL to redirect to, or None to serve the request here."""
+    base=cfg.public_base_url
+    if not (cfg.canonical_redirect and base.startswith('https://')):return None
+    if request.method not in ('GET','HEAD') or request.url.path.startswith(CANONICAL_EXEMPT):return None
+    want=urlsplit(base).netloc.lower()
+    host=request.headers.get('host','').lower()
+    if not host or host==want:return None
+    query=('?'+request.url.query) if request.url.query else ''
+    return base+request.url.path+query
+
+@app.middleware('http')
+async def canonical_host(request,call_next):
+    target=canonical_target(request)
+    # 302, not 301: a permanent redirect would be cached by browsers and hard
+    # to undo if the setting is ever changed.
+    if target:return RedirectResponse(target,status_code=302)
+    return await call_next(request)
+
 @app.middleware('http')
 async def secure_headers(request,call_next):
     resp=await call_next(request)
@@ -161,7 +185,8 @@ async def secure_headers(request,call_next):
 def health():
     return {'status':'ok','mode':'single_test_membership' if cfg.license_writes else 'observe_only',
             'whop_configured':bool(cfg.whop_api_key),'webhook_configured':bool(cfg.whop_webhook_secret),
-            'ninjatrader_configured':bool(cfg.nt_cid and cfg.nt_sec), 'reconciler_enabled':cfg.run_reconciler}
+            'ninjatrader_configured':bool(cfg.nt_cid and cfg.nt_sec), 'reconciler_enabled':cfg.run_reconciler,
+            'public_host':urlsplit(cfg.public_base_url).netloc,'canonical_redirect':cfg.canonical_redirect}
 
 @app.get('/',response_class=HTMLResponse)
 def index(request:Request):
