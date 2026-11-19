@@ -229,7 +229,7 @@ class NinjaClient:
             if self.token and dt.datetime.now(dt.timezone.utc)+dt.timedelta(minutes=8)<self.expires:
                 return f'Bearer {self.user_id} {self.cfg.nt_username} {self.token}'
             async with httpx.AsyncClient(timeout=20) as client:
-                r=await client.post('https://demo.tradovateapi.com/v1/auth/accesstokenrequest',json={
+                r=await client.post(self.cfg.nt_auth_url,json={
                     'name':self.cfg.nt_username,'password':self.cfg.nt_password,
                     'appId':self.cfg.nt_app_id,'appVersion':self.cfg.nt_app_version,
                     'cid':self.cfg.nt_cid,'sec':self.cfg.nt_sec})

@@ -13,10 +13,10 @@ class Engine:
         self.cfg=cfg; self.whop=WhopClient(cfg); self.nt=NinjaClient(cfg)
 
     def allowed(self,c):
-        return bool(self.cfg.license_writes and self.cfg.allowed_test_email and
-                    self.cfg.allowed_test_membership and c.get('verified') and
-                    c.get('nt_email','').casefold()==self.cfg.allowed_test_email.casefold() and
-                    c['membership_id']==self.cfg.allowed_test_membership)
+        # Writes need the global switch AND an exact membership + verified-email
+        # match on the allowlist (ALLOWED_TEST_* pair plus LICENSE_WRITE_ALLOWLIST).
+        if not (self.cfg.license_writes and c.get('verified') and c.get('nt_email')):return False
+        return (c['membership_id'],c['nt_email'].casefold()) in self.cfg.write_allowlist()
 
     def acquire(self,cid,owner):
         now=int(time.time())

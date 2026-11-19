@@ -29,10 +29,17 @@ class Config:
     nt_app_version: str = os.getenv('NT_APP_VERSION','1.0')
     nt_cid: str = os.getenv('NT_CID','')
     nt_sec: str = os.getenv('NT_SEC','')
+    # Vendor token endpoint. Confirm with the NinjaTrader vendor contact whether
+    # production licensing should use the demo or live Tradovate auth host.
+    nt_auth_url: str = os.getenv('NT_AUTH_URL','https://demo.tradovateapi.com/v1/auth/accesstokenrequest')
     admin_password: str = os.getenv('ADMIN_PASSWORD','')
     allowed_test_email: str = os.getenv('ALLOWED_TEST_EMAIL','').strip().lower()
     allowed_test_membership: str = os.getenv('ALLOWED_TEST_MEMBERSHIP','')
     license_writes: bool = os.getenv('LICENSE_WRITES_ENABLED','false').lower()=='true'
+    # Extra membership/email pairs allowed to receive real license writes, for the
+    # staged rollout after the single-account test: "mem_a:a@x.com,mem_b:b@y.com".
+    # Both the Whop membership AND the verified NinjaTrader email must match.
+    license_write_allowlist: str = os.getenv('LICENSE_WRITE_ALLOWLIST','')
     public_base_url: str = os.getenv('PUBLIC_BASE_URL','http://127.0.0.1:8000').rstrip('/')
     # Send visitors on any other hostname (e.g. the old *.onrender.com address)
     # to PUBLIC_BASE_URL. Turn on only after the custom domain works over HTTPS.
@@ -59,3 +66,14 @@ class Config:
     discord_url: str = os.getenv('DISCORD_URL','')
     checkout_url: str = os.getenv('CHECKOUT_URL','')
     whop_hub_url: str = os.getenv('WHOP_HUB_URL','')
+
+    def write_allowlist(self):
+        """Set of (membership_id, casefolded email) pairs that may receive license writes."""
+        pairs=set()
+        if self.allowed_test_membership and self.allowed_test_email:
+            pairs.add((self.allowed_test_membership.strip(),self.allowed_test_email.strip().casefold()))
+        for item in self.license_write_allowlist.split(','):
+            mem,sep,email=item.strip().partition(':')
+            if sep and mem.strip().startswith('mem_') and '@' in email:
+                pairs.add((mem.strip(),email.strip().casefold()))
+        return pairs
