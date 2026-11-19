@@ -24,6 +24,10 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">')
 
 
+# Whop's embedded-checkout loader (from the @whop/checkout package, v0.7.0).
+WHOP_LOADER = 'https://js.whop.com/static/checkout/loader.js'
+
+
 def candles(seed=7, n=64, w=640, h=300):
     """Decorative candlestick backdrop for the demo frame (not real market data)."""
     rnd = random.Random(seed)
@@ -54,8 +58,21 @@ def render(cfg):
     page = (SRC / 'page.html').read_text()
     css = (SRC / 'styles.css').read_text()
     js = (SRC / 'app.js').read_text()
+    cfg = dict(cfg)
+    # Plan IDs come from the checkout URLs so there is a single source of truth.
+    for url_key, plan_key in (('checkout_url', 'plan_monthly'), ('checkout_url_annual', 'plan_annual')):
+        m = re.search(r'(plan_[A-Za-z0-9]+)', cfg.get(url_key, ''))
+        if not m:
+            raise ValueError(f'{url_key} must contain a Whop plan ID (plan_...)')
+        cfg[plan_key] = m.group(1)
+    embed_on = str(cfg.get('embed_checkout', '')).lower() == 'true'
+    cfg['embed_checkout'] = 'true' if embed_on else ''
+    # Page-wide Join buttons scroll to the on-page checkout when it's embedded,
+    # otherwise they go straight to Whop's hosted checkout.
+    cfg['cta_href'] = '#checkout' if embed_on else cfg['checkout_url']
     values = {k: html.escape(str(v), quote=True) for k, v in cfg.items()}
     values['candles'] = candles()
+    values['cta_attr'] = '' if embed_on else ' data-checkout'
 
     def sub(m):
         key = m.group(1)
@@ -65,10 +82,15 @@ def render(cfg):
 
     body = re.sub(r'\{\{\s*([a-z_]+)\s*\}\}', sub, page)
     # Optional blocks: <!--if:key--> ... <!--endif:key--> are removed when the value is blank.
+    # <!--ifnot:key--> ... <!--endifnot:key--> is the reverse.
     for key, val in cfg.items():
+        on = bool(str(val).strip())
         pattern = re.compile(rf'<!--if:{key}-->(.*?)<!--endif:{key}-->', re.S)
-        body = pattern.sub(lambda m: m.group(1) if str(val).strip() else '', body)
-    embed = f'{FONTS}\n<style>\n{css}\n</style>\n{body}\n<script>\n{js}\n</script>\n'
+        body = pattern.sub(lambda m: m.group(1) if on else '', body)
+        pattern = re.compile(rf'<!--ifnot:{key}-->(.*?)<!--endifnot:{key}-->', re.S)
+        body = pattern.sub(lambda m: '' if on else m.group(1), body)
+    loader = f'<script async defer src="{WHOP_LOADER}"></script>\n' if embed_on else ''
+    embed = f'{FONTS}\n<style>\n{css}\n</style>\n{body}\n<script>\n{js}\n</script>\n{loader}'
     full = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
             '<title>StartUpTrading: NinjaTrader indicators and private trade room</title>\n'

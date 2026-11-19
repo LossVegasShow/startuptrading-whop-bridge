@@ -154,7 +154,8 @@
 .sut-steps p { color: var(--text-2); font-size: 15px; }
 
 /* Pricing */
-.sut-price-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 64px; align-items: center; }
+.sut-price-grid { position: relative; display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.sut-price-grid > .sut-price:only-of-type { grid-column: 1 / -1; max-width: 460px; }
 .sut-price { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 32px; box-shadow: 0 0 0 1px rgba(250,123,57,.08), 0 40px 90px -50px rgba(250,123,57,.35); }
 .sut-price-head { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
 .sut .sut-amount { margin-top: 12px; display: flex; align-items: baseline; gap: 6px; }
@@ -172,13 +173,31 @@
 .sut .sut-toggle label:hover { color: var(--text); }
 .sut .sut-toggle em { font: 600 11px var(--mono); font-style: normal; letter-spacing: .02em; color: var(--up);
   background: rgba(61,220,151,.12); padding: 2px 6px; border-radius: 999px; }
-.sut #sut-bill-m:checked ~ .sut-toggle .sut-toggle-m,
-.sut #sut-bill-y:checked ~ .sut-toggle .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
-.sut #sut-bill-m:focus-visible ~ .sut-toggle .sut-toggle-m,
-.sut #sut-bill-y:focus-visible ~ .sut-toggle .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sut #sut-bill-m:checked ~ * .sut-toggle-m,
+.sut #sut-bill-y:checked ~ * .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.sut #sut-bill-m:focus-visible ~ * .sut-toggle-m,
+.sut #sut-bill-y:focus-visible ~ * .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sut #sut-bill-m:checked ~ * .sut-y, .sut #sut-bill-m:checked ~ .sut-y,
 .sut #sut-bill-y:checked ~ * .sut-m, .sut #sut-bill-y:checked ~ .sut-m { display: none; }
 .sut .sut-per { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+/* Embedded Whop checkout */
+.sut-checkout { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 24px 24px 18px; scroll-margin-top: 88px; }
+.sut-checkout-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.sut .sut-checkout-plan { font: 500 12.5px var(--mono); color: var(--text-2); }
+.sut-lock { display: inline-block; width: 10px; height: 8px; margin-right: 2px; border-radius: 2px; background: var(--up); position: relative; top: 1px; }
+.sut-lock::before { content: ""; position: absolute; left: 2px; top: -5px; width: 6px; height: 6px; border: 1.5px solid var(--up); border-bottom: 0; border-radius: 4px 4px 0 0; box-sizing: border-box; }
+.sut-embed { position: relative; min-height: 480px; }
+.sut-embed-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: 500 13px var(--mono); color: var(--muted); border: 1px dashed var(--line-2); border-radius: 10px; pointer-events: none; }
+.sut-embed > [data-whop-checkout-plan-id] { position: relative; z-index: 1; }
+.sut-embed.is-loaded { min-height: 0; }
+.sut-embed.is-loaded .sut-embed-loading { display: none; }
+/* The unselected plan's checkout stays mounted but collapsed, so Whop's iframe
+   keeps its width and is sized correctly when the visitor switches. */
+.sut #sut-bill-m:checked ~ * .sut-embed.sut-y,
+.sut #sut-bill-y:checked ~ * .sut-embed.sut-m { display: block; height: 0; min-height: 0; overflow: hidden; visibility: hidden; }
+.sut .sut-checkout-fallback { margin-top: 12px; text-align: center; }
 
 /* Quotes */
 .sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -214,6 +233,8 @@
 /* Responsive */
 @media (max-width: 980px) {
   .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sut-price-grid { gap: 20px; }
+  .sut-price-grid > .sut-price { max-width: none; }
   .sut-ind-flip .sut-ind-copy { order: 0; }
   .sut-portrait { max-width: 420px; }
   .sut-links { display: none; }
@@ -233,6 +254,7 @@
   .sut-list li { grid-template-columns: 1fr; gap: 4px; }
   .sut .sut-cta-row .sut-btn { width: 100%; }
   .sut-price { padding: 24px; }
+  .sut-checkout { padding: 18px 14px 14px; }
   .sut-final { padding: 84px 0; }
   .sut-logo svg + * { display: none; }
 }

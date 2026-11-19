@@ -13,6 +13,23 @@
       links[i].href = url.toString();
     } catch (e) { /* leave the link as it is */ }
   }
+  // Embedded Whop checkout: pass a Whop affiliate code (?a=) through. UTM tags
+  // are forwarded by Whop's loader itself. Runs before the async loader mounts.
+  var embeds = document.querySelectorAll('.sut [data-whop-checkout-plan-id]');
+  for (var j = 0; j < embeds.length; j++) {
+    if (here.get('a')) embeds[j].setAttribute('data-whop-checkout-affiliate-code', here.get('a'));
+    (function (box) {
+      // Hide the "Loading…" note once Whop's iframe has loaded.
+      var wrap = box.parentNode;
+      var mark = function () { wrap.classList.add('is-loaded'); };
+      if (!window.MutationObserver) return;
+      new MutationObserver(function (_, obs) {
+        var frame = box.querySelector('iframe');
+        if (frame) { frame.addEventListener('load', mark); obs.disconnect(); }
+      }).observe(box, { childList: true });
+    })(embeds[j]);
+  }
+
   var year = document.querySelector('.sut [data-year]');
   if (year) year.textContent = new Date().getFullYear();
 })();
