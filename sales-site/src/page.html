@@ -211,6 +211,28 @@
       </div>
       <!--endif:embed_checkout-->
     </div>
+
+    <!--if:free_indicator_url-->
+    <aside class="sut-free" aria-labelledby="free-title">
+      <div class="sut-free-copy">
+        <p class="sut-eyebrow muted">Not ready yet?</p>
+        <h3 id="free-title">Start with Jack's free {{free_indicator_name}}.</h3>
+        <p>Put it on your own charts, see how Jack builds his tools, and upgrade when you're ready. Free, no card needed.</p>
+        <a class="sut-btn sut-btn-ghost" href="{{free_url_pricing}}" data-free="pricing">Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a>
+      </div>
+      <table class="sut-compare">
+        <caption class="sut-sr">What's free and what the membership adds</caption>
+        <thead><tr><th scope="col"></th><th scope="col">Free</th><th scope="col">Membership</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">{{free_indicator_name}}</th><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">ATR Order Automation</th><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">TSMS &amp; TSMS + Fibs</th><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Private Discord with Jack</th><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Walkthroughs &amp; setup help</th><td class="no">—</td><td class="yes">✓</td></tr>
+        </tbody>
+      </table>
+    </aside>
+    <!--endif:free_indicator_url-->
   </div>
 </section>
 
@@ -242,6 +264,7 @@
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
       <details><summary>Is there an annual plan?</summary><p>Yes: ${{price_annual}} a year, which works out to ${{price_annual_per_month}} a month (about {{annual_savings_pct}}% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section and check out right there.</p></details>
       <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
+      <!--if:free_indicator_url--><details><summary>Can I try something before I pay?</summary><p>Yes. Jack's {{free_indicator_name}} is free. <a href="{{free_url_faq}}" data-free="faq">Get it here</a>, use it on your charts, and join when you want the full set of indicators and the trade room.</p></details><!--endif:free_indicator_url-->
       <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
     </div>
   </div>
@@ -252,9 +275,25 @@
     <h2>Get the indicators. Join the room.</h2>
     <p class="sut-lead">${{price_monthly}}/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
     <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}}>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
-    <p class="sut-fine">Already a member? <a href="{{activation_url}}">Activate your indicators</a>.</p>
+    <p class="sut-fine">Already a member? <a href="{{activation_url}}">Activate your indicators</a>.<!--if:free_indicator_url--> Not ready? <a href="{{free_url_final}}" data-free="final">Start with the free {{free_indicator_name}}</a>.<!--endif:free_indicator_url--></p>
   </div>
 </section>
+
+<!--if:exit_offer-->
+<div class="sut-exit" id="sut-exit" hidden>
+  <div class="sut-exit-backdrop" data-exit-close></div>
+  <div class="sut-exit-card" role="dialog" aria-modal="true" aria-labelledby="sut-exit-title">
+    <button class="sut-exit-x" type="button" data-exit-close aria-label="Close">×</button>
+    <p class="sut-eyebrow">Before you go</p>
+    <h3 id="sut-exit-title">Take Jack's {{free_indicator_name}} with you. Free.</h3>
+    <p>Not ready for the membership? Start with the free indicator on your own charts. No card, no commitment.</p>
+    <div class="sut-exit-actions">
+      <a class="sut-btn" href="{{free_url_exit}}" data-free="exit">Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <button class="sut-btn sut-btn-ghost" type="button" data-exit-close>No thanks</button>
+    </div>
+  </div>
+</div>
+<!--endif:exit_offer-->
 
 <!--include:_footer.html-->
 </div>

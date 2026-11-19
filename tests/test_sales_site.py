@@ -76,7 +76,7 @@ def test_hosted_checkout_mode_when_embed_disabled():
     cfg['embed_checkout'] = 'false'
     embed, _ = load_build().render(cfg)
     assert '<div data-whop-checkout-plan-id=' not in embed and 'js.whop.com' not in embed
-    assert '#checkout' not in embed
+    assert 'href="#checkout"' not in embed
     links = checkout_links(embed)
     assert len(links) >= 5
     assert_links_match_plans(cfg, links)
@@ -156,3 +156,32 @@ def test_welcome_page_points_to_activation_and_sells_nothing():
 def test_sales_page_is_indexable_and_shares_footer():
     _, embed, full = rendered()
     assert 'noindex' not in full and 'Risk disclosure' in embed
+
+
+def test_not_ready_free_offer():
+    cfg, embed, _ = rendered()
+    build = load_build()
+    links = re.findall(r'<a[^>]*href="([^"]+)"[^>]*data-free="(\w+)"', embed)
+    assert {place for _, place in links} == set(build.FREE_PLACEMENTS)
+    for href, place in links:
+        href = href.replace('&amp;', '&')
+        assert href.startswith(cfg['free_indicator_url'] + '?')
+        assert 'utm_medium=sales_page' in href and 'utm_campaign=not_ready' in href
+        assert f'utm_content={place}' in href
+    # The paid offer stays the main action: free links are never the primary button
+    # in the hero or the nav.
+    hero = embed.split('class="sut-strip"')[0]
+    assert 'data-free' not in hero
+    assert 'Free' in embed and 'Membership' in embed       # comparison table
+
+
+def test_exit_offer_is_accessible_and_switchable():
+    cfg, embed, _ = rendered()
+    assert 'role="dialog" aria-modal="true"' in embed and 'id="sut-exit" hidden' in embed
+    assert 'data-exit-close aria-label="Close"' in embed
+    cfg = dict(cfg, exit_offer='false')
+    off, _ = load_build().render(cfg)
+    assert 'id="sut-exit"' not in off and 'data-free="pricing"' in off   # offer stays, popup goes
+    cfg = dict(cfg, free_indicator_url='')
+    none, _ = load_build().render(cfg)
+    assert 'data-free' not in none.split('<script>')[0] and 'id="sut-exit"' not in none

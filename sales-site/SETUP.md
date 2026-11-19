@@ -155,5 +155,13 @@ the old address. It doesn't need GoHighLevel.
 - [ ] `https://activate.startuptrading.com` shows the activation page and
       "Sign in with Whop" works.
 - [ ] Page checked on a phone: no sideways scrolling, buttons easy to tap.
+- [ ] "Not ready yet?" links open `startuptrading.com/indicators` with
+      `utm_campaign=not_ready` and the spot in `utm_content` (pricing, final,
+      faq, exit). In GHL, those leads can be tagged and nurtured towards the
+      membership.
+- [ ] On desktop, moving the mouse to leave the tab (after 8 s on the page)
+      shows the free-indicator popup once; it doesn't show again that week or
+      after clicking Join. To turn it off, set `"exit_offer": "false"` and
+      rebuild.
 - [ ] **All dashed orange placeholder boxes replaced or removed**
       (see `COPY_REVIEW.md`).

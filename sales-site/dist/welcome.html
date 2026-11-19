@@ -213,6 +213,39 @@
 .sut #sut-bill-y:checked ~ * .sut-embed.sut-m { display: block; height: 0; min-height: 0; overflow: hidden; visibility: hidden; }
 .sut .sut-checkout-fallback { margin-top: 12px; text-align: center; }
 
+/* "Not ready yet?" free-indicator offer */
+.sut-free { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center;
+  margin-top: 28px; padding: 32px; border: 1px dashed var(--line-2); border-radius: 14px; background: var(--bg-2); }
+.sut-free h3 { margin: 10px 0 10px; font-size: 22px; }
+.sut-free-copy > p:not(.sut-eyebrow) { color: var(--text-2); font-size: 15.5px; max-width: 460px; }
+.sut-free .sut-btn { margin-top: 20px; }
+.sut .sut-eyebrow.muted { color: var(--muted); }
+.sut-compare { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sut-compare th, .sut-compare td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+.sut-compare thead th { font: 600 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sut-compare thead th:last-child { color: var(--accent); }
+.sut-compare tbody th { font-weight: 500; color: var(--text-2); }
+.sut-compare td { width: 92px; text-align: center; font: 600 14px var(--mono); }
+.sut-compare thead th:not(:first-child) { text-align: center; }
+.sut-compare td.yes { color: var(--up); }
+.sut-compare td.no { color: var(--muted); }
+.sut-compare tbody tr:last-child th, .sut-compare tbody tr:last-child td { border-bottom: 0; }
+.sut .sut-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Exit-intent offer (desktop only, at most once a week; see app.js) */
+.sut-exit[hidden] { display: none; }
+.sut-exit { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
+.sut-exit-backdrop { position: absolute; inset: 0; background: rgba(4,6,9,.72); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.sut-exit-card { position: relative; max-width: 480px; width: 100%; padding: 32px; border: 1px solid var(--line-2);
+  border-radius: 14px; background: var(--surface); box-shadow: 0 40px 100px -30px rgba(0,0,0,.9); animation: sut-pop .18s ease-out; }
+@keyframes sut-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+.sut-exit-card h3 { margin: 12px 0 10px; font-size: 24px; }
+.sut-exit-card > p:not(.sut-eyebrow) { color: var(--text-2); }
+.sut-exit-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.sut .sut-exit-x { position: absolute; top: 10px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted); font: 400 24px/1 var(--sans); cursor: pointer; }
+.sut .sut-exit-x:hover { color: var(--text); background: var(--surface-2); }
+
 /* Quotes */
 .sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
@@ -270,6 +303,7 @@
 @media (max-width: 980px) {
   .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
   .sut-price-grid { gap: 20px; }
+  .sut-free { grid-template-columns: 1fr; gap: 28px; }
   .sut-price-grid > .sut-price { max-width: none; }
   .sut-ind-flip .sut-ind-copy { order: 0; }
   .sut-portrait { max-width: 420px; }
@@ -294,6 +328,10 @@
   .sut-list li { grid-template-columns: 1fr; gap: 4px; }
   .sut .sut-cta-row .sut-btn { width: 100%; }
   .sut-price { padding: 24px; }
+  .sut-free { padding: 22px 18px; }
+  .sut-compare th, .sut-compare td { padding: 9px 6px; }
+  .sut-compare td { width: 72px; }
+  .sut-exit-card { padding: 26px 20px; }
   .sut-checkout { padding: 18px 14px 14px; }
   .sut-final { padding: 84px 0; }
   .sut-logo svg + * { display: none; }
@@ -453,6 +491,63 @@
         sessionStorage.setItem('sut_purchase_sent', '1');
       }
     } catch (e) { /* storage blocked: skip */ }
+  }
+
+  // Free-indicator links: keep the visitor's original campaign (e.g. YouTube)
+  // when there is one; the placement tag (utm_content) always says which spot.
+  var free = document.querySelectorAll('.sut a[data-free]');
+  for (var f = 0; f < free.length; f++) {
+    try {
+      var furl = new URL(free[f].href);
+      ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) {
+        if (here.get(k)) furl.searchParams.set(k, here.get(k));
+      });
+      free[f].href = furl.toString();
+    } catch (e) { /* keep the static link */ }
+  }
+
+  // Exit-intent offer: desktop only, after 8s on the page, at most once a week,
+  // and never for someone who clicked Join or started the checkout.
+  var exitBox = document.getElementById('sut-exit');
+  if (exitBox && window.matchMedia && window.matchMedia('(pointer: fine) and (min-width: 900px)').matches) {
+    var store = {
+      get: function () { try { return Number(localStorage.getItem('sut_exit_seen') || 0); } catch (e) { return 0; } },
+      set: function () { try { localStorage.setItem('sut_exit_seen', String(Date.now())); } catch (e) {} }
+    };
+    var armed = false, committed = false, lastFocus = null;
+    setTimeout(function () { armed = true; }, 8000);
+    document.addEventListener('click', function (ev) {
+      var t = ev.target.closest && ev.target.closest('a');
+      if (t && (t.hasAttribute('data-checkout') || t.getAttribute('href') === '#checkout')) committed = true;
+    });
+    var checkoutBox = document.getElementById('checkout');
+    if (checkoutBox) checkoutBox.addEventListener('pointerdown', function () { committed = true; });
+    var close = function () {
+      exitBox.hidden = true;
+      document.removeEventListener('keydown', onKey);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    };
+    var onKey = function (ev) {
+      if (ev.key === 'Escape') close();
+      if (ev.key === 'Tab') {            // keep focus inside the dialog
+        var items = exitBox.querySelectorAll('a, button');
+        var first = items[0], last = items[items.length - 1];
+        if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+        else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      }
+    };
+    var closers = exitBox.querySelectorAll('[data-exit-close]');
+    for (var c = 0; c < closers.length; c++) closers[c].addEventListener('click', close);
+    document.addEventListener('mouseout', function (ev) {
+      if (!armed || committed || !exitBox.hidden || ev.relatedTarget || ev.clientY > 0) return;
+      if (Date.now() - store.get() < 7 * 24 * 3600 * 1000) return;
+      store.set();
+      lastFocus = document.activeElement;
+      exitBox.hidden = false;
+      document.addEventListener('keydown', onKey);
+      var cta = exitBox.querySelector('a[data-free]');
+      if (cta) cta.focus();
+    });
   }
 
   var year = document.querySelector('.sut [data-year]');
