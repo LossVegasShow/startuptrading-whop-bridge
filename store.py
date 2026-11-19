@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS message_outbox (
   attempts INTEGER NOT NULL DEFAULT 0, next_attempt_at INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL DEFAULT 0, last_error TEXT,
   PRIMARY KEY(customer_id,kind));
+CREATE TABLE IF NOT EXISTS alert_log (
+  key TEXT PRIMARY KEY, first_seen INTEGER NOT NULL, last_sent INTEGER NOT NULL);
 '''
 
 # Persistent PostgreSQL is required for hosted customer storage. SQLite remains
@@ -97,7 +99,8 @@ def postgres_sql(sql):
     if sql.startswith('INSERT OR IGNORE INTO webhook_events'):
         sql=sql.replace('INSERT OR IGNORE INTO webhook_events','INSERT INTO webhook_events',1)
         sql+=' ON CONFLICT (webhook_id) DO NOTHING'
-    return sql.replace('?', '%s')
+    # Escape literal % (e.g. LIKE 'x%') before turning ? into psycopg's %s.
+    return sql.replace('%', '%%').replace('?', '%s')
 
 class PostgresConnection:
     def __init__(self, conn):

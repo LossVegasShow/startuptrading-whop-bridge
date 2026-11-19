@@ -1,0 +1,26 @@
+{% extends "_base.html" %}
+{% block title %}Needs attention{% endblock %}
+{% block brand_sub %}Operations{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span class="eyebrow">Operations</span>
+  <h1>{% if issues %}{{ issues|length }} item{{ 's' if issues|length != 1 }} need{{ '' if issues|length != 1 else 's' }} attention{% else %}All clear{% endif %}</h1>
+  <p class="lead">Checked from the database every time this page loads, and by the background worker.
+    {% if alerts_on %}New items are also posted to your alert channel.{% else %}Set <code>ALERT_WEBHOOK_URL</code> in Render to get these in Discord or Slack.{% endif %}</p>
+  {% if not worker_on %}<div class="banner err" role="status"><span class="glyph">!</span><div><strong>Background worker is off</strong><p>Set <code>RUN_RECONCILER=true</code> in Render so webhooks, emails and alerts are processed automatically.</p></div></div>{% endif %}
+</div>
+{% if issues %}
+<div class="ticker">
+  {% for i in issues %}
+  <div class="ticker-row attention-row">
+    <span class="status {{ {'high':'off','medium':'wait','low':'idle'}[i.severity] }}">{{ i.severity }}</span>
+    <span><span class="name">{{ i.title }}</span><br><span class="small muted">{{ i.detail }}</span></span>
+    {% if i.customer_id %}<a class="btn secondary" href="{{ i.link }}">Snapshot</a>{% else %}<span></span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="done-row"><span><span class="check">✓</span>No failing syncs, stuck events, failing emails or unrevoked licenses.</span></div>
+{% endif %}
+<p class="hint field"><a href="/admin">← Back to the dashboard</a></p>
+{% endblock %}

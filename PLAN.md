@@ -289,6 +289,20 @@ licenses succeed. **It doesn't need a rebuild.**
       install steps, plus support. Hook for purchase-conversion tracking.
 
 ### Phase 5: Launch operations
+- [x] **"Needs attention"** panel at `/admin/attention` (banner on `/admin`):
+      unrevoked licenses after access ended, failing license syncs, paying
+      allowlisted members missing licenses, failing or unmapped Whop events, a
+      stalled background worker, failing emails and CRM syncs, and members
+      still not activated after both reminders.
+- [x] **Alerts** to Discord or Slack (`ALERT_WEBHOOK_URL`): new problems once,
+      then daily while they persist. IDs only.
+- [x] **Member lifecycle emails** via Resend: activation reminders at 24 h and
+      72 h, "your access ends on [date]" on cancel, and "switched off, rejoin
+      anytime" at expiry. Each is re-checked before sending (no reminder after
+      activating, no "ending" after un-cancelling) and sent at most once.
+- [ ] **(You)** In Render: `RUN_RECONCILER=true` (runs emails, alerts and
+      webhooks), `RESEND_API_KEY` + `RESEND_FROM`, and optionally
+      `ALERT_WEBHOOK_URL`.
 - [ ] ⏸ **Waiting on GHL access:** connect GoHighLevel CRM sync, with a
       "paid but never activated" reminder sequence (group B at the top).
 - [ ] Error alerts (Sentry or Render notifications) and a tested Postgres

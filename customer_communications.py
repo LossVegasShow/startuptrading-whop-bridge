@@ -9,6 +9,7 @@ import httpx
 from store import connect, customer
 from config import INDICATORS, PLANS
 import email_templates
+import lifecycle_emails
 
 API='https://services.leadconnectorhq.com'
 
@@ -145,9 +146,15 @@ async def process_pending(cfg,limit=30):
         # Recover interrupted Resend requests using the same provider idempotency key.
         db.execute("UPDATE message_outbox SET status='retry' WHERE status='sending' AND updated_at<?",(now-600,))
         crm=[r['customer_id'] for r in db.execute("SELECT customer_id FROM crm_sync WHERE status IN ('pending','retry') AND next_attempt_at<=? LIMIT ?",(now,limit))] if crm_enabled(cfg) else []
-        emails=[r['customer_id'] for r in db.execute("SELECT customer_id FROM message_outbox WHERE status IN ('pending','retry') AND next_attempt_at<=? LIMIT ?",(now,limit))] if email_enabled(cfg) else []
+        emails=[(r['customer_id'],r['kind']) for r in db.execute(
+            "SELECT customer_id,kind FROM message_outbox WHERE status IN ('pending','retry') AND next_attempt_at<=? LIMIT ?",(now,limit))]
     for cid in crm:
         await sync_crm(cfg,cid)
-    for cid in emails:
-        await send_activation_email(cfg,cid)
-    return {'crm_checked':len(crm),'email_checked':len(emails)}
+    sent=0
+    for cid,kind in emails:
+        if kind=='activation':
+            if email_enabled(cfg):
+                await send_activation_email(cfg,cid);sent+=1
+        elif kind in lifecycle_emails.KINDS:
+            await lifecycle_emails.send(cfg,cid,kind);sent+=1
+    return {'crm_checked':len(crm),'email_checked':sent}
