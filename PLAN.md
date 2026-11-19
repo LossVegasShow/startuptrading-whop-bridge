@@ -76,8 +76,8 @@ licenses succeed. **It doesn't need a rebuild.**
 | Layer | Recommendation | Why |
 |---|---|---|
 | Billing + Discord | **Stay on Whop** | It already handles billing, Discord access and OAuth. Moving to Stripe or Memberful means rebuilding Discord access and webhooks for little gain at a few hundred members. |
-| Sales site | **Framer** (editable by Jack/Robert without a developer) or **Astro on Cloudflare Pages / Vercel** (if it should live in code) | Separating it lets copy and design change without risking the licensing deploy, and keeps the bridge's strict security policy. |
-| Domains | `startuptrading.com` → sales site · `activate.startuptrading.com` → bridge | Clear separation, and the activation link looks trustworthy inside Whop. |
+| Sales site | **GoHighLevel** (decided), with the page built in `sales-site/` and pasted into a GHL Code element | Already the team's CRM and funnel tool. Copy and design changes never touch the licensing deploy. |
+| Domains | Namecheap DNS: `startuptrading.com` + `www` → GHL · `activate.startuptrading.com` → Render | Clear separation, and the activation link looks trustworthy inside Whop. See `sales-site/SETUP.md`. |
 | Bridge hosting | **Render**: one production web service and one paid Postgres with backups. Staging uses its own database. | Sized well for this business; no need for more infrastructure. |
 | Transactional email | **Resend** (already supported), domain verified with SPF, DKIM and DMARC | License and verification emails must land in the inbox, and they stay separate from marketing email. |
 | CRM | **GoHighLevel** (already holds the free-indicator leads; sync code exists) | Avoid running two CRMs. Choose Klaviyo only as part of a full migration. |
@@ -160,41 +160,29 @@ licenses succeed. **It doesn't need a rebuild.**
       everyone. This needs a reviewed production-write setting to replace the
       single-account test switch.
 
-### Phase 4: Sales site and copy (runs alongside Phases 2–3)
-
-**Design direction (avoiding the "AI slop" look)**
-- Use real proof instead of decoration: indicator screenshots, short chart
-  recordings, and Jack and his actual trading setup.
-- Keep the existing dark trading-terminal look and the orange accent
-  (`#fa7b39`), with tabular numbers and a dense, platform-like layout.
-- Avoid purple gradients, emoji or glyph icons, three identical feature boxes,
-  stock photos and vague superlatives.
-
-**Page structure**
-1. **Hero:** a specific headline, one CTA, and the price visible up front.
-2. **Demo:** 30–60 seconds of the indicators on a live chart.
-3. **The three indicators**, one section each: ATR Order Automation, Trend
-   Scanner and Momentum Selector, and TSMS & Fibs. Say what each does and
-   when to use it.
-4. **Who Jack is,** with proof: YouTube streams and member quotes (real ones
-   only).
-5. **Inside the Discord:** what happens there daily and what access to Jack
-   means.
-6. **"What happens after you subscribe,"** in three steps. This also reduces
-   failed activations.
-7. **FAQ:** cancellation, NinjaTrader requirements, existing accounts,
-   refunds.
-8. **Final CTA** plus a trading-risk disclaimer.
-
-**Copy direction (example):**
-> *The three indicators Jack trades with, licensed to your NinjaTrader in
-> under 5 minutes. $99/month. Cancel anytime.*
-
-Be concrete and make no profit claims. Regulators look closely at trading
-products, and specific copy converts better anyway.
-
-**Tracking:** the checkout CTA passes UTM tags to Whop, so paying members can
-be traced back to YouTube, social or email.
+### Phase 4: Sales site and copy ✅ page built, ⏳ needs assets, sign-off and DNS
+- [x] Sales page in `sales-site/`: one source, built into a paste-ready
+      GoHighLevel block (`dist/ghl-embed.html`) plus a standalone preview
+      (`dist/index.html`). All CSS is scoped under `.sut` so GHL's styles can't
+      clash.
+- [x] Sections: hero with demo frame, what's included, the three indicators,
+      trade room, Jack, how it works, pricing ($99/mo; annual hidden pending
+      approval), member quotes, FAQ, final CTA, risk disclosure.
+- [x] Copy is concrete and makes no profit claims. No invented testimonials
+      or numbers; missing facts and assets are dashed placeholder boxes.
+- [x] Every Join button goes to the Whop checkout from `site.config.json`, and
+      UTM tags plus Whop's `?a=` affiliate code are forwarded automatically.
+- [x] `SETUP.md`: GHL page build, GHL domain connection, Namecheap records,
+      and moving the bridge to `activate.startuptrading.com`.
+- [x] `COPY_REVIEW.md`: 10 claims for Jack to confirm, plus the asset list.
+- [x] Tests: the committed build matches the source, links are correct, CSS is
+      scoped, and there are no profit or guarantee phrases.
+- [ ] **(You/Jack)** Work through `sales-site/COPY_REVIEW.md` (claims,
+      assets, decisions).
+- [ ] **(You)** Follow `sales-site/SETUP.md`: GHL page, GHL domain,
+      Namecheap DNS, Render custom domain, Whop redirect and webhook URLs.
+- [ ] Optional later: an embedded Whop checkout on the page instead of the
+      hosted link (Whop docs weren't reachable from the build environment).
 
 ### Phase 5: Launch operations
 - [ ] Connect GoHighLevel, with a "paid but never activated" reminder sequence.

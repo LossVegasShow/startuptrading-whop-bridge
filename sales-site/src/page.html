@@ -1,0 +1,230 @@
+<div class="sut" id="top">
+<!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
+     Placeholder frames (class "sut-ph") must be replaced with real assets before launch.
+     See sales-site/COPY_REVIEW.md for every claim that needs Jack's sign-off. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <a class="sut-logo" href="#top" aria-label="StartUpTrading home">
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
+      STARTUPTRADING
+    </a>
+    <nav class="sut-links" aria-label="Sections">
+      <a href="#indicators">Indicators</a><a href="#room">Trade room</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+    </nav>
+    <a class="sut-btn sut-btn-sm" href="{{checkout_url}}" data-checkout>Join · ${{price_monthly}}/mo</a>
+  </div>
+</header>
+
+<section class="sut-hero">
+  <div class="sut-wrap sut-hero-grid">
+    <div class="sut-hero-copy">
+      <p class="sut-eyebrow"><span class="sut-live"></span>NinjaTrader 8 indicators + private trade room</p>
+      <h1>Jack's indicators.<br>His trade room.<br><span class="sut-dim">One membership.</span></h1>
+      <p class="sut-lead">All three of his NinjaTrader indicators (ATR Order Automation, TSMS, and TSMS&nbsp;&amp;&nbsp;Fibs) licensed to your own NinjaTrader account minutes after you join. Plus the members-only Discord with Jack and the community.</p>
+      <div class="sut-cta-row">
+        <a class="sut-btn sut-btn-lg" href="{{checkout_url}}" data-checkout>Join for ${{price_monthly}}/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See the indicators</a>
+      </div>
+      <ul class="sut-assure">
+        <li>Cancel anytime</li><li>Secure checkout by Whop</li><li>No NinjaTrader password needed</li>
+      </ul>
+    </div>
+
+    <figure class="sut-frame sut-hero-frame">
+      <div class="sut-frame-bar"><span></span><span></span><span></span><em>Demo · indicators on a live chart</em></div>
+      <div class="sut-frame-body">
+        {{candles}}
+        <div class="sut-ph sut-ph-overlay">
+          <span class="sut-play" aria-hidden="true"></span>
+          <strong>Demo video goes here</strong>
+          <small>Replace with a 30–60 second screen recording of all three indicators on one chart.</small>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section class="sut-strip" aria-label="What's included">
+  <div class="sut-wrap sut-strip-in">
+    <div><b>03</b><span>Proprietary NinjaTrader&nbsp;8 indicators</span></div>
+    <div><b>01</b><span>Private Discord trade room with Jack</span></div>
+    <div><b>~3 min</b><span>From checkout to licensed</span></div>
+    <div><b>$0</b><span>Setup fees. Cancel anytime.</span></div>
+  </div>
+</section>
+
+<section class="sut-section" id="indicators">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">01 · The indicators</p>
+      <h2>Built for the decisions you make in the seconds before you click.</h2>
+      <p class="sut-lead">Each one does a single job well. Together they answer the three questions every trade starts with: which way, where, and how much risk.</p>
+    </div>
+
+    <article class="sut-ind">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2071 · Trend Scanner and Momentum Selector</p>
+        <h3>Know which way the market's leaning before you take a side.</h3>
+        <p>TSMS reads trend direction and momentum together and shows you when they agree, so you stop fighting the tape on low-conviction setups.</p>
+        <ul class="sut-ticks"><li>Trend and momentum in one view</li><li>Clear agreement / disagreement states</li><li>Works on the timeframes you already trade</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>TSMS screenshot</strong><small>1600×1000 chart capture, annotated</small></div></figure>
+    </article>
+
+    <article class="sut-ind sut-ind-flip">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2205 · TSMS &amp; Fibs</p>
+        <h3>Trend context and pullback levels on the same chart.</h3>
+        <p>Everything TSMS does, with Fibonacci levels drawn for you. Pullback zones sit right next to the trend read, so you're not redrawing retracements every swing.</p>
+        <ul class="sut-ticks"><li>Fib levels plotted automatically</li><li>Pullback zones in trend context</li><li>Less manual drawing, cleaner charts</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>TSMS &amp; Fibs screenshot</strong><small>Show a pullback into a Fib level with TSMS agreeing</small></div></figure>
+    </article>
+
+    <article class="sut-ind">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2067 · ATR Order Automation</p>
+        <h3>Stops and targets sized to how much the market is actually moving.</h3>
+        <p>Instead of a fixed tick stop that's too tight on fast days and too loose on slow ones, ATR Order Automation sets your order distances from the Average True Range, consistently, every time.</p>
+        <ul class="sut-ticks"><li>Volatility-based stop and target distances</li><li>Consistent risk from trade to trade</li><li>Fewer manual order adjustments</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>ATR Order Automation screenshot</strong><small>Show the order panel with ATR-based brackets</small></div></figure>
+    </article>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="room">
+  <div class="sut-wrap sut-room">
+    <div>
+      <p class="sut-eyebrow">02 · The trade room</p>
+      <h2>Indicators show you the setup. The room shows you how it's traded.</h2>
+      <p class="sut-lead">Your membership includes the private {{discord_name}}: where Jack shares his reads, members compare notes, and you can ask questions when something doesn't make sense.</p>
+      <ul class="sut-list">
+        <li><b>Direct line to Jack</b><span>Ask about setups and how he uses each indicator.</span></li>
+        <li><b>Education &amp; walkthroughs</b><span>Demonstrations of the indicators in real market conditions.</span></li>
+        <li><b>Members-only channels</b><span>Talk shop with traders using the same tools as you.</span></li>
+        <li><b>Setup help</b><span>Stuck installing? The community and support have you covered.</span></li>
+      </ul>
+    </div>
+    <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Discord screenshot</strong><small>A real (anonymised) channel view: Jack's chart call + member replies</small></div></figure>
+  </div>
+</section>
+
+<section class="sut-section" id="jack">
+  <div class="sut-wrap sut-jack">
+    <figure class="sut-frame sut-portrait"><div class="sut-ph sut-ph-portrait"><strong>Photo of Jack</strong><small>At his actual trading desk. No stock photos.</small></div></figure>
+    <div>
+      <p class="sut-eyebrow">03 · Who's behind it</p>
+      <h2>Built by a trader, for the way he actually trades.</h2>
+      <div class="sut-ph sut-ph-text">
+        <strong>Jack's bio goes here</strong>
+        <small>3–4 sentences in Jack's voice: how long he's traded, what he trades, why he built these indicators, and where people can watch him (YouTube). Verified facts only.</small>
+      </div>
+      <!--if:youtube_url--><p class="sut-yt"><a href="{{youtube_url}}" target="_blank" rel="noopener">Watch Jack trade on YouTube <span aria-hidden="true">↗</span></a></p><!--endif:youtube_url-->
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="how">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">04 · How it works</p>
+      <h2>From checkout to charts in about three minutes.</h2>
+    </div>
+    <ol class="sut-steps">
+      <li><span>STEP 01</span><h3>Join on Whop</h3><p>Secure checkout. Your Discord access is granted automatically.</p></li>
+      <li><span>STEP 02</span><h3>Connect NinjaTrader</h3><p>Sign in on our activation page and confirm your NinjaTrader email with a 6-digit code. No account? Create a free one in two minutes.</p></li>
+      <li><span>STEP 03</span><h3>Add them to a chart</h3><p>All three indicators are licensed to your account. Follow the install guide and you're trading with them.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sut-section" id="pricing">
+  <div class="sut-wrap sut-price-grid">
+    <div>
+      <p class="sut-eyebrow">05 · Pricing</p>
+      <h2>One plan. Everything included.</h2>
+      <p class="sut-lead">No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
+    </div>
+    <div class="sut-price">
+      <div class="sut-price-head">
+        <span class="sut-tag">StartUpTrading membership</span>
+        <p class="sut-amount"><b>${{price_monthly}}</b><span>/month</span></p>
+      </div>
+      <ul class="sut-ticks">
+        <li>ATR Order Automation</li>
+        <li>Trend Scanner and Momentum Selector (TSMS)</li>
+        <li>TSMS &amp; Fibs</li>
+        <li>Private {{discord_name}} with Jack</li>
+        <li>Walkthroughs, education and setup help</li>
+        <li>Automatic licensing to your NinjaTrader account</li>
+      </ul>
+      <a class="sut-btn sut-btn-lg sut-btn-block" href="{{checkout_url}}" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <p class="sut-fine">Billed monthly through Whop. Cancel anytime.</p>
+      <!-- Annual plan ($495/yr) intentionally not shown until approved. -->
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="voices">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">06 · From members</p>
+      <h2>What members say.</h2>
+    </div>
+    <div class="sut-quotes">
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Real, permissioned quote with first name + how long they've been a member. No P&amp;L or income figures.</small></div>
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Ideally about a specific indicator or the Discord.</small></div>
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Remove this whole section if real quotes aren't available yet.</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section" id="faq">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">07 · Questions</p>
+      <h2>Before you join.</h2>
+      <p class="sut-lead">Something else? Email <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
+    </div>
+    <div class="sut-faq">
+      <details><summary>What do I need to use the indicators?</summary><p>NinjaTrader 8 on a Windows computer and a NinjaTrader account. The account is free to create if you don't have one yet.</p></details>
+      <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
+      <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
+      <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
+      <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
+      <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="sut-final">
+  <div class="sut-wrap sut-final-in">
+    <h2>Get the indicators. Join the room.</h2>
+    <p class="sut-lead">${{price_monthly}}/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
+    <a class="sut-btn sut-btn-lg" href="{{checkout_url}}" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <p class="sut-fine">Already a member? <a href="{{activation_url}}">Activate your indicators</a>.</p>
+  </div>
+</section>
+
+<footer class="sut-foot">
+  <div class="sut-wrap">
+    <div class="sut-foot-top">
+      <span class="sut-logo">STARTUPTRADING</span>
+      <nav aria-label="Footer">
+        <a href="{{activation_url}}">Member activation</a>
+        <a href="mailto:{{support_email}}">Support</a>
+        <!--if:terms_url--><a href="{{terms_url}}">Terms</a><!--endif:terms_url-->
+        <!--if:privacy_url--><a href="{{privacy_url}}">Privacy</a><!--endif:privacy_url-->
+      </nav>
+    </div>
+    <div class="sut-risk">
+      <p><b>Risk disclosure.</b> Futures and forex trading involves substantial risk of loss and is not suitable for every investor. You could lose more than your initial investment. Only trade with money you can afford to lose. Past performance is not indicative of future results.</p>
+      <p>StartUpTrading provides software tools and educational content only. Nothing on this site or in the community is financial, investment or trading advice, or a recommendation to buy or sell any instrument. Hypothetical or simulated performance results have certain limitations; unlike an actual performance record, simulated results do not represent actual trading and may have under- or over-compensated for the impact of certain market factors, such as lack of liquidity.</p>
+      <p>NinjaTrader® is a registered trademark of NinjaTrader Group, LLC. StartUpTrading is not affiliated with or endorsed by NinjaTrader. Payments are processed by Whop.</p>
+      <p class="sut-copy">© <span data-year>2026</span> StartUpTrading</p>
+    </div>
+  </div>
+</footer>
+</div>

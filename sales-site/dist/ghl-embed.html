@@ -1,0 +1,482 @@
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* StartUpTrading sales page. Every rule is scoped under .sut so the page can
+   live inside a GoHighLevel Code element without fighting the builder's CSS. */
+.sut {
+  --bg: #07090d; --bg-2: #0b0e14; --surface: #10151d; --surface-2: #161c26;
+  --line: #1d2530; --line-2: #2a3441;
+  --text: #ecf0f5; --text-2: #b3bcc9; --muted: #7b8698;
+  --accent: #fa7b39; --accent-2: #ff925a; --accent-ink: #170b03; --accent-soft: rgba(250,123,57,.12);
+  --up: #3ddc97; --down: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Full-bleed even when GHL wraps the element in a fixed-width container. */
+  position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+  background: var(--bg); color: var(--text);
+  font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-align: left;
+  overflow-x: clip;
+}
+.sut *, .sut *::before, .sut *::after { box-sizing: border-box; }
+.sut :where(h1, h2, h3, p, ul, ol, figure) { margin: 0; padding: 0; }
+.sut :where(ul, ol) { list-style: none; }
+.sut a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.sut a:hover { color: var(--accent-2); }
+.sut :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.sut ::selection { background: var(--accent); color: var(--accent-ink); }
+.sut h1, .sut h2, .sut h3 { color: var(--text); font-family: var(--sans); font-weight: 600; letter-spacing: -.03em; }
+.sut h1 { font-size: clamp(38px, 4.9vw, 64px); line-height: 1.02; letter-spacing: -.045em; }
+.sut h2 { font-size: clamp(28px, 3.8vw, 44px); line-height: 1.08; }
+.sut h3 { font-size: clamp(20px, 2.2vw, 26px); line-height: 1.2; }
+.sut .sut-dim { color: var(--muted); }
+.sut-wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+.sut .sut-eyebrow, .sut .sut-tag {
+  display: inline-flex; align-items: center; gap: 9px;
+  font: 500 12px/1.4 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--accent);
+}
+.sut .sut-tag { color: var(--muted); letter-spacing: .04em; }
+.sut-live { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 0 4px rgba(61,220,151,.14); animation: sut-pulse 2.4s ease-in-out infinite; }
+@keyframes sut-pulse { 50% { box-shadow: 0 0 0 7px rgba(61,220,151,.04); } }
+.sut .sut-lead { font-size: clamp(16.5px, 1.5vw, 19px); line-height: 1.6; color: var(--text-2); max-width: 600px; }
+.sut .sut-fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+/* Buttons */
+.sut .sut-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 46px; padding: 0 20px; border-radius: 9px; border: 1px solid transparent;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font: 600 15px/1 var(--sans); letter-spacing: -.01em; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.sut .sut-btn:hover { background: var(--accent-2); color: var(--accent-ink); }
+.sut .sut-btn:active { transform: translateY(1px); }
+.sut .sut-btn-sm { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.sut .sut-btn-lg { min-height: 54px; padding: 0 26px; font-size: 16.5px; }
+.sut .sut-btn-block { width: 100%; }
+.sut .sut-btn-ghost { background: transparent; color: var(--text); border-color: var(--line-2); }
+.sut .sut-btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: #3b4757; }
+.sut .sut-arrow { transition: transform .15s ease; }
+.sut .sut-btn:hover .sut-arrow { transform: translateX(3px); }
+
+/* Nav */
+.sut-nav { position: sticky; top: 0; z-index: 20; background: rgba(7,9,13,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.sut-nav-in { display: flex; align-items: center; gap: 28px; height: 64px; }
+.sut .sut-logo { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 14px var(--sans); letter-spacing: .08em; }
+.sut .sut-logo:hover { color: var(--text); }
+.sut-links { display: flex; gap: 26px; margin-left: auto; }
+.sut .sut-links a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-links a:hover { color: var(--text); }
+
+/* Hero */
+.sut-hero { position: relative; padding: 84px 0 72px; border-bottom: 1px solid var(--line); isolation: isolate; }
+.sut-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: -1px -1px;
+  -webkit-mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%); mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%);
+}
+.sut-hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.sut-hero-copy h1 { margin: 22px 0 22px; }
+.sut-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.sut-assure { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+.sut-assure li { font: 500 12.5px var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.sut-assure li::before { content: "✓"; color: var(--up); }
+
+/* Platform-window frames */
+.sut-frame { border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: 0 30px 80px -40px rgba(0,0,0,.8); }
+.sut-frame-bar { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-frame-bar span { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); }
+.sut-frame-bar em { margin-left: 10px; font: 500 11.5px var(--mono); font-style: normal; color: var(--muted); letter-spacing: .03em; }
+.sut-frame-body { position: relative; aspect-ratio: 16 / 10; background: linear-gradient(to bottom, var(--surface), var(--bg-2)); }
+.sut-candles { position: absolute; inset: 22px 18px; width: calc(100% - 36px); height: calc(100% - 44px); opacity: .5; }
+.sut-candles .up { fill: var(--up); stroke: var(--up); }
+.sut-candles .dn { fill: var(--down); stroke: var(--down); }
+.sut-candles line { stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* Placeholders: obvious on purpose so nothing ships unreplaced. */
+.sut .sut-ph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  padding: 24px; border: 1.5px dashed rgba(250,123,57,.45); border-radius: 10px; background: rgba(250,123,57,.04);
+}
+.sut .sut-ph strong { font: 600 14px var(--mono); color: var(--accent); letter-spacing: .02em; }
+.sut .sut-ph small { font-size: 13px; color: var(--muted); max-width: 340px; line-height: 1.5; }
+.sut .sut-frame > .sut-ph { border: 0; border-radius: 0; }
+.sut .sut-ph-overlay { position: absolute; inset: 0; border: 0; border-radius: 0; background: linear-gradient(rgba(7,9,13,.35), rgba(7,9,13,.7)); }
+.sut-play { width: 62px; height: 62px; border-radius: 50%; background: var(--accent); position: relative; margin-bottom: 8px; box-shadow: 0 0 0 10px rgba(250,123,57,.15); }
+.sut-play::after { content: ""; position: absolute; left: 25px; top: 20px; border-left: 17px solid var(--accent-ink); border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+.sut .sut-ph-shot { aspect-ratio: 16 / 10; }
+.sut .sut-ph-tall { aspect-ratio: 4 / 5; }
+.sut .sut-ph-portrait { aspect-ratio: 4 / 5; }
+.sut .sut-ph-text { align-items: flex-start; text-align: left; margin-top: 22px; min-height: 150px; }
+.sut .sut-ph-quote { min-height: 190px; }
+
+/* Strip */
+.sut-strip { border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-strip-in { display: grid; grid-template-columns: repeat(4, 1fr); }
+.sut-strip-in > div { padding: 26px 24px; display: flex; flex-direction: column; gap: 4px; }
+.sut-strip-in > div + div { border-left: 1px solid var(--line); }
+.sut-strip b { font: 600 26px/1.1 var(--mono); color: var(--text); letter-spacing: -.02em; font-feature-settings: "tnum"; }
+.sut-strip span { font-size: 13.5px; color: var(--muted); }
+
+/* Sections */
+.sut-section { padding: 112px 0; border-bottom: 1px solid var(--line); }
+.sut-alt { background: var(--bg-2); }
+.sut-head { max-width: 760px; margin-bottom: 64px; }
+.sut-head h2 { margin: 16px 0 18px; }
+.sut-section h2 + .sut-lead { margin-top: 18px; }
+.sut-section .sut-eyebrow + h2 { margin-top: 16px; }
+
+/* Indicators */
+.sut-ind { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
+.sut-ind + .sut-ind { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-ind-flip .sut-ind-copy { order: 2; }
+.sut-ind-copy h3 { margin: 14px 0 14px; }
+.sut-ind-copy > p:not(.sut-tag) { color: var(--text-2); font-size: 16.5px; }
+.sut-ticks { margin-top: 22px; display: grid; gap: 10px; }
+.sut-ticks li { display: grid; grid-template-columns: 22px 1fr; color: var(--text-2); font-size: 15px; }
+.sut-ticks li::before { content: "+"; font: 600 15px var(--mono); color: var(--accent); }
+
+/* Trade room */
+.sut-room { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 64px; align-items: center; }
+.sut-list { margin-top: 34px; border-top: 1px solid var(--line); }
+.sut-list li { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.sut-list b { color: var(--text); font-weight: 600; }
+.sut-list span { color: var(--muted); font-size: 15px; }
+
+/* Jack */
+.sut-jack { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: center; }
+.sut .sut-yt { margin-top: 22px; font-weight: 500; }
+
+/* Steps */
+.sut-steps { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sut-steps li { padding: 30px 28px; background: var(--surface); }
+.sut-steps li + li { border-left: 1px solid var(--line); }
+.sut-steps span { font: 500 12px var(--mono); color: var(--accent); letter-spacing: .06em; }
+.sut-steps h3 { margin: 14px 0 10px; font-size: 21px; }
+.sut-steps p { color: var(--text-2); font-size: 15px; }
+
+/* Pricing */
+.sut-price-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 64px; align-items: center; }
+.sut-price { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 32px; box-shadow: 0 0 0 1px rgba(250,123,57,.08), 0 40px 90px -50px rgba(250,123,57,.35); }
+.sut-price-head { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sut .sut-amount { margin-top: 12px; display: flex; align-items: baseline; gap: 6px; }
+.sut .sut-amount b { font: 600 60px/1 var(--sans); letter-spacing: -.05em; color: var(--text); font-feature-settings: "tnum"; }
+.sut .sut-amount span { color: var(--muted); font-size: 16px; }
+.sut-price .sut-ticks { margin: 24px 0 28px; }
+
+/* Quotes */
+.sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* FAQ */
+.sut-faq-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: start; }
+.sut-faq details { border-top: 1px solid var(--line); }
+.sut-faq details:last-child { border-bottom: 1px solid var(--line); }
+.sut-faq summary { cursor: pointer; list-style: none; position: relative; padding: 22px 40px 22px 0; font-weight: 550; font-size: 17px; color: var(--text); }
+.sut-faq summary::-webkit-details-marker { display: none; }
+.sut-faq summary::after { content: "+"; position: absolute; right: 4px; top: 18px; font: 400 24px var(--mono); color: var(--muted); transition: transform .2s ease; }
+.sut-faq details[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+.sut-faq details p { padding: 0 40px 24px 0; color: var(--text-2); }
+
+/* Final CTA */
+.sut-final { padding: 120px 0; text-align: center; border-bottom: 1px solid var(--line);
+  background: radial-gradient(60% 80% at 50% 100%, rgba(250,123,57,.12), transparent 70%); }
+.sut-final-in { display: flex; flex-direction: column; align-items: center; }
+.sut-final h2 { font-size: clamp(32px, 4.6vw, 56px); max-width: 760px; }
+.sut-final .sut-lead { margin: 18px auto 32px; }
+
+/* Footer */
+.sut-foot { padding: 48px 0 56px; }
+.sut-foot-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.sut-foot-top nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.sut .sut-foot-top nav a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-foot-top nav a:hover { color: var(--text); }
+.sut-risk { margin-top: 28px; display: grid; gap: 12px; max-width: 900px; }
+.sut-risk p { font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+.sut-risk b { color: var(--text-2); }
+.sut .sut-copy { margin-top: 8px; font-family: var(--mono); }
+
+/* Responsive */
+@media (max-width: 980px) {
+  .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sut-ind-flip .sut-ind-copy { order: 0; }
+  .sut-portrait { max-width: 420px; }
+  .sut-links { display: none; }
+  .sut-nav-in .sut-btn { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  .sut-wrap { padding: 0 18px; }
+  .sut-hero { padding: 52px 0 48px; }
+  .sut-section { padding: 76px 0; }
+  .sut-head { margin-bottom: 40px; }
+  .sut-ind + .sut-ind { margin-top: 64px; padding-top: 64px; }
+  .sut-strip-in { grid-template-columns: 1fr 1fr; }
+  .sut-strip-in > div:nth-child(3) { border-left: 0; }
+  .sut-strip-in > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .sut-steps, .sut-quotes { grid-template-columns: 1fr; }
+  .sut-steps li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .sut-list li { grid-template-columns: 1fr; gap: 4px; }
+  .sut .sut-cta-row .sut-btn { width: 100%; }
+  .sut-price { padding: 24px; }
+  .sut-final { padding: 84px 0; }
+  .sut-logo svg + * { display: none; }
+}
+@media (max-width: 400px) {
+  .sut .sut-nav .sut-logo { font-size: 12.5px; letter-spacing: .06em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sut *, .sut *::before, .sut *::after { animation: none !important; transition: none !important; }
+}
+
+</style>
+<div class="sut" id="top">
+<!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
+     Placeholder frames (class "sut-ph") must be replaced with real assets before launch.
+     See sales-site/COPY_REVIEW.md for every claim that needs Jack's sign-off. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <a class="sut-logo" href="#top" aria-label="StartUpTrading home">
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
+      STARTUPTRADING
+    </a>
+    <nav class="sut-links" aria-label="Sections">
+      <a href="#indicators">Indicators</a><a href="#room">Trade room</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+    </nav>
+    <a class="sut-btn sut-btn-sm" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join · $99/mo</a>
+  </div>
+</header>
+
+<section class="sut-hero">
+  <div class="sut-wrap sut-hero-grid">
+    <div class="sut-hero-copy">
+      <p class="sut-eyebrow"><span class="sut-live"></span>NinjaTrader 8 indicators + private trade room</p>
+      <h1>Jack's indicators.<br>His trade room.<br><span class="sut-dim">One membership.</span></h1>
+      <p class="sut-lead">All three of his NinjaTrader indicators (ATR Order Automation, TSMS, and TSMS&nbsp;&amp;&nbsp;Fibs) licensed to your own NinjaTrader account minutes after you join. Plus the members-only Discord with Jack and the community.</p>
+      <div class="sut-cta-row">
+        <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See the indicators</a>
+      </div>
+      <ul class="sut-assure">
+        <li>Cancel anytime</li><li>Secure checkout by Whop</li><li>No NinjaTrader password needed</li>
+      </ul>
+    </div>
+
+    <figure class="sut-frame sut-hero-frame">
+      <div class="sut-frame-bar"><span></span><span></span><span></span><em>Demo · indicators on a live chart</em></div>
+      <div class="sut-frame-body">
+        <svg class="sut-candles" viewBox="0 0 640 300" preserveAspectRatio="none" aria-hidden="true"><line class="dn" x1="5.0" x2="5.0" y1="261.6" y2="270.2"/><rect class="dn" x="2.2" y="266.3" width="5.6" height="1.8"/><line class="dn" x1="15.0" x2="15.0" y1="259.6" y2="273.0"/><rect class="dn" x="12.2" y="268.1" width="5.6" height="2.9"/><line class="up" x1="25.0" x2="25.0" y1="243.9" y2="280.5"/><rect class="up" x="22.2" y="247.8" width="5.6" height="23.2"/><line class="up" x1="35.0" x2="35.0" y1="236.8" y2="249.5"/><rect class="up" x="32.2" y="240.4" width="5.6" height="7.4"/><line class="dn" x1="45.0" x2="45.0" y1="232.6" y2="272.7"/><rect class="dn" x="42.2" y="240.4" width="5.6" height="27.6"/><line class="up" x1="55.0" x2="55.0" y1="240.5" y2="284.0"/><rect class="up" x="52.2" y="256.0" width="5.6" height="12.0"/><line class="dn" x1="65.0" x2="65.0" y1="251.7" y2="272.3"/><rect class="dn" x="62.2" y="256.0" width="5.6" height="13.5"/><line class="up" x1="75.0" x2="75.0" y1="262.7" y2="275.3"/><rect class="up" x="72.2" y="267.4" width="5.6" height="2.1"/><line class="up" x1="85.0" x2="85.0" y1="255.3" y2="273.5"/><rect class="up" x="82.2" y="258.9" width="5.6" height="8.5"/><line class="up" x1="95.0" x2="95.0" y1="219.5" y2="269.9"/><rect class="up" x="92.2" y="224.6" width="5.6" height="34.3"/><line class="dn" x1="105.0" x2="105.0" y1="217.8" y2="236.3"/><rect class="dn" x="102.2" y="224.6" width="5.6" height="8.5"/><line class="up" x1="115.0" x2="115.0" y1="226.4" y2="235.4"/><rect class="up" x="112.2" y="232.2" width="5.6" height="1.0"/><line class="dn" x1="125.0" x2="125.0" y1="223.4" y2="242.3"/><rect class="dn" x="122.2" y="232.2" width="5.6" height="5.3"/><line class="up" x1="135.0" x2="135.0" y1="204.9" y2="239.8"/><rect class="up" x="132.2" y="212.3" width="5.6" height="25.2"/><line class="up" x1="145.0" x2="145.0" y1="188.0" y2="212.8"/><rect class="up" x="142.2" y="201.6" width="5.6" height="10.7"/><line class="up" x1="155.0" x2="155.0" y1="156.4" y2="204.6"/><rect class="up" x="152.2" y="174.9" width="5.6" height="26.7"/><line class="up" x1="165.0" x2="165.0" y1="166.5" y2="179.4"/><rect class="up" x="162.2" y="173.9" width="5.6" height="1.0"/><line class="up" x1="175.0" x2="175.0" y1="158.8" y2="181.5"/><rect class="up" x="172.2" y="172.2" width="5.6" height="1.7"/><line class="up" x1="185.0" x2="185.0" y1="148.4" y2="185.4"/><rect class="up" x="182.2" y="157.1" width="5.6" height="15.1"/><line class="up" x1="195.0" x2="195.0" y1="146.5" y2="169.0"/><rect class="up" x="192.2" y="147.6" width="5.6" height="9.5"/><line class="up" x1="205.0" x2="205.0" y1="127.9" y2="151.8"/><rect class="up" x="202.2" y="133.5" width="5.6" height="14.1"/><line class="dn" x1="215.0" x2="215.0" y1="124.6" y2="158.6"/><rect class="dn" x="212.2" y="133.5" width="5.6" height="20.3"/><line class="up" x1="225.0" x2="225.0" y1="108.7" y2="167.1"/><rect class="up" x="222.2" y="127.3" width="5.6" height="26.5"/><line class="up" x1="235.0" x2="235.0" y1="106.8" y2="132.6"/><rect class="up" x="232.2" y="120.1" width="5.6" height="7.2"/><line class="dn" x1="245.0" x2="245.0" y1="97.0" y2="155.3"/><rect class="dn" x="242.2" y="120.1" width="5.6" height="31.9"/><line class="dn" x1="255.0" x2="255.0" y1="141.7" y2="171.6"/><rect class="dn" x="252.2" y="152.0" width="5.6" height="10.6"/><line class="up" x1="265.0" x2="265.0" y1="138.1" y2="164.9"/><rect class="up" x="262.2" y="139.6" width="5.6" height="23.0"/><line class="up" x1="275.0" x2="275.0" y1="114.2" y2="145.2"/><rect class="up" x="272.2" y="128.8" width="5.6" height="10.8"/><line class="up" x1="285.0" x2="285.0" y1="111.4" y2="143.1"/><rect class="up" x="282.2" y="116.4" width="5.6" height="12.4"/><line class="up" x1="295.0" x2="295.0" y1="81.3" y2="121.3"/><rect class="up" x="292.2" y="90.1" width="5.6" height="26.3"/><line class="dn" x1="305.0" x2="305.0" y1="84.3" y2="131.1"/><rect class="dn" x="302.2" y="90.1" width="5.6" height="33.3"/><line class="dn" x1="315.0" x2="315.0" y1="121.7" y2="163.0"/><rect class="dn" x="312.2" y="123.4" width="5.6" height="30.3"/><line class="dn" x1="325.0" x2="325.0" y1="138.9" y2="179.9"/><rect class="dn" x="322.2" y="153.7" width="5.6" height="21.1"/><line class="up" x1="335.0" x2="335.0" y1="171.7" y2="180.8"/><rect class="up" x="332.2" y="174.7" width="5.6" height="1.0"/><line class="up" x1="345.0" x2="345.0" y1="159.1" y2="180.8"/><rect class="up" x="342.2" y="169.6" width="5.6" height="5.1"/><line class="dn" x1="355.0" x2="355.0" y1="160.1" y2="174.6"/><rect class="dn" x="352.2" y="169.6" width="5.6" height="4.8"/><line class="dn" x1="365.0" x2="365.0" y1="165.7" y2="201.1"/><rect class="dn" x="362.2" y="174.4" width="5.6" height="13.2"/><line class="dn" x1="375.0" x2="375.0" y1="175.0" y2="194.2"/><rect class="dn" x="372.2" y="187.6" width="5.6" height="5.3"/><line class="up" x1="385.0" x2="385.0" y1="190.1" y2="205.8"/><rect class="up" x="382.2" y="192.8" width="5.6" height="1.0"/><line class="dn" x1="395.0" x2="395.0" y1="181.2" y2="220.3"/><rect class="dn" x="392.2" y="192.8" width="5.6" height="15.9"/><line class="dn" x1="405.0" x2="405.0" y1="202.9" y2="230.6"/><rect class="dn" x="402.2" y="208.7" width="5.6" height="11.6"/><line class="up" x1="415.0" x2="415.0" y1="198.5" y2="221.6"/><rect class="up" x="412.2" y="201.7" width="5.6" height="18.6"/><line class="up" x1="425.0" x2="425.0" y1="190.8" y2="203.3"/><rect class="up" x="422.2" y="196.0" width="5.6" height="5.7"/><line class="up" x1="435.0" x2="435.0" y1="182.9" y2="196.0"/><rect class="up" x="432.2" y="188.1" width="5.6" height="7.9"/><line class="up" x1="445.0" x2="445.0" y1="166.1" y2="206.5"/><rect class="up" x="442.2" y="171.2" width="5.6" height="16.9"/><line class="up" x1="455.0" x2="455.0" y1="158.5" y2="174.7"/><rect class="up" x="452.2" y="162.4" width="5.6" height="8.8"/><line class="up" x1="465.0" x2="465.0" y1="151.3" y2="165.5"/><rect class="up" x="462.2" y="159.8" width="5.6" height="2.6"/><line class="up" x1="475.0" x2="475.0" y1="133.1" y2="183.3"/><rect class="up" x="472.2" y="149.9" width="5.6" height="9.9"/><line class="dn" x1="485.0" x2="485.0" y1="147.6" y2="171.2"/><rect class="dn" x="482.2" y="149.9" width="5.6" height="17.7"/><line class="up" x1="495.0" x2="495.0" y1="156.4" y2="173.6"/><rect class="up" x="492.2" y="160.4" width="5.6" height="7.2"/><line class="up" x1="505.0" x2="505.0" y1="147.6" y2="182.6"/><rect class="up" x="502.2" y="152.3" width="5.6" height="8.1"/><line class="up" x1="515.0" x2="515.0" y1="137.9" y2="153.3"/><rect class="up" x="512.2" y="143.0" width="5.6" height="9.3"/><line class="dn" x1="525.0" x2="525.0" y1="142.4" y2="169.2"/><rect class="dn" x="522.2" y="143.0" width="5.6" height="1.2"/><line class="dn" x1="535.0" x2="535.0" y1="135.0" y2="161.0"/><rect class="dn" x="532.2" y="144.2" width="5.6" height="6.1"/><line class="up" x1="545.0" x2="545.0" y1="139.9" y2="158.1"/><rect class="up" x="542.2" y="148.7" width="5.6" height="1.6"/><line class="up" x1="555.0" x2="555.0" y1="102.9" y2="151.9"/><rect class="up" x="552.2" y="118.5" width="5.6" height="30.2"/><line class="dn" x1="565.0" x2="565.0" y1="112.8" y2="131.9"/><rect class="dn" x="562.2" y="118.5" width="5.6" height="3.4"/><line class="dn" x1="575.0" x2="575.0" y1="111.9" y2="181.4"/><rect class="dn" x="572.2" y="121.9" width="5.6" height="46.2"/><line class="up" x1="585.0" x2="585.0" y1="139.1" y2="169.8"/><rect class="up" x="582.2" y="152.8" width="5.6" height="15.3"/><line class="up" x1="595.0" x2="595.0" y1="126.7" y2="154.5"/><rect class="up" x="592.2" y="128.0" width="5.6" height="24.8"/><line class="up" x1="605.0" x2="605.0" y1="109.3" y2="128.8"/><rect class="up" x="602.2" y="110.6" width="5.6" height="17.4"/><line class="up" x1="615.0" x2="615.0" y1="70.0" y2="113.3"/><rect class="up" x="612.2" y="79.6" width="5.6" height="31.0"/><line class="up" x1="625.0" x2="625.0" y1="16.0" y2="88.0"/><rect class="up" x="622.2" y="26.5" width="5.6" height="53.1"/><line class="dn" x1="635.0" x2="635.0" y1="25.3" y2="35.0"/><rect class="dn" x="632.2" y="26.5" width="5.6" height="2.0"/></svg>
+        <div class="sut-ph sut-ph-overlay">
+          <span class="sut-play" aria-hidden="true"></span>
+          <strong>Demo video goes here</strong>
+          <small>Replace with a 30–60 second screen recording of all three indicators on one chart.</small>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section class="sut-strip" aria-label="What's included">
+  <div class="sut-wrap sut-strip-in">
+    <div><b>03</b><span>Proprietary NinjaTrader&nbsp;8 indicators</span></div>
+    <div><b>01</b><span>Private Discord trade room with Jack</span></div>
+    <div><b>~3 min</b><span>From checkout to licensed</span></div>
+    <div><b>$0</b><span>Setup fees. Cancel anytime.</span></div>
+  </div>
+</section>
+
+<section class="sut-section" id="indicators">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">01 · The indicators</p>
+      <h2>Built for the decisions you make in the seconds before you click.</h2>
+      <p class="sut-lead">Each one does a single job well. Together they answer the three questions every trade starts with: which way, where, and how much risk.</p>
+    </div>
+
+    <article class="sut-ind">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2071 · Trend Scanner and Momentum Selector</p>
+        <h3>Know which way the market's leaning before you take a side.</h3>
+        <p>TSMS reads trend direction and momentum together and shows you when they agree, so you stop fighting the tape on low-conviction setups.</p>
+        <ul class="sut-ticks"><li>Trend and momentum in one view</li><li>Clear agreement / disagreement states</li><li>Works on the timeframes you already trade</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>TSMS screenshot</strong><small>1600×1000 chart capture, annotated</small></div></figure>
+    </article>
+
+    <article class="sut-ind sut-ind-flip">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2205 · TSMS &amp; Fibs</p>
+        <h3>Trend context and pullback levels on the same chart.</h3>
+        <p>Everything TSMS does, with Fibonacci levels drawn for you. Pullback zones sit right next to the trend read, so you're not redrawing retracements every swing.</p>
+        <ul class="sut-ticks"><li>Fib levels plotted automatically</li><li>Pullback zones in trend context</li><li>Less manual drawing, cleaner charts</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>TSMS &amp; Fibs screenshot</strong><small>Show a pullback into a Fib level with TSMS agreeing</small></div></figure>
+    </article>
+
+    <article class="sut-ind">
+      <div class="sut-ind-copy">
+        <p class="sut-tag">#2067 · ATR Order Automation</p>
+        <h3>Stops and targets sized to how much the market is actually moving.</h3>
+        <p>Instead of a fixed tick stop that's too tight on fast days and too loose on slow ones, ATR Order Automation sets your order distances from the Average True Range, consistently, every time.</p>
+        <ul class="sut-ticks"><li>Volatility-based stop and target distances</li><li>Consistent risk from trade to trade</li><li>Fewer manual order adjustments</li></ul>
+      </div>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>ATR Order Automation screenshot</strong><small>Show the order panel with ATR-based brackets</small></div></figure>
+    </article>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="room">
+  <div class="sut-wrap sut-room">
+    <div>
+      <p class="sut-eyebrow">02 · The trade room</p>
+      <h2>Indicators show you the setup. The room shows you how it's traded.</h2>
+      <p class="sut-lead">Your membership includes the private StartUpTrading Discord: where Jack shares his reads, members compare notes, and you can ask questions when something doesn't make sense.</p>
+      <ul class="sut-list">
+        <li><b>Direct line to Jack</b><span>Ask about setups and how he uses each indicator.</span></li>
+        <li><b>Education &amp; walkthroughs</b><span>Demonstrations of the indicators in real market conditions.</span></li>
+        <li><b>Members-only channels</b><span>Talk shop with traders using the same tools as you.</span></li>
+        <li><b>Setup help</b><span>Stuck installing? The community and support have you covered.</span></li>
+      </ul>
+    </div>
+    <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Discord screenshot</strong><small>A real (anonymised) channel view: Jack's chart call + member replies</small></div></figure>
+  </div>
+</section>
+
+<section class="sut-section" id="jack">
+  <div class="sut-wrap sut-jack">
+    <figure class="sut-frame sut-portrait"><div class="sut-ph sut-ph-portrait"><strong>Photo of Jack</strong><small>At his actual trading desk. No stock photos.</small></div></figure>
+    <div>
+      <p class="sut-eyebrow">03 · Who's behind it</p>
+      <h2>Built by a trader, for the way he actually trades.</h2>
+      <div class="sut-ph sut-ph-text">
+        <strong>Jack's bio goes here</strong>
+        <small>3–4 sentences in Jack's voice: how long he's traded, what he trades, why he built these indicators, and where people can watch him (YouTube). Verified facts only.</small>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="how">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">04 · How it works</p>
+      <h2>From checkout to charts in about three minutes.</h2>
+    </div>
+    <ol class="sut-steps">
+      <li><span>STEP 01</span><h3>Join on Whop</h3><p>Secure checkout. Your Discord access is granted automatically.</p></li>
+      <li><span>STEP 02</span><h3>Connect NinjaTrader</h3><p>Sign in on our activation page and confirm your NinjaTrader email with a 6-digit code. No account? Create a free one in two minutes.</p></li>
+      <li><span>STEP 03</span><h3>Add them to a chart</h3><p>All three indicators are licensed to your account. Follow the install guide and you're trading with them.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sut-section" id="pricing">
+  <div class="sut-wrap sut-price-grid">
+    <div>
+      <p class="sut-eyebrow">05 · Pricing</p>
+      <h2>One plan. Everything included.</h2>
+      <p class="sut-lead">No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
+    </div>
+    <div class="sut-price">
+      <div class="sut-price-head">
+        <span class="sut-tag">StartUpTrading membership</span>
+        <p class="sut-amount"><b>$99</b><span>/month</span></p>
+      </div>
+      <ul class="sut-ticks">
+        <li>ATR Order Automation</li>
+        <li>Trend Scanner and Momentum Selector (TSMS)</li>
+        <li>TSMS &amp; Fibs</li>
+        <li>Private StartUpTrading Discord with Jack</li>
+        <li>Walkthroughs, education and setup help</li>
+        <li>Automatic licensing to your NinjaTrader account</li>
+      </ul>
+      <a class="sut-btn sut-btn-lg sut-btn-block" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <p class="sut-fine">Billed monthly through Whop. Cancel anytime.</p>
+      <!-- Annual plan ($495/yr) intentionally not shown until approved. -->
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="voices">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">06 · From members</p>
+      <h2>What members say.</h2>
+    </div>
+    <div class="sut-quotes">
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Real, permissioned quote with first name + how long they've been a member. No P&amp;L or income figures.</small></div>
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Ideally about a specific indicator or the Discord.</small></div>
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Remove this whole section if real quotes aren't available yet.</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section" id="faq">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">07 · Questions</p>
+      <h2>Before you join.</h2>
+      <p class="sut-lead">Something else? Email <a href="mailto:support@startuptrading.com">support@startuptrading.com</a>.</p>
+    </div>
+    <div class="sut-faq">
+      <details><summary>What do I need to use the indicators?</summary><p>NinjaTrader 8 on a Windows computer and a NinjaTrader account. The account is free to create if you don't have one yet.</p></details>
+      <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
+      <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
+      <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
+      <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
+      <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="sut-final">
+  <div class="sut-wrap sut-final-in">
+    <h2>Get the indicators. Join the room.</h2>
+    <p class="sut-lead">$99/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
+    <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <p class="sut-fine">Already a member? <a href="https://activate.startuptrading.com/">Activate your indicators</a>.</p>
+  </div>
+</section>
+
+<footer class="sut-foot">
+  <div class="sut-wrap">
+    <div class="sut-foot-top">
+      <span class="sut-logo">STARTUPTRADING</span>
+      <nav aria-label="Footer">
+        <a href="https://activate.startuptrading.com/">Member activation</a>
+        <a href="mailto:support@startuptrading.com">Support</a>
+        
+        
+      </nav>
+    </div>
+    <div class="sut-risk">
+      <p><b>Risk disclosure.</b> Futures and forex trading involves substantial risk of loss and is not suitable for every investor. You could lose more than your initial investment. Only trade with money you can afford to lose. Past performance is not indicative of future results.</p>
+      <p>StartUpTrading provides software tools and educational content only. Nothing on this site or in the community is financial, investment or trading advice, or a recommendation to buy or sell any instrument. Hypothetical or simulated performance results have certain limitations; unlike an actual performance record, simulated results do not represent actual trading and may have under- or over-compensated for the impact of certain market factors, such as lack of liquidity.</p>
+      <p>NinjaTrader® is a registered trademark of NinjaTrader Group, LLC. StartUpTrading is not affiliated with or endorsed by NinjaTrader. Payments are processed by Whop.</p>
+      <p class="sut-copy">© <span data-year>2026</span> StartUpTrading</p>
+    </div>
+  </div>
+</footer>
+</div>
+
+<script>
+(function () {
+  // Forward UTM tags (and Whop's ?a= affiliate code) from this page's URL to
+  // every checkout link, so Whop can attribute the sale to the campaign.
+  var keep = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'a'];
+  var here = new URLSearchParams(window.location.search);
+  var links = document.querySelectorAll('.sut a[data-checkout]');
+  for (var i = 0; i < links.length; i++) {
+    try {
+      var url = new URL(links[i].href);
+      keep.forEach(function (k) {
+        if (here.has(k) && !url.searchParams.has(k)) url.searchParams.set(k, here.get(k));
+      });
+      links[i].href = url.toString();
+    } catch (e) { /* leave the link as it is */ }
+  }
+  var year = document.querySelector('.sut [data-year]');
+  if (year) year.textContent = new Date().getFullYear();
+})();
+
+</script>

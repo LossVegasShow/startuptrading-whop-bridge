@@ -1,0 +1,226 @@
+/* StartUpTrading sales page. Every rule is scoped under .sut so the page can
+   live inside a GoHighLevel Code element without fighting the builder's CSS. */
+.sut {
+  --bg: #07090d; --bg-2: #0b0e14; --surface: #10151d; --surface-2: #161c26;
+  --line: #1d2530; --line-2: #2a3441;
+  --text: #ecf0f5; --text-2: #b3bcc9; --muted: #7b8698;
+  --accent: #fa7b39; --accent-2: #ff925a; --accent-ink: #170b03; --accent-soft: rgba(250,123,57,.12);
+  --up: #3ddc97; --down: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Full-bleed even when GHL wraps the element in a fixed-width container. */
+  position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+  background: var(--bg); color: var(--text);
+  font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-align: left;
+  overflow-x: clip;
+}
+.sut *, .sut *::before, .sut *::after { box-sizing: border-box; }
+.sut :where(h1, h2, h3, p, ul, ol, figure) { margin: 0; padding: 0; }
+.sut :where(ul, ol) { list-style: none; }
+.sut a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.sut a:hover { color: var(--accent-2); }
+.sut :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.sut ::selection { background: var(--accent); color: var(--accent-ink); }
+.sut h1, .sut h2, .sut h3 { color: var(--text); font-family: var(--sans); font-weight: 600; letter-spacing: -.03em; }
+.sut h1 { font-size: clamp(38px, 4.9vw, 64px); line-height: 1.02; letter-spacing: -.045em; }
+.sut h2 { font-size: clamp(28px, 3.8vw, 44px); line-height: 1.08; }
+.sut h3 { font-size: clamp(20px, 2.2vw, 26px); line-height: 1.2; }
+.sut .sut-dim { color: var(--muted); }
+.sut-wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+.sut .sut-eyebrow, .sut .sut-tag {
+  display: inline-flex; align-items: center; gap: 9px;
+  font: 500 12px/1.4 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--accent);
+}
+.sut .sut-tag { color: var(--muted); letter-spacing: .04em; }
+.sut-live { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 0 4px rgba(61,220,151,.14); animation: sut-pulse 2.4s ease-in-out infinite; }
+@keyframes sut-pulse { 50% { box-shadow: 0 0 0 7px rgba(61,220,151,.04); } }
+.sut .sut-lead { font-size: clamp(16.5px, 1.5vw, 19px); line-height: 1.6; color: var(--text-2); max-width: 600px; }
+.sut .sut-fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+/* Buttons */
+.sut .sut-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 46px; padding: 0 20px; border-radius: 9px; border: 1px solid transparent;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font: 600 15px/1 var(--sans); letter-spacing: -.01em; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.sut .sut-btn:hover { background: var(--accent-2); color: var(--accent-ink); }
+.sut .sut-btn:active { transform: translateY(1px); }
+.sut .sut-btn-sm { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.sut .sut-btn-lg { min-height: 54px; padding: 0 26px; font-size: 16.5px; }
+.sut .sut-btn-block { width: 100%; }
+.sut .sut-btn-ghost { background: transparent; color: var(--text); border-color: var(--line-2); }
+.sut .sut-btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: #3b4757; }
+.sut .sut-arrow { transition: transform .15s ease; }
+.sut .sut-btn:hover .sut-arrow { transform: translateX(3px); }
+
+/* Nav */
+.sut-nav { position: sticky; top: 0; z-index: 20; background: rgba(7,9,13,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.sut-nav-in { display: flex; align-items: center; gap: 28px; height: 64px; }
+.sut .sut-logo { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 14px var(--sans); letter-spacing: .08em; }
+.sut .sut-logo:hover { color: var(--text); }
+.sut-links { display: flex; gap: 26px; margin-left: auto; }
+.sut .sut-links a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-links a:hover { color: var(--text); }
+
+/* Hero */
+.sut-hero { position: relative; padding: 84px 0 72px; border-bottom: 1px solid var(--line); isolation: isolate; }
+.sut-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: -1px -1px;
+  -webkit-mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%); mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%);
+}
+.sut-hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.sut-hero-copy h1 { margin: 22px 0 22px; }
+.sut-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.sut-assure { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+.sut-assure li { font: 500 12.5px var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.sut-assure li::before { content: "✓"; color: var(--up); }
+
+/* Platform-window frames */
+.sut-frame { border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: 0 30px 80px -40px rgba(0,0,0,.8); }
+.sut-frame-bar { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-frame-bar span { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); }
+.sut-frame-bar em { margin-left: 10px; font: 500 11.5px var(--mono); font-style: normal; color: var(--muted); letter-spacing: .03em; }
+.sut-frame-body { position: relative; aspect-ratio: 16 / 10; background: linear-gradient(to bottom, var(--surface), var(--bg-2)); }
+.sut-candles { position: absolute; inset: 22px 18px; width: calc(100% - 36px); height: calc(100% - 44px); opacity: .5; }
+.sut-candles .up { fill: var(--up); stroke: var(--up); }
+.sut-candles .dn { fill: var(--down); stroke: var(--down); }
+.sut-candles line { stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* Placeholders: obvious on purpose so nothing ships unreplaced. */
+.sut .sut-ph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  padding: 24px; border: 1.5px dashed rgba(250,123,57,.45); border-radius: 10px; background: rgba(250,123,57,.04);
+}
+.sut .sut-ph strong { font: 600 14px var(--mono); color: var(--accent); letter-spacing: .02em; }
+.sut .sut-ph small { font-size: 13px; color: var(--muted); max-width: 340px; line-height: 1.5; }
+.sut .sut-frame > .sut-ph { border: 0; border-radius: 0; }
+.sut .sut-ph-overlay { position: absolute; inset: 0; border: 0; border-radius: 0; background: linear-gradient(rgba(7,9,13,.35), rgba(7,9,13,.7)); }
+.sut-play { width: 62px; height: 62px; border-radius: 50%; background: var(--accent); position: relative; margin-bottom: 8px; box-shadow: 0 0 0 10px rgba(250,123,57,.15); }
+.sut-play::after { content: ""; position: absolute; left: 25px; top: 20px; border-left: 17px solid var(--accent-ink); border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+.sut .sut-ph-shot { aspect-ratio: 16 / 10; }
+.sut .sut-ph-tall { aspect-ratio: 4 / 5; }
+.sut .sut-ph-portrait { aspect-ratio: 4 / 5; }
+.sut .sut-ph-text { align-items: flex-start; text-align: left; margin-top: 22px; min-height: 150px; }
+.sut .sut-ph-quote { min-height: 190px; }
+
+/* Strip */
+.sut-strip { border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-strip-in { display: grid; grid-template-columns: repeat(4, 1fr); }
+.sut-strip-in > div { padding: 26px 24px; display: flex; flex-direction: column; gap: 4px; }
+.sut-strip-in > div + div { border-left: 1px solid var(--line); }
+.sut-strip b { font: 600 26px/1.1 var(--mono); color: var(--text); letter-spacing: -.02em; font-feature-settings: "tnum"; }
+.sut-strip span { font-size: 13.5px; color: var(--muted); }
+
+/* Sections */
+.sut-section { padding: 112px 0; border-bottom: 1px solid var(--line); }
+.sut-alt { background: var(--bg-2); }
+.sut-head { max-width: 760px; margin-bottom: 64px; }
+.sut-head h2 { margin: 16px 0 18px; }
+.sut-section h2 + .sut-lead { margin-top: 18px; }
+.sut-section .sut-eyebrow + h2 { margin-top: 16px; }
+
+/* Indicators */
+.sut-ind { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
+.sut-ind + .sut-ind { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-ind-flip .sut-ind-copy { order: 2; }
+.sut-ind-copy h3 { margin: 14px 0 14px; }
+.sut-ind-copy > p:not(.sut-tag) { color: var(--text-2); font-size: 16.5px; }
+.sut-ticks { margin-top: 22px; display: grid; gap: 10px; }
+.sut-ticks li { display: grid; grid-template-columns: 22px 1fr; color: var(--text-2); font-size: 15px; }
+.sut-ticks li::before { content: "+"; font: 600 15px var(--mono); color: var(--accent); }
+
+/* Trade room */
+.sut-room { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 64px; align-items: center; }
+.sut-list { margin-top: 34px; border-top: 1px solid var(--line); }
+.sut-list li { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.sut-list b { color: var(--text); font-weight: 600; }
+.sut-list span { color: var(--muted); font-size: 15px; }
+
+/* Jack */
+.sut-jack { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: center; }
+.sut .sut-yt { margin-top: 22px; font-weight: 500; }
+
+/* Steps */
+.sut-steps { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sut-steps li { padding: 30px 28px; background: var(--surface); }
+.sut-steps li + li { border-left: 1px solid var(--line); }
+.sut-steps span { font: 500 12px var(--mono); color: var(--accent); letter-spacing: .06em; }
+.sut-steps h3 { margin: 14px 0 10px; font-size: 21px; }
+.sut-steps p { color: var(--text-2); font-size: 15px; }
+
+/* Pricing */
+.sut-price-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 64px; align-items: center; }
+.sut-price { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 32px; box-shadow: 0 0 0 1px rgba(250,123,57,.08), 0 40px 90px -50px rgba(250,123,57,.35); }
+.sut-price-head { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sut .sut-amount { margin-top: 12px; display: flex; align-items: baseline; gap: 6px; }
+.sut .sut-amount b { font: 600 60px/1 var(--sans); letter-spacing: -.05em; color: var(--text); font-feature-settings: "tnum"; }
+.sut .sut-amount span { color: var(--muted); font-size: 16px; }
+.sut-price .sut-ticks { margin: 24px 0 28px; }
+
+/* Quotes */
+.sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* FAQ */
+.sut-faq-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: start; }
+.sut-faq details { border-top: 1px solid var(--line); }
+.sut-faq details:last-child { border-bottom: 1px solid var(--line); }
+.sut-faq summary { cursor: pointer; list-style: none; position: relative; padding: 22px 40px 22px 0; font-weight: 550; font-size: 17px; color: var(--text); }
+.sut-faq summary::-webkit-details-marker { display: none; }
+.sut-faq summary::after { content: "+"; position: absolute; right: 4px; top: 18px; font: 400 24px var(--mono); color: var(--muted); transition: transform .2s ease; }
+.sut-faq details[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+.sut-faq details p { padding: 0 40px 24px 0; color: var(--text-2); }
+
+/* Final CTA */
+.sut-final { padding: 120px 0; text-align: center; border-bottom: 1px solid var(--line);
+  background: radial-gradient(60% 80% at 50% 100%, rgba(250,123,57,.12), transparent 70%); }
+.sut-final-in { display: flex; flex-direction: column; align-items: center; }
+.sut-final h2 { font-size: clamp(32px, 4.6vw, 56px); max-width: 760px; }
+.sut-final .sut-lead { margin: 18px auto 32px; }
+
+/* Footer */
+.sut-foot { padding: 48px 0 56px; }
+.sut-foot-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.sut-foot-top nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.sut .sut-foot-top nav a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-foot-top nav a:hover { color: var(--text); }
+.sut-risk { margin-top: 28px; display: grid; gap: 12px; max-width: 900px; }
+.sut-risk p { font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+.sut-risk b { color: var(--text-2); }
+.sut .sut-copy { margin-top: 8px; font-family: var(--mono); }
+
+/* Responsive */
+@media (max-width: 980px) {
+  .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sut-ind-flip .sut-ind-copy { order: 0; }
+  .sut-portrait { max-width: 420px; }
+  .sut-links { display: none; }
+  .sut-nav-in .sut-btn { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  .sut-wrap { padding: 0 18px; }
+  .sut-hero { padding: 52px 0 48px; }
+  .sut-section { padding: 76px 0; }
+  .sut-head { margin-bottom: 40px; }
+  .sut-ind + .sut-ind { margin-top: 64px; padding-top: 64px; }
+  .sut-strip-in { grid-template-columns: 1fr 1fr; }
+  .sut-strip-in > div:nth-child(3) { border-left: 0; }
+  .sut-strip-in > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .sut-steps, .sut-quotes { grid-template-columns: 1fr; }
+  .sut-steps li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .sut-list li { grid-template-columns: 1fr; gap: 4px; }
+  .sut .sut-cta-row .sut-btn { width: 100%; }
+  .sut-price { padding: 24px; }
+  .sut-final { padding: 84px 0; }
+  .sut-logo svg + * { display: none; }
+}
+@media (max-width: 400px) {
+  .sut .sut-nav .sut-logo { font-size: 12.5px; letter-spacing: .06em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sut *, .sut *::before, .sut *::after { animation: none !important; transition: none !important; }
+}
