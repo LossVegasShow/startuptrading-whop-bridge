@@ -29,9 +29,23 @@ import email_templates
 cfg=Config(); engine=Engine(cfg)
 ROOT=Path(__file__).parent
 
+CODES_PER_DAY=10
+
+def purge_expired(db):
+    """Delete expired sign-in state, sessions and invites (anyone can create OAuth state rows)."""
+    now=int(time.time())
+    for table in ('oauth_states','admin_test_oauth_states','sessions','admin_test_sessions'):
+        db.execute(f'DELETE FROM {table} WHERE expires_at<?',(now,))
+    db.execute('DELETE FROM invites WHERE expires_at<?',(now-86400*30,))
+
 def issue_code(db,cid,purpose,email):
     now=int(time.time()); old=db.execute('SELECT requested_at FROM codes WHERE customer_id=? AND purpose=?',(cid,purpose)).fetchone()
     if old and now-old['requested_at']<60: raise HTTPException(429,'Wait a minute before requesting another code')
+    # Daily cap: with 5 guesses per code, unlimited codes would still allow slow
+    # guessing, and would let a member send code emails to any inbox repeatedly.
+    sent=db.execute("SELECT COUNT(*) AS n FROM audit WHERE customer_id=? AND action='code_requested' AND details=? AND at>?",
+                    (cid,purpose,now-86400)).fetchone()['n']
+    if sent>=CODES_PER_DAY: raise HTTPException(429,'Too many codes requested today; try again tomorrow or contact support')
     code=f'{secrets.randbelow(1000000):06}'
     digest=hmac.new(cfg.admin_password.encode(),f'{cid}:{purpose}:{code}'.encode(),hashlib.sha256).hexdigest()
     db.execute('INSERT OR REPLACE INTO codes(customer_id,purpose,code_hash,target_email,expires_at,attempts,requested_at) VALUES(?,?,?,?,?,0,?)',
@@ -137,6 +151,7 @@ async def event_worker():
                 except Exception as exc:
                     with connect(cfg) as db:audit(db,cid,'reconcile_retry_needed',str(exc)[:140])
             await process_pending(cfg)
+            with connect(cfg) as db:purge_expired(db)
         except Exception: pass
 
 @asynccontextmanager
@@ -181,6 +196,10 @@ async def secure_headers(request,call_next):
     resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='no-referrer'
     resp.headers['X-Content-Type-Options']='nosniff';resp.headers['X-Frame-Options']='DENY'
     resp.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    resp.headers['Permissions-Policy']='camera=(), microphone=(), geolocation=(), payment=()'
+    if cfg.public_base_url.startswith('https://'):
+        # Tell browsers to only ever use HTTPS for this host (not subdomains).
+        resp.headers['Strict-Transport-Security']='max-age=31536000'
     return resp
 
 @app.get('/health')
@@ -434,6 +453,7 @@ def oauth_login():
     state=secrets.token_urlsafe(32);verifier=secrets.token_urlsafe(40);nonce=secrets.token_urlsafe(32)
     challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('=')
     with connect(cfg) as db:
+        purge_expired(db)
         db.execute('INSERT INTO oauth_states(state_hash,verifier,nonce,expires_at) VALUES(?,?,?,?)',
                    (hash_token(state),verifier,nonce,int(time.time())+600))
     url='https://api.whop.com/oauth/authorize?'+urlencode({
@@ -519,7 +539,19 @@ async def oauth_callback(code:str='',state:str='',error:str=''):
         secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=1209600)
     return response
 
-@app.get('/activate/{invite_token}')
+def valid_invite(db,invite_token):
+    return db.execute('SELECT customer_id FROM invites WHERE token_hash=? AND expires_at>? AND used_at IS NULL',
+                      (hash_token(invite_token),int(time.time()))).fetchone()
+
+@app.get('/activate/{invite_token}',response_class=HTMLResponse)
+def invite_landing(request:Request,invite_token:str):
+    # Opening the link must not use it up: email security scanners (Outlook Safe
+    # Links, Gmail) fetch links automatically. The visitor confirms with a POST.
+    with connect(cfg) as db:
+        if not valid_invite(db,invite_token):raise HTTPException(404,'Invitation invalid or expired')
+    return page(request,'invite_accept.html',token=invite_token)
+
+@app.post('/activate/{invite_token}')
 def accept_invite(request:Request,invite_token:str):
     with connect(cfg) as db:
         row=db.execute('SELECT customer_id FROM invites WHERE token_hash=? AND expires_at>? AND used_at IS NULL',(hash_token(invite_token),int(time.time()))).fetchone()
@@ -732,6 +764,9 @@ async def admin_reconcile(request:Request,cid:int):
 @app.post('/webhooks/whop')
 async def webhook(request:Request):
     if not cfg.whop_webhook_secret:raise HTTPException(503,'Webhook secret not configured')
+    try:declared=int(request.headers.get('content-length','0'))
+    except ValueError:raise HTTPException(400,'Invalid Content-Length')
+    if declared>256*1024:raise HTTPException(413,'Oversized webhook')
     raw=await request.body()
     if len(raw)>256*1024:raise HTTPException(413,'Oversized webhook')
     if not verify_webhook(request.headers,raw,cfg.whop_webhook_secret):raise HTTPException(401,'Invalid webhook signature')
