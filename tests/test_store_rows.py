@@ -12,3 +12,8 @@ def test_count_query_shape_works_like_sqlite():
     # e.g. db.execute('SELECT COUNT(*) FROM licenses ...').fetchone()[0] (app.py admin intake)
     result = PostgresResult([{'count': 3}], 1)
     assert result.fetchone()[0] == 3
+
+
+def test_postgres_translation_escapes_literal_percent():
+    from store import postgres_sql
+    assert postgres_sql("SELECT 1 FROM t WHERE kind LIKE 'a%' AND id=?") == "SELECT 1 FROM t WHERE kind LIKE 'a%%' AND id=%s"

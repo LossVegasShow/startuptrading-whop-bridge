@@ -73,3 +73,63 @@ color:#160b04;font:600 14.5px {SANS};text-decoration:none">Open install guide &r
 <p style="margin:26px 0 0;font-size:13.5px;color:{MUTED}">Access stays active while your Whop membership is active.
 Please contact support before buying a second subscription if anything looks wrong.</p>'''
     return _shell('All three indicators are licensed to your NinjaTrader account.', body, support_email)
+
+
+def _button(url, label):
+    return (f'<a href="{escape(url)}" style="display:inline-block;padding:13px 20px;background:{ACCENT};border-radius:8px;'
+            f'color:#160b04;font:600 14.5px {SANS};text-decoration:none">{escape(label)} &rarr;</a>')
+
+
+def _body(eyebrow, color, title, paragraphs, button=None):
+    ps = ''.join(f'<p style="margin:0 0 14px;color:#b4bdca">{p}</p>' for p in paragraphs)
+    return (f'<p style="margin:0 0 6px;font:600 11.5px {MONO};letter-spacing:.08em;color:{color}">{escape(eyebrow)}</p>'
+            f'<h1 style="margin:0 0 16px;font:650 22px/1.3 {SANS};color:{TEXT}">{escape(title)}</h1>{ps}'
+            + (f'<div style="margin-top:22px">{button}</div>' if button else ''))
+
+
+def reminder_email(first, activation_url, support_email=''):
+    """Activation reminder (24 h, then 72 h). Returns (text, html)."""
+    if first:
+        title = 'Your indicators are waiting'
+        lines = ['Thanks for joining StartUpTrading. Your three NinjaTrader indicators are ready to be licensed, '
+                 'and it takes about three minutes.',
+                 'Sign in with the Whop account you used to join, then confirm the email on your NinjaTrader '
+                 'account with a 6-digit code. No NinjaTrader account yet? You can create a free one during setup.']
+    else:
+        title = 'Need a hand activating?'
+        lines = ["Your StartUpTrading membership is active, but your indicators aren't connected to NinjaTrader yet.",
+                 'If something got in the way (a missing code, a different email on your NinjaTrader account, '
+                 'or no account yet), reply to this email and we\'ll sort it out with you.']
+    text = '\n\n'.join([title] + lines + [f'Activate: {activation_url}'] +
+                        ([f'Support: {support_email}'] if support_email else []))
+    html = _shell(lines[0], _body('ACTIVATION', ACCENT, title, [escape(l) for l in lines],
+                                  _button(activation_url, 'Activate my indicators')), support_email)
+    return text, html
+
+
+def ending_email(when, hub_url='', support_email=''):
+    """Cancelled, still paid up. Returns (text, html)."""
+    lines = [f'Your StartUpTrading membership is set to end on {when}. Until then you keep full access to all '
+             'three indicators and the Discord.',
+             'After that date the indicators switch off automatically in NinjaTrader. If you change your mind, '
+             'you can keep your membership from your Whop account, and nothing changes.']
+    text = '\n\n'.join([f'Your access ends on {when}'] + lines +
+                        ([f'Manage your membership: {hub_url}'] if hub_url else []) +
+                        ([f'Support: {support_email}'] if support_email else []))
+    html = _shell(lines[0], _body('MEMBERSHIP', ACCENT, f'Your access ends on {when}', [escape(l) for l in lines],
+                                  _button(hub_url, 'Manage my membership') if hub_url else None), support_email)
+    return text, html
+
+
+def ended_email(rejoin_url, support_email=''):
+    """Membership ended. Returns (text, html)."""
+    lines = ['Your StartUpTrading membership has ended, so your three indicators have been switched off in '
+             'NinjaTrader and Discord access has closed.',
+             "You're welcome back any time. Rejoin and reconnect with the same NinjaTrader account, and the "
+             'indicators come straight back.']
+    text = '\n\n'.join(['Your indicators have been switched off'] + lines + [f'Rejoin: {rejoin_url}'] +
+                        ([f'Support: {support_email}'] if support_email else []))
+    html = _shell(lines[0], _body('MEMBERSHIP', MUTED, 'Your indicators have been switched off',
+                                  [escape(l) for l in lines], _button(rejoin_url, 'Rejoin StartUpTrading')),
+                  support_email)
+    return text, html

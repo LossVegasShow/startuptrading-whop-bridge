@@ -310,6 +310,18 @@ form > label:first-of-type { margin-top: 12px; }
 form > input + button, form > select + button, form > textarea + button { margin-top: 16px; }
 .card > h2 + p, .card > h2 + form { margin-top: 6px; }
 
+/* Needs-attention banner (admin) and list */
+.attention-banner { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px;
+  padding: 14px 18px; border-radius: var(--radius); border: 1px solid rgba(245,184,74,.35); background: var(--warn-soft);
+  color: var(--text); text-decoration: none; }
+.attention-banner:hover { color: var(--text); border-color: var(--warn); }
+.attention-banner span { color: var(--text-2); font-size: 13.5px; }
+.attention-banner.high { border-color: rgba(255,107,107,.4); background: var(--bad-soft); }
+.attention-banner.ok { border-color: rgba(61,220,151,.3); background: var(--ok-soft); }
+.ticker-row.attention-row { grid-template-columns: 76px 1fr auto; }
+.ticker-row.attention-row .status { justify-self: start; text-transform: uppercase; }
+code { font-family: var(--mono); font-size: .92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+
 /* ---------- Admin tables (unchanged structure) ---------- */
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 td, th { border-bottom: 1px solid var(--line); padding: 10px 11px; text-align: left; vertical-align: top; }

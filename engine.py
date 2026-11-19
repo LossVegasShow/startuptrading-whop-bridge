@@ -7,6 +7,7 @@ import time
 from config import INDICATORS
 from clients import membership_entitlement, membership_plan_id, WhopClient, NinjaClient, IntegrationError, parse_utc
 from store import connect, audit, customer, request_crm_sync, queue_activation_email
+import lifecycle_emails
 
 class Engine:
     def __init__(self,cfg):
@@ -64,6 +65,8 @@ class Engine:
                         entitlement['paid_through'] if entitlement else None,int(time.time()),cid))
             audit(db,cid,'membership_reconciled',state)
             request_crm_sync(db,cid)
+            cancelling=membership.get('status')=='canceling' or membership.get('cancel_at_period_end') is True
+            lifecycle_emails.on_reconcile(db,c,bool(entitlement),cancelling)
         if not c.get('verified') or not c.get('nt_email'):
             return {'status':'awaiting_verification' if entitlement else 'ineligible','writes':0}
         if not self.allowed(c):

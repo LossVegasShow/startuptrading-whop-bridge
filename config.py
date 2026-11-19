@@ -62,6 +62,8 @@ class Config:
     ghl_custom_fields_json: str = os.getenv('GHL_CUSTOM_FIELDS_JSON','')
     indicator_setup_url: str = os.getenv('INDICATOR_SETUP_URL','')
     support_email: str = os.getenv('SUPPORT_EMAIL','')
+    # Discord or Slack incoming-webhook URL for "needs attention" alerts.
+    alert_webhook_url: str = os.getenv('ALERT_WEBHOOK_URL','')
     # Customer-facing links. Each is hidden from the UI when unset.
     discord_url: str = os.getenv('DISCORD_URL','')
     checkout_url: str = os.getenv('CHECKOUT_URL','')
