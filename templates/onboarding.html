@@ -1,4 +1,143 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Activate Indicators · StartUpTrading</title><link rel="stylesheet" href="/static/site.css"></head><body><main class="shell"><header class="top"><div class="brand"><b>◆</b> STARTUPTRADING<div class="sub">Indicator activation</div></div><a class="btn secondary" href="https://whop.com/">Back to Whop</a></header><span class="eyebrow">MEMBER ACTIVATION</span><h1>Connect your NinjaTrader account</h1><p class="lead">Your Whop membership determines access. We only need to verify the email associated with your NinjaTrader account—never your trading password.</p><div class="steps"><span class="pill active">1 · Whop membership</span><span class="pill">2 · NinjaTrader email</span><span class="pill">3 · Indicators</span></div>
-{% if c.buyer_email_verified %}<div class="notice"><strong>✓ Whop identity confirmed.</strong> Membership: {{ c.membership_id }}. You do not need to sign in again.</div>{% else %}<section class="card" style="margin-top:20px"><h2>Confirm your Whop purchase email</h2><p>Send a code to {{ c.buyer_email[:2] }}••••@{{ c.buyer_email.split('@')[-1] }}.</p><form method="post" action="/onboarding/buyer-code"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button>Send membership code</button></form><form method="post" action="/onboarding/buyer-verify"><input type="hidden" name="csrf_token" value="{{ csrf }}"><label>Code from your email</label><input name="code" inputmode="numeric" autocomplete="one-time-code" minlength="6" maxlength="6" required><button style="margin-top:12px">Confirm membership</button></form></section>{% endif %}
-<section class="card" style="margin-top:18px"><h2>NinjaTrader account</h2>{% if c.verified %}<div class="notice"><strong>✓ Connected: {{ c.nt_email }}</strong><p>This email is securely linked to your Whop membership. To change accounts, contact StartUpTrading support so your existing licenses can be handled safely.</p></div>{% elif not c.buyer_email_verified %}<p>Confirm your Whop identity above to continue.</p>{% else %}<p>Have a NinjaTrader account? Enter its email. New to NinjaTrader? Create an account and return here using that same email.</p><div class="cards"><div><b>Already have NinjaTrader</b><p class="small">Use the email on your NinjaTrader account.</p></div><div><b>Need an account?</b><p class="small"><a href="{{ affiliate if affiliate else 'https://account.ninjatrader.com/' }}" target="_blank" rel="noopener noreferrer">Create NinjaTrader account ↗</a></p><p class="small">Return here after registration; your Whop membership remains linked.</p></div></div><form method="post" action="/onboarding/nt-code"><input type="hidden" name="csrf_token" value="{{ csrf }}"><label>NinjaTrader account email</label><input name="nt_email" type="email" autocomplete="email" maxlength="64" required value="{{ c.nt_email or '' }}" placeholder="trader@example.com"><label>Account status</label><select name="path"><option value="existing" {{ 'selected' if c.onboarding_path=='existing' else '' }}>I already have an account</option><option value="new" {{ 'selected' if c.onboarding_path=='new' else '' }}>I just created my account</option></select><button style="margin-top:14px">Email me a verification code</button></form>{% if c.nt_email %}<form method="post" action="/onboarding/nt-verify" style="margin-top:18px"><input type="hidden" name="csrf_token" value="{{ csrf }}"><label>Six-digit code sent to {{ c.nt_email }}</label><input name="code" inputmode="numeric" minlength="6" maxlength="6" autocomplete="one-time-code" required placeholder="123456"><button style="margin-top:12px">Verify and link account</button></form>{% endif %}{% endif %}</section>
-<section class="card" style="margin-top:18px"><h2>Your three indicators</h2><p>Membership status: <strong>{{ c.status }}</strong>{% if c.paid_through %} · Access through {{ c.paid_through[:10] }}{% endif %}</p><div class="cards">{% for pid,name in indicators.items() %}<div style="padding:16px;background:var(--surface2);border-radius:10px"><b>{{ name }}</b><p class="small">{% set ns=namespace(state='Pending') %}{% for l in licenses %}{% if l.product_id==pid %}{% set ns.state=l.state %}{% endif %}{% endfor %}{{ ns.state }}</p></div>{% endfor %}</div><form method="post" action="/onboarding/refresh"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="secondary" style="margin-top:14px">Refresh access</button></form></section><footer>StartUpTrading never asks for your NinjaTrader password. Email verification confirms inbox control, not independent account ownership.</footer></main></body></html>
+{% extends "_base.html" %}
+{% block title %}{% if view.step == 4 %}Your indicators{% else %}Connect NinjaTrader{% endif %}{% endblock %}
+{% block shell_class %} narrow{% endblock %}
+{% macro masked(email) %}{{ email[:2] }}••••@{{ email.split('@')[-1] }}{% endmacro %}
+{% macro csrf_field() %}<input type="hidden" name="csrf_token" value="{{ csrf }}">{% endmacro %}
+
+{% block content %}
+{% set notes = {
+  'buyer_sent': ('Code sent', 'Check ' ~ masked(c.buyer_email) ~ ' for a 6-digit code. It expires in 10 minutes.'),
+  'buyer_verified': ('Membership confirmed', 'Next, connect your NinjaTrader account.'),
+  'nt_sent': ('Code sent', 'Check ' ~ (c.nt_email or 'your inbox') ~ ' for a 6-digit code. It expires in 10 minutes.'),
+  'nt_verified': ('NinjaTrader connected', 'Your indicators are being activated.'),
+  'refreshed': ('Status updated', ''),
+} %}
+
+<div class="page-head">
+  <span class="eyebrow">{% if view.step == 4 %}Activation{% else %}Step {{ view.visual_step }} of 3{% endif %}</span>
+  {% if view.step == 4 and view.all_active %}<h1>You're all set.</h1>
+  {% elif view.step == 4 and view.ineligible %}<h1>Your membership isn't active.</h1>
+  {% elif view.step == 4 %}<h1>Activating your indicators.</h1>
+  {% elif view.step == 1 %}<h1>Confirm your membership.</h1>
+  {% else %}<h1>Connect your NinjaTrader account.</h1>{% endif %}
+  {% if view.step < 4 %}<p class="lead">Licenses are issued to the email on your NinjaTrader account. We only need to confirm that email; never your password.</p>{% endif %}
+</div>
+
+<ol class="stepper" aria-label="Activation progress">
+  {% for label, state in view.stepper %}
+  <li class="{{ state }}"{% if state == 'current' %} aria-current="step"{% endif %}><span class="num">{% if state == 'done' %}✓ DONE{% else %}0{{ loop.index }}{% endif %}</span><span class="lbl">{{ label }}</span></li>
+  {% endfor %}
+</ol>
+
+{% if error %}
+<div class="banner err" role="alert"><span class="glyph">!</span><div><strong>{{ error[0] }}</strong><p>{{ error[1] }}{% if error[2] == 'support' and site.support_email %} <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a>{% endif %}</p></div></div>
+{% elif message in notes %}
+<div class="banner ok" role="status"><span class="glyph">✓</span><div><strong>{{ notes[message][0] }}</strong>{% if notes[message][1] %}<p>{{ notes[message][1] }}</p>{% endif %}</div></div>
+{% endif %}
+
+{# ---------- Step 1: Whop membership ---------- #}
+{% if view.step == 1 %}
+<section class="card step-card">
+  <div class="panel-head"><h2>Confirm your purchase email</h2><span class="mono">01</span></div>
+  <p>We'll send a code to {{ masked(c.buyer_email) }}, the email on your Whop purchase.</p>
+  <form method="post" action="/onboarding/buyer-code" class="actions">{{ csrf_field() }}<button class="secondary">Send me a code</button></form>
+  <div class="divider"></div>
+  <form method="post" action="/onboarding/buyer-verify">{{ csrf_field() }}
+    <label for="buyer-code">6-digit code</label>
+    <div class="inline-form">
+      <input id="buyer-code" class="code" name="code" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" minlength="6" maxlength="6" required placeholder="••••••">
+      <button>Confirm membership</button>
+    </div>
+  </form>
+</section>
+{% else %}
+<div class="done-row"><span><span class="check">✓</span>Whop membership confirmed</span>{% if c.paid_through %}<span class="mono small muted">Paid through {{ c.paid_through[:10] }}</span>{% endif %}</div>
+{% endif %}
+
+{# ---------- Step 2: NinjaTrader email ---------- #}
+{% macro nt_form(submit_label) %}
+<form method="post" action="/onboarding/nt-code">{{ csrf_field() }}
+  <fieldset class="field" id="path">
+    <legend class="sr-only">Do you have a NinjaTrader account?</legend>
+    <div class="choice-grid">
+      <label class="choice"><input type="radio" name="path" value="existing" {{ 'checked' if c.onboarding_path != 'new' }}><b>I have a NinjaTrader account</b><span>Use the email you sign in with.</span></label>
+      <label class="choice"><input type="radio" name="path" value="new" {{ 'checked' if c.onboarding_path == 'new' }}><b>I need to create one</b><span><a href="{{ site.affiliate }}" target="_blank" rel="noopener">Create a free account ↗</a>, then come back.</span></label>
+    </div>
+  </fieldset>
+  <div class="field">
+    <label for="nt-email">NinjaTrader account email</label>
+    <input id="nt-email" name="nt_email" type="email" autocomplete="email" maxlength="64" required value="{{ c.nt_email or '' }}" placeholder="you@example.com">
+  </div>
+  <div class="actions"><button>{{ submit_label }}</button><span class="hint">Can be different from your Whop email.</span></div>
+</form>
+{% endmacro %}
+
+{% if view.step == 2 %}
+<section class="card step-card">
+  <div class="panel-head"><h2>Connect NinjaTrader</h2><span class="mono">02</span></div>
+  {{ nt_form('Send verification code') }}
+</section>
+{% elif view.step == 3 %}
+<section class="card step-card">
+  <div class="panel-head"><h2>Enter your code</h2><span class="mono">02</span></div>
+  <p>We sent a 6-digit code to <strong>{{ c.nt_email }}</strong>. It expires in 10 minutes.</p>
+  <form method="post" action="/onboarding/nt-verify" class="field">{{ csrf_field() }}
+    <label for="nt-code">6-digit code</label>
+    <div class="inline-form">
+      <input id="nt-code" class="code" name="code" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" minlength="6" maxlength="6" required placeholder="••••••" autofocus>
+      <button>Verify and activate</button>
+    </div>
+  </form>
+  <div class="actions">
+    <form method="post" action="/onboarding/nt-code">{{ csrf_field() }}
+      <input type="hidden" name="nt_email" value="{{ c.nt_email }}"><input type="hidden" name="path" value="{{ c.onboarding_path or 'existing' }}">
+      <button class="link-btn">Resend code</button>
+    </form>
+    <span class="hint">Not there? Check spam or promotions.</span>
+  </div>
+  <details class="inline"><summary>Use a different email</summary><div>{{ nt_form('Send code to this email') }}</div></details>
+</section>
+{% elif view.step == 4 %}
+<div class="done-row"><span><span class="check">✓</span>NinjaTrader connected</span><span class="mono small muted">{{ c.nt_email }}</span></div>
+{% endif %}
+
+{# ---------- Step 3: indicators ---------- #}
+<section class="card step-card">
+  <div class="panel-head"><h2>Your indicators</h2><span class="mono">{% if view.step == 4 %}03{% else %}INCLUDED{% endif %}</span></div>
+
+  {% if view.step == 4 and view.ineligible %}
+  <p>Whop shows your StartUpTrading membership as inactive, so the indicators are switched off. Renew and they'll reactivate automatically.</p>
+  {% elif view.step == 4 and not view.all_active %}
+  <p>This usually takes a few minutes. We'll email <strong>{{ c.nt_email }}</strong> when everything's ready. You can close this page.</p>
+  {% endif %}
+
+  <div class="ticker field">
+    {% for i in view.indicators %}
+    <div class="ticker-row"><span class="pid">#{{ i.pid }}</span><span class="name">{{ i.name }}</span><span class="status {{ {'ok':'', 'wait':'wait', 'warn':'wait', 'off':'off'}[i.tone] if view.step == 4 else 'idle' }}">{{ i.label }}</span></div>
+    {% endfor %}
+  </div>
+
+  {% if view.step == 4 and view.all_active %}
+  <h3 class="field">Finish setup in NinjaTrader</h3>
+  <ol class="install">
+    <li><span>Open NinjaTrader and sign in with {{ c.nt_email }}.</span></li>
+    <li><span>{% if site.setup_url %}Follow the <a href="{{ site.setup_url }}" target="_blank" rel="noopener">install guide</a> to import the indicators.{% else %}Import the indicators using the install guide in your welcome email.{% endif %}</span></li>
+    <li><span>Add them to a chart. If one doesn't appear, restart NinjaTrader once before contacting support.</span></li>
+  </ol>
+  <div class="actions">
+    {% if site.setup_url %}<a class="btn" href="{{ site.setup_url }}" target="_blank" rel="noopener">Open install guide <span class="arrow" aria-hidden="true">→</span></a>{% endif %}
+    {% if site.discord_url %}<a class="btn secondary" href="{{ site.discord_url }}" target="_blank" rel="noopener">Join the Discord</a>{% endif %}
+  </div>
+  {% elif view.step == 4 and view.ineligible %}
+  <div class="actions">{% if site.whop_hub_url %}<a class="btn" href="{{ site.whop_hub_url }}">Manage membership on Whop</a>{% elif site.checkout_url %}<a class="btn" href="{{ site.checkout_url }}">Renew membership</a>{% endif %}
+    <form method="post" action="/onboarding/refresh">{{ csrf_field() }}<button class="secondary">I've renewed, check again</button></form></div>
+  {% elif view.step == 4 %}
+  <div class="actions"><form method="post" action="/onboarding/refresh">{{ csrf_field() }}<button class="secondary">Check status</button></form>
+    {% if site.discord_url %}<a class="btn secondary" href="{{ site.discord_url }}" target="_blank" rel="noopener">Join the Discord meanwhile</a>{% endif %}</div>
+  {% endif %}
+</section>
+
+{% if view.step == 4 and c.verified %}
+<p class="hint field">Need to use a different NinjaTrader account? {% if site.support_email %}<a href="mailto:{{ site.support_email }}">Contact support</a>{% else %}Contact support{% endif %} so your licenses move over safely.</p>
+{% endif %}
+{% endblock %}

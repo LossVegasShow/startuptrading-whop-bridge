@@ -1,1 +1,52 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Activate Your Indicators | StartUpTrading</title><link rel="stylesheet" href="/static/site.css"></head><body><main class="shell"><header class="top"><div class="brand"><b>◆</b> STARTUPTRADING <div class="sub">Member indicator activation</div></div><a class="btn secondary" href="https://whop.com/">Back to Whop</a></header><section style="padding:50px 0"><span class="eyebrow">Member benefit</span><h1>Your trading indicators.<br>One simple activation.</h1><p class="lead">Connect your NinjaTrader account to the three indicators included with your existing StartUpTrading membership.</p><p><a class="btn" href="/oauth/login">Sign in with Whop to activate →</a></p>{% if admin_preview_enabled %}<p><a href="/admin-test/login" class="btn secondary">Authorized admin preview</a></p>{% endif %}<div class="cards" style="max-width:800px;margin-top:34px"><div class="card"><div class="icon">↗</div><h3>Already have NinjaTrader?</h3><p>Open your personal activation invitation from StartUpTrading, verify your email, and you're ready.</p></div><div class="card"><div class="icon">＋</div><h3>Need an account?</h3><p>Your invitation includes a registration path. Once you've registered, return to activate your indicators.</p></div></div><p class="notice" style="max-width:800px;margin-top:22px">Sign in using the Whop account that holds your paid StartUpTrading membership. If Whop sign-in is not configured yet, StartUpTrading support can send you a private activation invitation.</p></section><footer>StartUpTrading · Subscription and billing remain managed by Whop. The licensing service does not place trades.</footer></main></body></html>
+{% extends "_base.html" %}
+{% block title %}Activate your indicators{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow"><span class="dot"></span>Members · about 3 minutes</span>
+    <h1>Get your three indicators running in NinjaTrader.</h1>
+    <p class="lead">Sign in with the Whop account you subscribed with and confirm your NinjaTrader email. We license all three indicators to your account automatically.</p>
+    <div class="actions">
+      <a class="btn lg" href="/oauth/login">Sign in with Whop <span class="arrow" aria-hidden="true">→</span></a>
+      {% if admin_preview_enabled %}<a class="btn secondary" href="/admin-test/login">Admin preview</a>{% endif %}
+    </div>
+    <p class="hint">Opens Whop's secure sign-in. We never see your password.</p>
+  </div>
+
+  <aside class="card" aria-labelledby="need-title">
+    <div class="panel-head"><h2 id="need-title">What you'll need</h2><span class="mono">03 items</span></div>
+    <ul class="checklist">
+      <li><span class="n">01</span><div><b>Your Whop login</b><span>The account that holds your StartUpTrading membership.</span></div></li>
+      <li><span class="n">02</span><div><b>Your NinjaTrader email</b><span>The address you sign in to NinjaTrader with. No account yet? You can create a free one during setup.</span></div></li>
+      <li><span class="n">03</span><div><b>Access to that inbox</b><span>We send a 6-digit code to confirm it's yours.</span></div></li>
+    </ul>
+  </aside>
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <span class="eyebrow muted" id="how-title">How activation works</span>
+  <div class="flow">
+    <div><span class="n">STEP 01</span><h3>Sign in with Whop</h3><p>Confirms your membership is active. Nothing to type.</p></div>
+    <div><span class="n">STEP 02</span><h3>Connect NinjaTrader</h3><p>Enter your NinjaTrader email and the code we send it.</p></div>
+    <div><span class="n">STEP 03</span><h3>Open your charts</h3><p>All three licenses are issued to your account. Add them to a chart and trade.</p></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="included-title">
+  <span class="eyebrow muted" id="included-title">Included with your membership</span>
+  <div class="ticker">
+    {% for pid, name in indicators.items() %}
+    <div class="ticker-row"><span class="pid">#{{ pid }}</span><span class="name">{{ name }}</span><span class="status idle">NinjaTrader 8</span></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section" aria-labelledby="faq-title">
+  <span class="eyebrow muted" id="faq-title">Common questions</span>
+  <details><summary>My NinjaTrader email is different from my Whop email.</summary><p>That's fine. Sign in with Whop as usual, then enter whichever email your NinjaTrader account uses. The licenses go to the NinjaTrader email.</p></details>
+  <details><summary>I don't have a NinjaTrader account yet.</summary><p>You can <a href="{{ site.affiliate }}" target="_blank" rel="noopener">create one for free</a>. Then come back here and use that email in step 2.</p></details>
+  <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on the account, confirmed with a one-time code.</p></details>
+  <details><summary>What happens if I cancel?</summary><p>You keep full access until the end of the period you've paid for. After that, the indicators deactivate automatically. Resubscribe any time and they come back.</p></details>
+  {% if site.checkout_url %}<details><summary>Not a member yet?</summary><p><a href="{{ site.checkout_url }}">Join StartUpTrading</a> first. You'll come straight back here to activate.</p></details>{% endif %}
+</section>
+{% endblock %}

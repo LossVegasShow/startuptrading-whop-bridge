@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import httpx
 from store import connect, customer
 from config import INDICATORS, PLANS
+import email_templates
 
 API='https://services.leadconnectorhq.com'
 
@@ -91,6 +92,7 @@ def activation_message(c,cfg):
         '2. Follow the StartUpTrading setup instructions for the indicator download/import and chart configuration:',
         cfg.indicator_setup_url,
         '3. If your indicators do not appear, contact StartUpTrading support before purchasing another subscription.',
+        *(['', 'Join the members Discord: '+cfg.discord_url] if cfg.discord_url else []),
         '', 'Your access is tied to your active StartUpTrading Whop membership.',
         'Linked account email: '+c['nt_email']]
     if cfg.support_email:lines += ['Support: '+cfg.support_email]
@@ -116,7 +118,9 @@ async def send_activation_email(cfg,cid):
     headers={'Authorization':'Bearer '+cfg.resend_api_key,'Idempotency-Key':f'sut-activation-{cid}-v1'}
     payload={'from':cfg.resend_from,'to':[c['nt_email']],
         'subject':'Your StartUpTrading NinjaTrader indicators are ready',
-        'text':activation_message(c,cfg)}
+        'text':activation_message(c,cfg),
+        'html':email_templates.activation_email(c['nt_email'],list(INDICATORS.values()),cfg.indicator_setup_url,
+                                                cfg.discord_url,cfg.support_email)}
     try:
         async with httpx.AsyncClient(timeout=18) as client:
             resp=await client.post('https://api.resend.com/emails',headers=headers,json=payload)

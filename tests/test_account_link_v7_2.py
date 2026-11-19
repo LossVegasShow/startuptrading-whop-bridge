@@ -18,9 +18,9 @@ def test_verified_member_sees_linked_account_not_password(tmp_path):
  with TestClient(web.app) as client:
   r=client.get('/onboarding',cookies=cookies)
   assert r.status_code==200 and 'ninja@example.com' in r.text
-  assert 'Whop identity confirmed' in r.text
+  assert 'Whop membership confirmed' in r.text
   assert 'password' in r.text.lower()
-  assert 'Send membership code' not in r.text
+  assert 'Send me a code' not in r.text and '/onboarding/buyer-code' not in r.text
 
 def test_verified_account_cannot_relink_from_direct_post(tmp_path):
  cookies,token=setup(tmp_path)

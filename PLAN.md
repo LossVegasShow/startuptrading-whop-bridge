@@ -122,16 +122,33 @@ licenses succeed. **It doesn't need a rebuild.**
 - [ ] From now on, make all changes through branches and pull requests, never
       web uploads.
 
-### Phase 2: Make the bridge customer-ready (about 2–3 days)
-- [ ] Replace raw JSON errors with branded pages. Each has one next step:
-      "Use the Whop account you paid with", "Resend code" or "Contact support".
-- [ ] Rebuild `/` as a focused activation page with a three-step progress bar:
-      Sign in with Whop → Connect NinjaTrader → Done.
-- [ ] Success page: the three indicators by name, an install video or guide,
-      the Discord link and the support contact.
-- [ ] Recovery: returning members land on the step they left. Add resend and
-      expired-code handling, and make it mobile-friendly.
-- [ ] HTML activation email that matches the site.
+### Phase 2: Make the bridge customer-ready ✅ code done, ⏳ needs your links and content
+- [x] Friendly errors: browsers get a branded page or an inline banner with one
+      next step (`customer_errors.py`). API clients, webhooks and `/admin` keep
+      JSON and the same status codes.
+- [x] New `/` activation landing page: what you'll need, how it works, the three
+      indicators, and FAQ (different emails, no NinjaTrader account, passwords,
+      cancellation).
+- [x] Onboarding rebuilt as a three-step flow with a progress bar: confirm
+      membership → NinjaTrader email + code (resend, use a different email) →
+      indicators, with per-indicator status (Active / Activating / Needs
+      attention / Expired).
+- [x] Success state: install steps, install-guide and Discord buttons.
+      Inactive-membership state links to renewal.
+- [x] Redesigned stylesheet in the dark trading-terminal look. No inline
+      styles or scripts, so the strict CSP stays intact. Admin pages still work
+      and got the spacing they had lost to the CSP.
+- [x] HTML emails for the verification code and activation, with plain-text
+      fallback. The code is in the subject line.
+- [x] Tests: 11 new (78 total). Screenshots checked at desktop and phone width
+      with no horizontal scrolling.
+- [ ] **(You)** Set in Render: `SUPPORT_EMAIL`, `DISCORD_URL`,
+      `INDICATOR_SETUP_URL` (activation emails stay off until this is set),
+      `CHECKOUT_URL`, `WHOP_HUB_URL`.
+- [ ] **(You)** Provide the official logo. A placeholder candlestick mark is in
+      `templates/_base.html`.
+- [ ] **(You)** Confirm the copy "access continues until the end of the paid
+      period, then indicators deactivate automatically" matches policy.
 - [ ] Get NinjaTrader vendor confirmation of the production token endpoint.
 
 ### Phase 3: Test the full lifecycle (needs Jack's test account)
