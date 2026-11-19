@@ -19,6 +19,8 @@ placeholder box instead.
 | 8 | Trade room | "Education & walkthroughs", "Setup help" | Confirm these happen. Specifics (for example "live sessions every weekday at 9:30 ET") convert better than generalities. |
 | 9 | Hero | "Jack's indicators" | Confirm Jack is the right name to lead with, and that he's comfortable being the face of the page. |
 | 10 | Footer | Risk disclosure, "not affiliated with NinjaTrader" | Have whoever handles compliance approve the wording. |
+| 11 | Thank-you page, step 3 | "Open StartUpTrading in your Whop account and connect Discord" | Confirm that's how members get Discord access in your Whop setup. Set `whop_hub_url` in `site.config.json` to show an "Open my Whop membership" button. |
+| 12 | Thank-you page, step 4 | "As soon as activation finishes, we email install instructions" | True once `INDICATOR_SETUP_URL` is set in Render and live license writes are on (Phase 3). |
 
 ## B. Assets to supply (replace the dashed boxes)
 

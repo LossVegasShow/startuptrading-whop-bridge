@@ -30,6 +30,18 @@
     })(embeds[j]);
   }
 
+  // Thank-you page: tell any tag manager on the page that a purchase finished,
+  // once per browser session (GTM can map 'sut_purchase' to Meta/Google tags).
+  if (document.querySelector('.sut[data-page="welcome"]')) {
+    try {
+      if (!sessionStorage.getItem('sut_purchase_sent')) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ event: 'sut_purchase' });
+        sessionStorage.setItem('sut_purchase_sent', '1');
+      }
+    } catch (e) { /* storage blocked: skip */ }
+  }
+
   var year = document.querySelector('.sut [data-year]');
   if (year) year.textContent = new Date().getFullYear();
 })();

@@ -230,6 +230,28 @@
 .sut-risk b { color: var(--text-2); }
 .sut .sut-copy { margin-top: 8px; font-family: var(--mono); }
 
+/* Thank-you page (/welcome) */
+.sut-welcome { padding: 96px 0 84px; }
+.sut-welcome-in > * { max-width: 760px; }
+.sut-welcome h1 { margin: 22px 0 22px; }
+.sut-welcome .sut-fine { margin-top: 16px; }
+.sut .sut-links-always { display: flex; }
+.sut-next { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sut-next > li { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: 28px; background: var(--surface); }
+.sut-next > li + li { border-top: 1px solid var(--line); }
+.sut-next-n { font: 600 13px/28px var(--mono); color: var(--muted); }
+.sut-next h3 { font-size: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sut-next p { margin-top: 8px; color: var(--text-2); font-size: 15.5px; max-width: 640px; }
+.sut-next .sut-btn { margin-top: 18px; }
+.sut-next > li.is-done .sut-next-n { color: var(--up); }
+.sut-next > li.is-current { background: linear-gradient(90deg, var(--accent-soft), transparent 60%), var(--surface); box-shadow: inset 3px 0 0 var(--accent); }
+.sut-next > li.is-current .sut-next-n { color: var(--accent); }
+.sut-done-chip { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--up); background: rgba(61,220,151,.12); padding: 3px 8px; border-radius: 999px; }
+.sut-help { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+.sut-help > div { border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+.sut-help h3 { font-size: 17px; }
+.sut-help p { margin-top: 8px; color: var(--text-2); font-size: 15px; word-break: break-word; }
+
 /* Responsive */
 @media (max-width: 980px) {
   .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -241,6 +263,10 @@
   .sut-nav-in .sut-btn { margin-left: auto; }
 }
 @media (max-width: 760px) {
+  .sut-welcome { padding: 56px 0 52px; }
+  .sut-next > li { grid-template-columns: 1fr; gap: 6px; padding: 22px 18px; }
+  .sut-help { grid-template-columns: 1fr; }
+  .sut-welcome .sut-cta-row .sut-btn, .sut-next .sut-btn { width: 100%; }
   .sut-wrap { padding: 0 18px; }
   .sut-hero { padding: 52px 0 48px; }
   .sut-section { padding: 76px 0; }

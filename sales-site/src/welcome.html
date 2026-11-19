@@ -1,0 +1,84 @@
+<div class="sut" id="top" data-page="welcome">
+<!-- StartUpTrading thank-you page (GHL path /welcome). Whop's embedded checkout
+     sends buyers here after payment (data-whop-checkout-return-url). Built by
+     sales-site/build.py; edit src/, not dist/. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <span class="sut-logo">
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
+      STARTUPTRADING
+    </span>
+    <nav class="sut-links sut-links-always" aria-label="Help">
+      <a href="mailto:{{support_email}}">Support</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Order received</p>
+    <h1>You're in.<br><span class="sut-dim">One step left.</span></h1>
+    <p class="sut-lead">Thanks for joining StartUpTrading. Whop has emailed your receipt. Now let's get Jack's three indicators licensed to your NinjaTrader account.</p>
+    <div class="sut-cta-row">
+      <a class="sut-btn sut-btn-lg" href="{{activation_url}}">Activate my indicators <span class="sut-arrow" aria-hidden="true">→</span></a>
+    </div>
+    <p class="sut-fine">Takes about 3 minutes. Have the email you use for NinjaTrader handy.</p>
+  </div>
+</section>
+
+<section class="sut-section sut-welcome-steps">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">Your next steps</p>
+      <h2>Here's everything that happens next.</h2>
+    </div>
+
+    <ol class="sut-next">
+      <li class="is-done">
+        <span class="sut-next-n">01</span>
+        <div>
+          <h3>Payment <span class="sut-done-chip">Done</span></h3>
+          <p>Whop processed your order and emailed the receipt. Billing and cancellation are managed in your Whop account.</p>
+        </div>
+      </li>
+      <li class="is-current">
+        <span class="sut-next-n">02</span>
+        <div>
+          <h3>Activate your indicators</h3>
+          <p>Sign in with the Whop account you just used, then confirm the email on your NinjaTrader account with a 6-digit code. It can be different from your Whop email. No NinjaTrader account yet? You can create a free one during setup.</p>
+          <a class="sut-btn" href="{{activation_url}}">Start activation <span class="sut-arrow" aria-hidden="true">→</span></a>
+        </div>
+      </li>
+      <li>
+        <span class="sut-next-n">03</span>
+        <div>
+          <h3>Join the Discord</h3>
+          <p>Your Discord access comes through Whop. Open StartUpTrading in your Whop account and connect Discord to get into the members' channels.</p>
+          <!--if:whop_hub_url--><a class="sut-btn sut-btn-ghost" href="{{whop_hub_url}}" target="_blank" rel="noopener">Open my Whop membership ↗</a><!--endif:whop_hub_url-->
+        </div>
+      </li>
+      <li>
+        <span class="sut-next-n">04</span>
+        <div>
+          <h3>Add the indicators to a chart</h3>
+          <p>As soon as activation finishes, we email install instructions to your NinjaTrader address. Open NinjaTrader, follow the guide, and add them to a chart.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="sut-help">
+      <div>
+        <h3>Need a hand?</h3>
+        <p>Email <a href="mailto:{{support_email}}">{{support_email}}</a> and include the email you used at checkout. If an indicator doesn't show up, contact us before buying anything else.</p>
+      </div>
+      <div>
+        <h3>Bookmark this</h3>
+        <p><a href="{{activation_url}}">{{activation_url}}</a> is where you can check your indicators' status any time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--include:_footer.html-->
+</div>

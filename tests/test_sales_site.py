@@ -20,9 +20,12 @@ def rendered():
 
 
 def test_committed_dist_is_up_to_date():
-    _, embed, full = rendered()
-    assert (SITE / 'dist' / 'ghl-embed.html').read_text() == embed, 'run: python sales-site/build.py'
-    assert (SITE / 'dist' / 'index.html').read_text() == full, 'run: python sales-site/build.py'
+    cfg = json.loads((SITE / 'site.config.json').read_text())
+    build = load_build()
+    for name, (_, full_name, embed_name, _, _) in build.PAGES.items():
+        embed, full = build.render(cfg, name)
+        assert (SITE / 'dist' / embed_name).read_text() == embed, f'{name}: run python sales-site/build.py'
+        assert (SITE / 'dist' / full_name).read_text() == full, f'{name}: run python sales-site/build.py'
 
 
 def test_no_unfilled_template_tokens():
@@ -62,7 +65,7 @@ def test_embedded_checkout_mode():
                                       re.search(r'plan_\w+', cfg['checkout_url_annual']).group(0)]
     for _, attrs in mounts:
         assert 'data-whop-checkout-theme="dark"' in attrs
-        assert f'data-whop-checkout-return-url="{cfg["activation_url"]}"' in attrs
+        assert f'data-whop-checkout-return-url="{cfg["thank_you_url"]}"' in attrs
     # Page-wide Join buttons scroll to the checkout; fallback links still go to Whop.
     assert embed.count('href="#checkout"') >= 3 and 'id="checkout"' in embed
     assert_links_match_plans(cfg, checkout_links(embed))
@@ -123,3 +126,33 @@ def test_no_fabricated_social_proof():
     page = (SITE / 'src' / 'page.html').read_text().lower()
     for phrase in ('profit', '% win', 'win rate', 'made $', 'members trust', '5-star', 'guarantee'):
         assert phrase not in page, phrase
+
+
+def welcome():
+    cfg = json.loads((SITE / 'site.config.json').read_text())
+    return cfg, *load_build().render(cfg, 'welcome')
+
+
+def test_thank_you_url_is_the_ghl_welcome_page():
+    cfg, _, _ = welcome()
+    assert cfg['thank_you_url'] == 'https://startuptrading.com/welcome'
+
+
+def test_welcome_page_points_to_activation_and_sells_nothing():
+    cfg, embed, full = welcome()
+    assert '{{' not in embed and '<!--if' not in embed and '<!--include' not in embed
+    assert re.search(r'<a class="sut-btn sut-btn-lg" href="' + re.escape(cfg['activation_url']) + '"', embed)
+    assert embed.count(f'href="{cfg["activation_url"]}"') >= 3
+    # No checkout, no Join buttons, no Whop loader on the thank-you page.
+    assert 'data-checkout' not in re.sub(r'<script>.*?</script>', '', embed, flags=re.S)
+    assert '<div data-whop-checkout-plan-id=' not in embed and 'js.whop.com' not in embed
+    assert not re.search(r'>\s*Join (StartUpTrading|for|monthly|annually|·)', embed)
+    # Shared legal footer, and kept out of search results.
+    assert 'Risk disclosure' in embed
+    assert '<meta name="robots" content="noindex">' in full
+    assert 'sut_purchase' in embed
+
+
+def test_sales_page_is_indexable_and_shares_footer():
+    _, embed, full = rendered()
+    assert 'noindex' not in full and 'Risk disclosure' in embed

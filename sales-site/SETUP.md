@@ -7,6 +7,7 @@ on **Render**. **Namecheap** DNS points the domain at both:
 |---|---|---|
 | `startuptrading.com` | Sales page (GHL) | `A` record from GHL's domain screen |
 | `www.startuptrading.com` | Sales page (GHL) | `CNAME` from GHL's domain screen |
+| `startuptrading.com/welcome` | Thank-you page (GHL) | Same domain, no extra DNS |
 | `activate.startuptrading.com` | Activation app (Render) | `CNAME` → `startuptrading-whop-bridge.onrender.com` |
 
 > Domain confirmed: `startuptrading.com`. Monthly plan confirmed: `plan_qSXeS0xoDapGU`.
@@ -32,7 +33,7 @@ YouTube, Terms and Privacy links. Blank optional links are removed from the page
 section contains Whop's checkout itself, so buyers pay without leaving the page.
 The Monthly/Annual toggle switches which plan's checkout is shown, and the
 page's other Join buttons scroll down to it. After payment, Whop sends the buyer
-straight to `activation_url` to connect NinjaTrader. If the embed ever misbehaves
+to the thank-you page (`thank_you_url`, step 2b), which leads into activation. If the embed ever misbehaves
 inside GHL, set `"embed_checkout": "false"` and rebuild: the page goes back to
 buttons that open Whop's hosted checkout. Nothing else changes.
 
@@ -60,6 +61,30 @@ buttons that open Whop's hosted checkout. Nothing else changes.
 
 Updating later means rebuilding, then replacing the Code element's contents
 with the new `dist/ghl-embed.html`.
+
+### 2b. Add the thank-you page (`/welcome`)
+
+After paying in the embedded checkout, Whop sends buyers to
+`https://startuptrading.com/welcome` (`thank_you_url` in `site.config.json`).
+That page thanks them and walks them through activation, Discord and support.
+
+1. In the same GHL site, **add a page** named "Welcome" with path **`/welcome`**.
+2. Build it the same way as step 2: delete the header and footer, add a
+   full-width section (padding 0, background `#07090d`), a one-column row, and
+   a **Code** element. Paste the contents of **`dist/welcome-embed.html`**.
+3. **Page settings:**
+   - Background `#07090d`.
+   - **SEO:** title *Welcome to StartUpTrading*. Turn on the option to hide
+     the page from search engines (noindex) if your GHL plan offers it.
+   - **Tracking code:** this is where purchases are counted. Paste your Meta
+     Pixel `Purchase` event and/or Google Ads conversion snippet into the
+     page's *Header tracking code*. The page also pushes
+     `{event: 'sut_purchase'}` to `window.dataLayer` once per visit, for Google
+     Tag Manager users.
+4. Save and publish. Don't link to `/welcome` from the sales page.
+5. **Whop → product / checkout link settings:** set the post-purchase redirect
+   URL to `https://startuptrading.com/welcome` as well, so buyers who use the
+   hosted-checkout fallback link land on the same page.
 
 ## 3. Connect the domain in GoHighLevel
 
@@ -126,7 +151,9 @@ instead.
       switching to **Annual** shows the annual checkout ($495/year).
 - [ ] The nav, hero and final "Join" buttons scroll down to the checkout.
 - [ ] Do one real purchase (then refund it in Whop): after paying, you land on
-      `https://activate.startuptrading.com/` and Discord access is granted.
+      `https://startuptrading.com/welcome`, "Activate my indicators" opens
+      `https://activate.startuptrading.com/`, Discord access is granted, and the
+      purchase shows up in your pixel / conversion tracking.
 - [ ] Visiting `/?utm_source=test&a=yourcode`, a purchase shows that UTM source
       and affiliate in Whop's sales view.
 - [ ] `https://activate.startuptrading.com` shows the activation page and
