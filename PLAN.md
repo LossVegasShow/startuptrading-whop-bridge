@@ -42,6 +42,7 @@ membership ends. The sales site should look modern and credible, not templated.
 - **The monthly plan ID has two spellings.** `config.py` uses
   `plan_qSXeS0xoDapGU` (capital X, changed by hand on Nov 19); older code and
   the README used `plan_qSxeS0xoDapGU`. Whop IDs are case-sensitive.
+  **Resolved: `plan_qSXeS0xoDapGU` confirmed correct by the owner (Nov 19).**
   **Action: confirm the exact ID in the Whop dashboard.**
 - **The NinjaTrader vendor token comes from `demo.tradovateapi.com`.** The
   NinjaTrader vendor contact must confirm this is correct for production
@@ -118,7 +119,7 @@ licenses succeed. **It doesn't need a rebuild.**
       `LOCAL_DEMO_OTP=false`, and `RUN_RECONCILER` set on purpose.
 - [ ] **(You)** Give `startuptrading-v2-preview` its own database so it never
       writes to production customer records.
-- [ ] **(You)** Confirm the exact monthly plan ID in Whop (`qSX…` vs `qSx…`).
+- [x] Monthly plan ID confirmed: `plan_qSXeS0xoDapGU`.
 - [ ] From now on, make all changes through branches and pull requests, never
       web uploads.
 
@@ -212,5 +213,5 @@ licenses succeed. **It doesn't need a rebuild.**
    - GoHighLevel vs Klaviyo.
    - Policy for `past_due` (grace period or immediate removal) and for
      refunds and chargebacks.
-4. **Confirmations:** the exact monthly plan ID in Whop, and the NinjaTrader
+4. **Confirmations:** ~~the exact monthly plan ID in Whop~~ (confirmed), ~~the domain~~ (`startuptrading.com`, confirmed), and the NinjaTrader
    production token endpoint.
