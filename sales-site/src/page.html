@@ -196,13 +196,13 @@
           <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
           <div data-whop-checkout-plan-id="{{plan_monthly}}" data-whop-checkout-theme="dark"
                data-whop-checkout-theme-accent-color="{{whop_accent_color}}"
-               data-whop-checkout-return-url="{{activation_url}}"></div>
+               data-whop-checkout-return-url="{{thank_you_url}}"></div>
         </div>
         <div class="sut-embed sut-y">
           <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
           <div data-whop-checkout-plan-id="{{plan_annual}}" data-whop-checkout-theme="dark"
                data-whop-checkout-theme-accent-color="{{whop_accent_color}}"
-               data-whop-checkout-return-url="{{activation_url}}"></div>
+               data-whop-checkout-return-url="{{thank_you_url}}"></div>
         </div>
         <p class="sut-fine sut-checkout-fallback">
           Payments are processed by Whop. Checkout not loading?
@@ -256,23 +256,5 @@
   </div>
 </section>
 
-<footer class="sut-foot">
-  <div class="sut-wrap">
-    <div class="sut-foot-top">
-      <span class="sut-logo">STARTUPTRADING</span>
-      <nav aria-label="Footer">
-        <a href="{{activation_url}}">Member activation</a>
-        <a href="mailto:{{support_email}}">Support</a>
-        <!--if:terms_url--><a href="{{terms_url}}">Terms</a><!--endif:terms_url-->
-        <!--if:privacy_url--><a href="{{privacy_url}}">Privacy</a><!--endif:privacy_url-->
-      </nav>
-    </div>
-    <div class="sut-risk">
-      <p><b>Risk disclosure.</b> Futures and forex trading involves substantial risk of loss and is not suitable for every investor. You could lose more than your initial investment. Only trade with money you can afford to lose. Past performance is not indicative of future results.</p>
-      <p>StartUpTrading provides software tools and educational content only. Nothing on this site or in the community is financial, investment or trading advice, or a recommendation to buy or sell any instrument. Hypothetical or simulated performance results have certain limitations; unlike an actual performance record, simulated results do not represent actual trading and may have under- or over-compensated for the impact of certain market factors, such as lack of liquidity.</p>
-      <p>NinjaTrader® is a registered trademark of NinjaTrader Group, LLC. StartUpTrading is not affiliated with or endorsed by NinjaTrader. Payments are processed by Whop.</p>
-      <p class="sut-copy">© <span data-year>2026</span> StartUpTrading</p>
-    </div>
-  </div>
-</footer>
+<!--include:_footer.html-->
 </div>

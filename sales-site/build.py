@@ -2,9 +2,13 @@
 
     python sales-site/build.py
 
-Reads src/page.html, src/styles.css, src/app.js and site.config.json, and writes:
-  dist/index.html      full standalone page (preview it in a browser)
-  dist/ghl-embed.html  the block to paste into a GoHighLevel "Code" element
+Reads src/*.html, src/styles.css, src/app.js and site.config.json, and writes,
+for each page in PAGES:
+  dist/<name>.html        full standalone page (preview it in a browser)
+  dist/<name>-embed.html  the block to paste into a GoHighLevel "Code" element
+
+  sales page:     dist/index.html   + dist/ghl-embed.html     (GHL path /)
+  thank-you page: dist/welcome.html + dist/welcome-embed.html (GHL path /welcome)
 
 Everything is scoped under `.sut` so GoHighLevel's own styles can't clash.
 """
@@ -26,6 +30,17 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
 
 # Whop's embedded-checkout loader (from the @whop/checkout package, v0.7.0).
 WHOP_LOADER = 'https://js.whop.com/static/checkout/loader.js'
+
+# name -> (source template, standalone file, embed file, <title>, description)
+PAGES = {
+    'sales': ('page.html', 'index.html', 'ghl-embed.html',
+              'StartUpTrading: NinjaTrader indicators and private trade room',
+              "Jack's three NinjaTrader indicators and the private StartUpTrading Discord. "
+              '${price_monthly}/month, cancel anytime.'),
+    'welcome': ('welcome.html', 'welcome.html', 'welcome-embed.html',
+                'Welcome to StartUpTrading',
+                'Your StartUpTrading membership: next steps to activate your indicators.'),
+}
 
 
 def candles(seed=7, n=64, w=640, h=300):
@@ -54,8 +69,11 @@ def candles(seed=7, n=64, w=640, h=300):
             + ''.join(out) + '</svg>')
 
 
-def render(cfg):
-    page = (SRC / 'page.html').read_text()
+def render(cfg, name='sales'):
+    template, _, _, title, description = PAGES[name]
+    page = (SRC / template).read_text()
+    # <!--include:_file.html--> pulls in a shared partial from src/.
+    page = re.sub(r'<!--include:([\w.-]+\.html)-->', lambda m: (SRC / m.group(1)).read_text(), page)
     css = (SRC / 'styles.css').read_text()
     js = (SRC / 'app.js').read_text()
     cfg = dict(cfg)
@@ -89,13 +107,14 @@ def render(cfg):
         body = pattern.sub(lambda m: m.group(1) if on else '', body)
         pattern = re.compile(rf'<!--ifnot:{key}-->(.*?)<!--endifnot:{key}-->', re.S)
         body = pattern.sub(lambda m: '' if on else m.group(1), body)
-    loader = f'<script async defer src="{WHOP_LOADER}"></script>\n' if embed_on else ''
+    has_checkout = '<div data-whop-checkout-plan-id=' in body
+    loader = f'<script async defer src="{WHOP_LOADER}"></script>\n' if has_checkout else ''
     embed = f'{FONTS}\n<style>\n{css}\n</style>\n{body}\n<script>\n{js}\n</script>\n{loader}'
     full = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
-            '<title>StartUpTrading: NinjaTrader indicators and private trade room</title>\n'
-            '<meta name="description" content="Jack\'s three NinjaTrader indicators and the private '
-            f'StartUpTrading Discord. ${values["price_monthly"]}/month, cancel anytime.">\n'
+            f'<title>{html.escape(title)}</title>\n'
+            f'<meta name="description" content="{html.escape(description.replace("{price_monthly}", cfg["price_monthly"]), quote=True)}">\n'
+            + ('<meta name="robots" content="noindex">\n' if name == 'welcome' else '') +
             '<meta name="theme-color" content="#07090d">\n'
             '<style>html,body{margin:0;background:#07090d}</style>\n'
             f'</head>\n<body>\n{embed}</body>\n</html>\n')
@@ -104,11 +123,12 @@ def render(cfg):
 
 def main():
     cfg = json.loads((HERE / 'site.config.json').read_text())
-    embed, full = render(cfg)
     DIST.mkdir(exist_ok=True)
-    (DIST / 'ghl-embed.html').write_text(embed)
-    (DIST / 'index.html').write_text(full)
-    print(f'wrote {DIST / "index.html"} and {DIST / "ghl-embed.html"} ({len(embed) // 1024} KB)')
+    for name, (_, full_name, embed_name, _, _) in PAGES.items():
+        embed, full = render(cfg, name)
+        (DIST / embed_name).write_text(embed)
+        (DIST / full_name).write_text(full)
+        print(f'{name}: wrote dist/{full_name} and dist/{embed_name} ({len(embed) // 1024} KB)')
 
 
 if __name__ == '__main__':

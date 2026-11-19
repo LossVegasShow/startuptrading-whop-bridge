@@ -185,6 +185,9 @@ licenses succeed. **It doesn't need a rebuild.**
 - [x] Monthly/Annual toggle and an embedded Whop checkout in Pricing: buyers
       pay on the page, then Whop redirects them straight to activation. The
       `embed_checkout` switch falls back to hosted-checkout buttons.
+- [x] Thank-you page (`/welcome`) on GHL: Whop redirects buyers there after
+      payment; one main "Activate my indicators" action, then the Discord and
+      install steps, plus support. Hook for purchase-conversion tracking.
 
 ### Phase 5: Launch operations
 - [ ] Connect GoHighLevel, with a "paid but never activated" reminder sequence.
