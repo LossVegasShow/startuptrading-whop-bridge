@@ -9,9 +9,9 @@ placeholder box instead.
 
 | # | Where | Current copy | Why it needs checking |
 |---|---|---|---|
-| 1 | Indicators → TSMS | "Reads trend direction and momentum together and shows you when they agree" | Written from the indicator's name. Describe what it actually plots. |
-| 2 | Indicators → TSMS & Fibs | "Everything TSMS does, with Fibonacci levels drawn for you" | Written from the name. Confirm Fibs are automatic and what they anchor to. |
-| 3 | Indicators → ATR Order Automation | "Sets your order distances from the Average True Range" | Written from the name. Confirm it manages stops and targets, and whether it places orders. |
+| 1 | Indicators → Trend Scanner & Market Selector | Copy taken from startuptrading.com's Tools section ("Daily trend strength and direction for every market on your watchlist…") | ✅ Jack's own wording. |
+| 2 | Indicators → TSMS & Fibs | "The Trend Scanner's trend read with Fibonacci levels drawn for you" | Not described on the live site. Confirm what it adds. |
+| 3 | Indicators → ATR Order Automation | Copy taken from startuptrading.com's Tools section ("Sizes each trade from ATR and places your stop and target…") | ✅ Jack's own wording. |
 | 4 | Hero, strip, FAQ | "Licensed … minutes after you join" / "~3 min" | True once live license writes are enabled (Phase 3). Until then, licensing isn't automatic. |
 | 5 | Hero, pricing, FAQ | "Cancel anytime … keep access until the end of the period you've paid for" | Matches the bridge's logic. Confirm it's the business policy, and add a refund line if there is one. |
 | 6 | FAQ | "NinjaTrader 8 on a Windows computer" | Confirm the indicators are NT8 desktop only. |
@@ -20,9 +20,10 @@ placeholder box instead.
 | 9 | Hero | "Jack's indicators" | Confirm Jack is the right name to lead with, and that he's comfortable being the face of the page. |
 | 10 | Footer | Risk disclosure, "not affiliated with NinjaTrader" | Have whoever handles compliance approve the wording. |
 | 11 | Thank-you page, step 3 | "Open StartUpTrading in your Whop account and connect Discord" | Confirm that's how members get Discord access in your Whop setup. Set `whop_hub_url` in `site.config.json` to show an "Open my Whop membership" button. |
-| 13 | Pricing "Not ready yet?", FAQ, exit popup | "Jack's free ATR indicator" … "Free, no card needed" | Confirm the free product's exact name (set `free_indicator_name` in `site.config.json`) and that the `/indicators` page asks for no card. |
+| 13 | Pricing "Not ready yet?", FAQ, exit popup | "Jack's free ATR Headliner Indicator" … "Free, no card needed" | ✅ Name taken from the live site. Confirm `/indicators` asks for no card. |
 | 14 | Free vs Membership table | Members also get the free ATR indicator (✓ in both columns) | Confirm it's included or available to members; otherwise change that row. |
 | 12 | Thank-you page, step 4 | "As soon as activation finishes, we email install instructions" | True once `INDICATOR_SETUP_URL` is set in Render and live license writes are on (Phase 3). |
+| 15 | FAQ | "I already bought ATR Order Automation or the Trend Scanner. Can I join?" … "You keep the license you bought" | Matches the app: one-time licenses are never changed or revoked. Confirm there's no discount or upgrade path you'd rather offer. |
 
 ## B. Assets to supply (replace the dashed boxes)
 

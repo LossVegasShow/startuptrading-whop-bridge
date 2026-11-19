@@ -184,8 +184,11 @@ def queue_activation_email(db,cid):
     c=customer(db,cid)
     if not c or not c['verified'] or not c['nt_email'] or c['status']!='eligible':return False
     from config import INDICATORS
-    licenses=db.execute('SELECT product_id,license_id,expiration FROM licenses WHERE customer_id=?',(cid,)).fetchall()
-    valid={int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through']}
+    licenses=db.execute('SELECT product_id,license_id,expiration,state FROM licenses WHERE customer_id=?',(cid,)).fetchall()
+    # Bridge-issued licenses matching the paid-through date, plus indicators the
+    # member already owns from a one-time purchase, together cover all three.
+    valid={int(r['product_id']) for r in licenses
+           if (r['license_id'] and r['expiration']==c['paid_through']) or r['state']=='owned_separately'}
     if valid!=set(INDICATORS):return False
     db.execute("""INSERT INTO message_outbox(customer_id,kind,target_email,updated_at)
         VALUES(?,'activation',?,?) ON CONFLICT(customer_id,kind) DO NOTHING""",(cid,c['nt_email'],int(time.time())))

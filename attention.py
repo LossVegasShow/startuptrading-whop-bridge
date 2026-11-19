@@ -53,7 +53,7 @@ def find_issues(db, cfg, now=None):
             WHERE status='eligible' AND verified=1 AND updated_at<?""", (now - 1800,)):
         if (r['membership_id'], (r['nt_email'] or '').casefold()) not in allow:
             continue
-        have = db.execute("SELECT COUNT(*) AS n FROM licenses WHERE customer_id=? AND state IN ('created','renewed','unchanged')",
+        have = db.execute("SELECT COUNT(*) AS n FROM licenses WHERE customer_id=? AND state IN ('created','renewed','unchanged','owned_separately')",
                           (r['id'],)).fetchone()['n']
         if have < len(INDICATORS):
             issues.append(_issue(f'licensing:{r["id"]}', HIGH, 'Paying member missing licenses',

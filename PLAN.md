@@ -60,15 +60,16 @@ Live check 2026-11-19: `/welcome` is live and correct (purchase event fires;
 its GHL page title is still blank). The **membership sales page is not
 published yet**: `startuptrading.com/` is the existing GHL home page, which
 sells ATR Order Automation ($297) and the Trend Scanner ($497) one-time and links
-"Join the Discord" to whop.com/startuptrading. Decisions pending: where the
-membership page lives (suggested `/join`), how it sits next to the one-time
-products, and the Trend Scanner's name ("Market" vs "Momentum" Selector).
+"Join the Discord" to whop.com/startuptrading. Decided 2026-11-19: the
+membership page lives at **`/join`** (home page's "Join the Discord" links there);
+one-time buyers keep their licenses, and the bridge counts them as owned and never
+touches them; the indicator is **"Trend Scanner & Market Selector"**.
 
 
 Full guide: **`sales-site/SETUP.md`**. Rebuild first
 (`python sales-site/build.py`) if anything in `sales-site/` changed.
 
-1. **Publish the sales page:** create the GHL site, page path `/`, and paste
+1. **Publish the sales page at `/join`** (decided 2026-11-19; `/` stays the existing home page): page path `/join`, and paste
    `sales-site/dist/ghl-embed.html` into a Code element (SETUP step 2).
 2. **Publish the thank-you page:** page path `/welcome`, paste
    `sales-site/dist/welcome-embed.html`, add the Purchase pixel / conversion

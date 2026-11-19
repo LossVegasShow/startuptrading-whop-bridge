@@ -123,8 +123,9 @@ def ending_email(when, hub_url='', support_email=''):
 
 def ended_email(rejoin_url, support_email=''):
     """Membership ended. Returns (text, html)."""
-    lines = ['Your StartUpTrading membership has ended, so your three indicators have been switched off in '
-             'NinjaTrader and Discord access has closed.',
+    lines = ['Your StartUpTrading membership has ended, so the indicators included with it have been switched off '
+             'in NinjaTrader and Discord access has closed. Any indicator you bought outright is yours and '
+             'keeps working.',
              "You're welcome back any time. Rejoin and reconnect with the same NinjaTrader account, and the "
              'indicators come straight back.']
     text = '\n\n'.join(['Your indicators have been switched off'] + lines + [f'Rejoin: {rejoin_url}'] +

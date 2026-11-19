@@ -45,7 +45,9 @@ buttons that open Whop's hosted checkout. Nothing else changes.
 ## 2. Create the page in GoHighLevel
 
 1. **Sites → Websites** (or **Funnels**) → **New** → **From blank**. Name it
-   "StartUpTrading", then add a page named "Home" with path `/`.
+   "StartUpTrading", then add a page named "Join" with path **`/join`**.
+   (Decided 2026-11-19: the existing home page at `/` stays; the membership page
+   lives at `startuptrading.com/join`.)
 2. In the builder, delete the default header and footer sections.
 3. Add one **Section** → set it to **Full width**. In its settings, set
    padding and margin to **0** and the background to `#07090d`.
@@ -90,6 +92,18 @@ That page thanks them and walks them through activation, Discord and support.
 5. **Whop → product / checkout link settings:** set the post-purchase redirect
    URL to `https://startuptrading.com/welcome` as well, so buyers who use the
    hosted-checkout fallback link land on the same page.
+
+### 2c. Link the existing home page to `/join`
+
+On the current home page (`/`) in GHL:
+- Change **"Join the Discord"** (now `https://whop.com/startuptrading/`) to
+  **`/join`**, so visitors see the membership offer and pay on your site.
+- Optional: in the Tools section, add a line under the one-time products such as
+  *"Or get all three plus the Discord: membership from $99/month →"* linking to
+  `/join`.
+- In Render, set `CHECKOUT_URL=https://startuptrading.com/join#pricing`. It's the
+  "rejoin" link in the access-ended email and the "Become a member" button
+  on the activation app's no-membership page.
 
 ## 3. Connect the domain in GoHighLevel
 

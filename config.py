@@ -8,7 +8,7 @@ PLANS = {
     'plan_qSXeS0xoDapGU': 'Monthly · $99',
     'plan_B84PWLvXemyFX': 'Annual · $495'
 }
-INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner and Momentum Selector', 2205:'TSMS & Fibs'}
+INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner & Market Selector', 2205:'TSMS & Fibs'}
 EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_period_end_changed','membership.updated','payment.succeeded','payment.failed'}
 
 @dataclass

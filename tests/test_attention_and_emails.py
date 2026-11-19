@@ -22,7 +22,7 @@ NOW = int(time.time())
 def cfg(tmp_path):
     return Config(db=str(tmp_path / 'a.sqlite'), database_url='', require_database_url=False,
                   public_base_url='https://activate.example.com', resend_api_key='re_test', resend_from='a@b.co',
-                  checkout_url='https://startuptrading.com/#pricing', support_email='help@example.com')
+                  checkout_url='https://startuptrading.com/join#pricing', support_email='help@example.com')
 
 
 def add_customer(db, mid, status='eligible', verified=0, nt=None, updated=NOW, user=None):
@@ -225,7 +225,7 @@ def test_cancel_then_uncancel_then_expire_emails(cfg):
     rec()
     assert outbox(cfg, cid)['access_ended']['status'] == 'pending'
     assert asyncio.run(lifecycle_emails.send(cfg, cid, 'access_ended', post=post)) == 'sent'
-    assert 'switched off' in post.sent[1][0]['subject'] and 'https://startuptrading.com/#pricing' in post.sent[1][0]['text']
+    assert 'switched off' in post.sent[1][0]['subject'] and 'https://startuptrading.com/join#pricing' in post.sent[1][0]['text']
 
 
 def test_uncancel_drops_the_ending_email(cfg):
