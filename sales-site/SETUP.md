@@ -25,8 +25,16 @@ python sales-site/build.py
 - `dist/index.html`: open in a browser to preview the full page.
 - `dist/ghl-embed.html`: the block you paste into GHL.
 
-Edit `site.config.json` for the checkout link, activation URL, support email,
+Edit `site.config.json` for the checkout links, activation URL, support email,
 YouTube, Terms and Privacy links. Blank optional links are removed from the page.
+
+**Embedded checkout.** With `"embed_checkout": "true"` (the default), the pricing
+section contains Whop's checkout itself, so buyers pay without leaving the page.
+The Monthly/Annual toggle switches which plan's checkout is shown, and the
+page's other Join buttons scroll down to it. After payment, Whop sends the buyer
+straight to `activation_url` to connect NinjaTrader. If the embed ever misbehaves
+inside GHL, set `"embed_checkout": "false"` and rebuild: the page goes back to
+buttons that open Whop's hosted checkout. Nothing else changes.
 
 ## 2. Create the page in GoHighLevel
 
@@ -114,8 +122,13 @@ instead.
       (`plan_qSXeS0xoDapGU`) and shows $99/month.
 - [ ] In Pricing, switching to **Annual** changes the button to the annual
       checkout (`plan_B84PWLvXemyFX`), which shows $495/year in Whop.
-- [ ] Visiting `/?utm_source=test&utm_campaign=launch`, the Join links carry
-      those tags.
+- [ ] The embedded checkout loads in the Pricing section for **Monthly**, and
+      switching to **Annual** shows the annual checkout ($495/year).
+- [ ] The nav, hero and final "Join" buttons scroll down to the checkout.
+- [ ] Do one real purchase (then refund it in Whop): after paying, you land on
+      `https://activate.startuptrading.com/` and Discord access is granted.
+- [ ] Visiting `/?utm_source=test&a=yourcode`, a purchase shows that UTM source
+      and affiliate in Whop's sales view.
 - [ ] `https://activate.startuptrading.com` shows the activation page and
       "Sign in with Whop" works.
 - [ ] Page checked on a phone: no sideways scrolling, buttons easy to tap.

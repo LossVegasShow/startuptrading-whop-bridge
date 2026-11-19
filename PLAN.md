@@ -182,8 +182,9 @@ licenses succeed. **It doesn't need a rebuild.**
       assets, decisions).
 - [ ] **(You)** Follow `sales-site/SETUP.md`: GHL page, GHL domain,
       Namecheap DNS, Render custom domain, Whop redirect and webhook URLs.
-- [ ] Optional later: an embedded Whop checkout on the page instead of the
-      hosted link (Whop docs weren't reachable from the build environment).
+- [x] Monthly/Annual toggle and an embedded Whop checkout in Pricing: buyers
+      pay on the page, then Whop redirects them straight to activation. The
+      `embed_checkout` switch falls back to hosted-checkout buttons.
 
 ### Phase 5: Launch operations
 - [ ] Connect GoHighLevel, with a "paid but never activated" reminder sequence.

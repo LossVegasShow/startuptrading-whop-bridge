@@ -167,7 +167,8 @@
 .sut-steps p { color: var(--text-2); font-size: 15px; }
 
 /* Pricing */
-.sut-price-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 64px; align-items: center; }
+.sut-price-grid { position: relative; display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.sut-price-grid > .sut-price:only-of-type { grid-column: 1 / -1; max-width: 460px; }
 .sut-price { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 32px; box-shadow: 0 0 0 1px rgba(250,123,57,.08), 0 40px 90px -50px rgba(250,123,57,.35); }
 .sut-price-head { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
 .sut .sut-amount { margin-top: 12px; display: flex; align-items: baseline; gap: 6px; }
@@ -185,13 +186,31 @@
 .sut .sut-toggle label:hover { color: var(--text); }
 .sut .sut-toggle em { font: 600 11px var(--mono); font-style: normal; letter-spacing: .02em; color: var(--up);
   background: rgba(61,220,151,.12); padding: 2px 6px; border-radius: 999px; }
-.sut #sut-bill-m:checked ~ .sut-toggle .sut-toggle-m,
-.sut #sut-bill-y:checked ~ .sut-toggle .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
-.sut #sut-bill-m:focus-visible ~ .sut-toggle .sut-toggle-m,
-.sut #sut-bill-y:focus-visible ~ .sut-toggle .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sut #sut-bill-m:checked ~ * .sut-toggle-m,
+.sut #sut-bill-y:checked ~ * .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.sut #sut-bill-m:focus-visible ~ * .sut-toggle-m,
+.sut #sut-bill-y:focus-visible ~ * .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sut #sut-bill-m:checked ~ * .sut-y, .sut #sut-bill-m:checked ~ .sut-y,
 .sut #sut-bill-y:checked ~ * .sut-m, .sut #sut-bill-y:checked ~ .sut-m { display: none; }
 .sut .sut-per { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+/* Embedded Whop checkout */
+.sut-checkout { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 24px 24px 18px; scroll-margin-top: 88px; }
+.sut-checkout-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.sut .sut-checkout-plan { font: 500 12.5px var(--mono); color: var(--text-2); }
+.sut-lock { display: inline-block; width: 10px; height: 8px; margin-right: 2px; border-radius: 2px; background: var(--up); position: relative; top: 1px; }
+.sut-lock::before { content: ""; position: absolute; left: 2px; top: -5px; width: 6px; height: 6px; border: 1.5px solid var(--up); border-bottom: 0; border-radius: 4px 4px 0 0; box-sizing: border-box; }
+.sut-embed { position: relative; min-height: 480px; }
+.sut-embed-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: 500 13px var(--mono); color: var(--muted); border: 1px dashed var(--line-2); border-radius: 10px; pointer-events: none; }
+.sut-embed > [data-whop-checkout-plan-id] { position: relative; z-index: 1; }
+.sut-embed.is-loaded { min-height: 0; }
+.sut-embed.is-loaded .sut-embed-loading { display: none; }
+/* The unselected plan's checkout stays mounted but collapsed, so Whop's iframe
+   keeps its width and is sized correctly when the visitor switches. */
+.sut #sut-bill-m:checked ~ * .sut-embed.sut-y,
+.sut #sut-bill-y:checked ~ * .sut-embed.sut-m { display: block; height: 0; min-height: 0; overflow: hidden; visibility: hidden; }
+.sut .sut-checkout-fallback { margin-top: 12px; text-align: center; }
 
 /* Quotes */
 .sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -227,6 +246,8 @@
 /* Responsive */
 @media (max-width: 980px) {
   .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sut-price-grid { gap: 20px; }
+  .sut-price-grid > .sut-price { max-width: none; }
   .sut-ind-flip .sut-ind-copy { order: 0; }
   .sut-portrait { max-width: 420px; }
   .sut-links { display: none; }
@@ -246,6 +267,7 @@
   .sut-list li { grid-template-columns: 1fr; gap: 4px; }
   .sut .sut-cta-row .sut-btn { width: 100%; }
   .sut-price { padding: 24px; }
+  .sut-checkout { padding: 18px 14px 14px; }
   .sut-final { padding: 84px 0; }
   .sut-logo svg + * { display: none; }
 }
@@ -271,7 +293,7 @@
     <nav class="sut-links" aria-label="Sections">
       <a href="#indicators">Indicators</a><a href="#room">Trade room</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
     </nav>
-    <a class="sut-btn sut-btn-sm" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join · $99/mo</a>
+    <a class="sut-btn sut-btn-sm" href="#checkout">Join · $99/mo</a>
   </div>
 </header>
 
@@ -282,7 +304,7 @@
       <h1>Jack's indicators.<br>His trade room.<br><span class="sut-dim">One membership.</span></h1>
       <p class="sut-lead">All three of his NinjaTrader indicators (ATR Order Automation, TSMS, and TSMS&nbsp;&amp;&nbsp;Fibs) licensed to your own NinjaTrader account minutes after you join. Plus the members-only Discord with Jack and the community.</p>
       <div class="sut-cta-row">
-        <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg" href="#checkout">Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
         <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See the indicators</a>
       </div>
       <ul class="sut-assure">
@@ -400,39 +422,72 @@
 </section>
 
 <section class="sut-section" id="pricing">
-  <div class="sut-wrap sut-price-grid">
-    <div>
+  <div class="sut-wrap">
+    <div class="sut-head sut-price-intro">
       <p class="sut-eyebrow">05 · Pricing</p>
       <h2>One plan. Everything included.</h2>
       <p class="sut-lead">Everything, on either billing period. No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
     </div>
-    <div class="sut-price">
-      <!-- Billing toggle: CSS-only (radio + sibling selectors), no script needed. -->
+
+    <div class="sut-price-grid">
+      <!-- Billing toggle: CSS-only (radio + sibling selectors). These inputs sit
+           before the plan card and the checkout so they can switch both. -->
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-m" checked>
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-y">
-      <div class="sut-toggle" role="group" aria-label="Billing period">
-        <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
-        <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save 58%</em></label>
+
+      <div class="sut-price">
+        <div class="sut-toggle" role="group" aria-label="Billing period">
+          <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
+          <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save 58%</em></label>
+        </div>
+        <div class="sut-price-head">
+          <span class="sut-tag">StartUpTrading membership</span>
+          <p class="sut-amount sut-m"><b>$99</b><span>/month</span></p>
+          <p class="sut-amount sut-y"><b>$495</b><span>/year</span></p>
+          <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
+          <p class="sut-per sut-y">Works out to $41.25/month, billed once a year.</p>
+        </div>
+        <ul class="sut-ticks">
+          <li>ATR Order Automation</li>
+          <li>Trend Scanner and Momentum Selector (TSMS)</li>
+          <li>TSMS &amp; Fibs</li>
+          <li>Private StartUpTrading Discord with Jack</li>
+          <li>Walkthroughs, education and setup help</li>
+          <li>Automatic licensing to your NinjaTrader account</li>
+        </ul>
+        
+        <p class="sut-fine sut-m">$99 billed monthly through Whop. Cancel anytime.</p>
+        <p class="sut-fine sut-y">$495 billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
       </div>
-      <div class="sut-price-head">
-        <span class="sut-tag">StartUpTrading membership</span>
-        <p class="sut-amount sut-m"><b>$99</b><span>/month</span></p>
-        <p class="sut-amount sut-y"><b>$495</b><span>/year</span></p>
-        <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
-        <p class="sut-per sut-y">Works out to $41.25/month, billed once a year.</p>
+
+      
+      <div class="sut-checkout" id="checkout">
+        <div class="sut-checkout-head">
+          <span class="sut-tag"><span class="sut-lock" aria-hidden="true"></span>Secure checkout</span>
+          <span class="sut-checkout-plan sut-m">Monthly · $99</span>
+          <span class="sut-checkout-plan sut-y">Annual · $495</span>
+        </div>
+        <!-- Whop embedded checkout. The hidden plan stays rendered (collapsed, not
+             display:none) so its iframe is sized correctly when you switch. After
+             payment Whop sends the buyer straight to the activation page. -->
+        <div class="sut-embed sut-m">
+          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
+          <div data-whop-checkout-plan-id="plan_qSXeS0xoDapGU" data-whop-checkout-theme="dark"
+               data-whop-checkout-theme-accent-color="orange"
+               data-whop-checkout-return-url="https://activate.startuptrading.com/"></div>
+        </div>
+        <div class="sut-embed sut-y">
+          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
+          <div data-whop-checkout-plan-id="plan_B84PWLvXemyFX" data-whop-checkout-theme="dark"
+               data-whop-checkout-theme-accent-color="orange"
+               data-whop-checkout-return-url="https://activate.startuptrading.com/"></div>
+        </div>
+        <p class="sut-fine sut-checkout-fallback">
+          Payments are processed by Whop. Checkout not loading?
+          <a class="sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout target="_blank" rel="noopener">Open it on Whop ↗</a><a class="sut-y" href="https://whop.com/checkout/plan_B84PWLvXemyFX/" data-checkout data-plan="annual" target="_blank" rel="noopener">Open it on Whop ↗</a>
+        </p>
       </div>
-      <ul class="sut-ticks">
-        <li>ATR Order Automation</li>
-        <li>Trend Scanner and Momentum Selector (TSMS)</li>
-        <li>TSMS &amp; Fibs</li>
-        <li>Private StartUpTrading Discord with Jack</li>
-        <li>Walkthroughs, education and setup help</li>
-        <li>Automatic licensing to your NinjaTrader account</li>
-      </ul>
-      <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="https://whop.com/checkout/plan_B84PWLvXemyFX/" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <p class="sut-fine sut-m">$99 billed monthly through Whop. Cancel anytime.</p>
-      <p class="sut-fine sut-y">$495 billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
+      
     </div>
   </div>
 </section>
@@ -463,7 +518,7 @@
       <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
       <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
-      <details><summary>Is there an annual plan?</summary><p>Yes: $495 a year, which works out to $41.25 a month (about 58% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section.</p></details>
+      <details><summary>Is there an annual plan?</summary><p>Yes: $495 a year, which works out to $41.25 a month (about 58% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section and check out right there.</p></details>
       <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
       <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
     </div>
@@ -474,7 +529,7 @@
   <div class="sut-wrap sut-final-in">
     <h2>Get the indicators. Join the room.</h2>
     <p class="sut-lead">$99/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
-    <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <a class="sut-btn sut-btn-lg" href="#checkout">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
     <p class="sut-fine">Already a member? <a href="https://activate.startuptrading.com/">Activate your indicators</a>.</p>
   </div>
 </section>
@@ -516,10 +571,28 @@
       links[i].href = url.toString();
     } catch (e) { /* leave the link as it is */ }
   }
+  // Embedded Whop checkout: pass a Whop affiliate code (?a=) through. UTM tags
+  // are forwarded by Whop's loader itself. Runs before the async loader mounts.
+  var embeds = document.querySelectorAll('.sut [data-whop-checkout-plan-id]');
+  for (var j = 0; j < embeds.length; j++) {
+    if (here.get('a')) embeds[j].setAttribute('data-whop-checkout-affiliate-code', here.get('a'));
+    (function (box) {
+      // Hide the "Loading…" note once Whop's iframe has loaded.
+      var wrap = box.parentNode;
+      var mark = function () { wrap.classList.add('is-loaded'); };
+      if (!window.MutationObserver) return;
+      new MutationObserver(function (_, obs) {
+        var frame = box.querySelector('iframe');
+        if (frame) { frame.addEventListener('load', mark); obs.disconnect(); }
+      }).observe(box, { childList: true });
+    })(embeds[j]);
+  }
+
   var year = document.querySelector('.sut [data-year]');
   if (year) year.textContent = new Date().getFullYear();
 })();
 
 </script>
+<script async defer src="https://js.whop.com/static/checkout/loader.js"></script>
 </body>
 </html>

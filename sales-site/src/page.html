@@ -12,7 +12,7 @@
     <nav class="sut-links" aria-label="Sections">
       <a href="#indicators">Indicators</a><a href="#room">Trade room</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
     </nav>
-    <a class="sut-btn sut-btn-sm" href="{{checkout_url}}" data-checkout>Join · ${{price_monthly}}/mo</a>
+    <a class="sut-btn sut-btn-sm" href="{{cta_href}}"{{cta_attr}}>Join · ${{price_monthly}}/mo</a>
   </div>
 </header>
 
@@ -23,7 +23,7 @@
       <h1>Jack's indicators.<br>His trade room.<br><span class="sut-dim">One membership.</span></h1>
       <p class="sut-lead">All three of his NinjaTrader indicators (ATR Order Automation, TSMS, and TSMS&nbsp;&amp;&nbsp;Fibs) licensed to your own NinjaTrader account minutes after you join. Plus the members-only Discord with Jack and the community.</p>
       <div class="sut-cta-row">
-        <a class="sut-btn sut-btn-lg" href="{{checkout_url}}" data-checkout>Join for ${{price_monthly}}/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}}>Join for ${{price_monthly}}/month <span class="sut-arrow" aria-hidden="true">→</span></a>
         <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See the indicators</a>
       </div>
       <ul class="sut-assure">
@@ -141,39 +141,75 @@
 </section>
 
 <section class="sut-section" id="pricing">
-  <div class="sut-wrap sut-price-grid">
-    <div>
+  <div class="sut-wrap">
+    <div class="sut-head sut-price-intro">
       <p class="sut-eyebrow">05 · Pricing</p>
       <h2>One plan. Everything included.</h2>
       <p class="sut-lead">Everything, on either billing period. No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
     </div>
-    <div class="sut-price">
-      <!-- Billing toggle: CSS-only (radio + sibling selectors), no script needed. -->
+
+    <div class="sut-price-grid">
+      <!-- Billing toggle: CSS-only (radio + sibling selectors). These inputs sit
+           before the plan card and the checkout so they can switch both. -->
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-m" checked>
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-y">
-      <div class="sut-toggle" role="group" aria-label="Billing period">
-        <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
-        <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save {{annual_savings_pct}}%</em></label>
+
+      <div class="sut-price">
+        <div class="sut-toggle" role="group" aria-label="Billing period">
+          <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
+          <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save {{annual_savings_pct}}%</em></label>
+        </div>
+        <div class="sut-price-head">
+          <span class="sut-tag">StartUpTrading membership</span>
+          <p class="sut-amount sut-m"><b>${{price_monthly}}</b><span>/month</span></p>
+          <p class="sut-amount sut-y"><b>${{price_annual}}</b><span>/year</span></p>
+          <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
+          <p class="sut-per sut-y">Works out to ${{price_annual_per_month}}/month, billed once a year.</p>
+        </div>
+        <ul class="sut-ticks">
+          <li>ATR Order Automation</li>
+          <li>Trend Scanner and Momentum Selector (TSMS)</li>
+          <li>TSMS &amp; Fibs</li>
+          <li>Private {{discord_name}} with Jack</li>
+          <li>Walkthroughs, education and setup help</li>
+          <li>Automatic licensing to your NinjaTrader account</li>
+        </ul>
+        <!--ifnot:embed_checkout-->
+        <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="{{checkout_url}}" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="{{checkout_url_annual}}" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <!--endifnot:embed_checkout-->
+        <p class="sut-fine sut-m">${{price_monthly}} billed monthly through Whop. Cancel anytime.</p>
+        <p class="sut-fine sut-y">${{price_annual}} billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
       </div>
-      <div class="sut-price-head">
-        <span class="sut-tag">StartUpTrading membership</span>
-        <p class="sut-amount sut-m"><b>${{price_monthly}}</b><span>/month</span></p>
-        <p class="sut-amount sut-y"><b>${{price_annual}}</b><span>/year</span></p>
-        <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
-        <p class="sut-per sut-y">Works out to ${{price_annual_per_month}}/month, billed once a year.</p>
+
+      <!--if:embed_checkout-->
+      <div class="sut-checkout" id="checkout">
+        <div class="sut-checkout-head">
+          <span class="sut-tag"><span class="sut-lock" aria-hidden="true"></span>Secure checkout</span>
+          <span class="sut-checkout-plan sut-m">Monthly · ${{price_monthly}}</span>
+          <span class="sut-checkout-plan sut-y">Annual · ${{price_annual}}</span>
+        </div>
+        <!-- Whop embedded checkout. The hidden plan stays rendered (collapsed, not
+             display:none) so its iframe is sized correctly when you switch. After
+             payment Whop sends the buyer straight to the activation page. -->
+        <div class="sut-embed sut-m">
+          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
+          <div data-whop-checkout-plan-id="{{plan_monthly}}" data-whop-checkout-theme="dark"
+               data-whop-checkout-theme-accent-color="{{whop_accent_color}}"
+               data-whop-checkout-return-url="{{activation_url}}"></div>
+        </div>
+        <div class="sut-embed sut-y">
+          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
+          <div data-whop-checkout-plan-id="{{plan_annual}}" data-whop-checkout-theme="dark"
+               data-whop-checkout-theme-accent-color="{{whop_accent_color}}"
+               data-whop-checkout-return-url="{{activation_url}}"></div>
+        </div>
+        <p class="sut-fine sut-checkout-fallback">
+          Payments are processed by Whop. Checkout not loading?
+          <a class="sut-m" href="{{checkout_url}}" data-checkout target="_blank" rel="noopener">Open it on Whop ↗</a><a class="sut-y" href="{{checkout_url_annual}}" data-checkout data-plan="annual" target="_blank" rel="noopener">Open it on Whop ↗</a>
+        </p>
       </div>
-      <ul class="sut-ticks">
-        <li>ATR Order Automation</li>
-        <li>Trend Scanner and Momentum Selector (TSMS)</li>
-        <li>TSMS &amp; Fibs</li>
-        <li>Private {{discord_name}} with Jack</li>
-        <li>Walkthroughs, education and setup help</li>
-        <li>Automatic licensing to your NinjaTrader account</li>
-      </ul>
-      <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="{{checkout_url}}" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="{{checkout_url_annual}}" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <p class="sut-fine sut-m">${{price_monthly}} billed monthly through Whop. Cancel anytime.</p>
-      <p class="sut-fine sut-y">${{price_annual}} billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
+      <!--endif:embed_checkout-->
     </div>
   </div>
 </section>
@@ -204,7 +240,7 @@
       <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
       <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
-      <details><summary>Is there an annual plan?</summary><p>Yes: ${{price_annual}} a year, which works out to ${{price_annual_per_month}} a month (about {{annual_savings_pct}}% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section.</p></details>
+      <details><summary>Is there an annual plan?</summary><p>Yes: ${{price_annual}} a year, which works out to ${{price_annual_per_month}} a month (about {{annual_savings_pct}}% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section and check out right there.</p></details>
       <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
       <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
     </div>
@@ -215,7 +251,7 @@
   <div class="sut-wrap sut-final-in">
     <h2>Get the indicators. Join the room.</h2>
     <p class="sut-lead">${{price_monthly}}/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
-    <a class="sut-btn sut-btn-lg" href="{{checkout_url}}" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}}>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
     <p class="sut-fine">Already a member? <a href="{{activation_url}}">Activate your indicators</a>.</p>
   </div>
 </section>
