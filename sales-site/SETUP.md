@@ -2,9 +2,9 @@
 
 > ⏸ **On hold:** GoHighLevel access hasn't been granted yet, so the GHL steps
 > (2, 2b, 3, the `@`/`www` records in 4, and 6) are deferred to the end of the
-> build. See "Deferred: waiting on GoHighLevel access" in `PLAN.md`. Steps 4.4
-> and 5 (the `activate` subdomain for the activation app) don't need GHL and
-> can be done now.
+> build. See "Deferred: waiting on GoHighLevel access" in `PLAN.md`. Moving the
+> activation app to `activate.startuptrading.com` doesn't need GHL: follow
+> `ACTIVATE_DOMAIN.md` now.
 
 The sales page lives on **GoHighLevel (GHL)**. The member activation app stays
 on **Render**. **Namecheap** DNS points the domain at both:
@@ -118,7 +118,7 @@ That page thanks them and walks them through activation, Discord and support.
 3. **Add new record** for each line GHL showed you:
    - Type `A Record`, Host `@`, Value = the IP from GHL, TTL `Automatic`.
    - Type `CNAME Record`, Host `www`, Value = the host from GHL, TTL `Automatic`.
-4. Add the activation subdomain for Render:
+4. Add the activation subdomain for Render (see `ACTIVATE_DOMAIN.md` step 1):
    - Type `CNAME Record`, Host `activate`,
      Value `startuptrading-whop-bridge.onrender.com`, TTL `Automatic`.
 5. Click the green ✓ to save each record.
@@ -130,20 +130,11 @@ instead.
 
 ## 5. Move the activation app to `activate.startuptrading.com`
 
-1. **Render** → `startuptrading-whop-bridge` → **Settings → Custom Domains →
-   Add** → `activate.startuptrading.com`. Render verifies the Namecheap
-   `CNAME` from step 4 and issues SSL.
-2. **Render → Environment:** set `PUBLIC_BASE_URL=https://activate.startuptrading.com`,
-   and fill in the Phase 2 links (`SUPPORT_EMAIL`, `DISCORD_URL`,
-   `INDICATOR_SETUP_URL`, `WHOP_HUB_URL`, and
-   `CHECKOUT_URL=https://startuptrading.com/#pricing`).
-3. **Whop → Developer:**
-   - OAuth app: add `https://activate.startuptrading.com/oauth/callback` as an
-     allowed redirect URI. Keep the old onrender.com one until the new one
-     works.
-   - Webhook: change the endpoint to `https://activate.startuptrading.com/webhooks/whop`.
-4. **Whop → product settings:** set the post-purchase redirect / "Activate
-   your indicators" link to `https://activate.startuptrading.com/`.
+This has its own step-by-step runbook, with a checker script:
+**[`ACTIVATE_DOMAIN.md`](../ACTIVATE_DOMAIN.md)** at the repository root. It
+covers the Namecheap `activate` record, the Render custom domain, the Whop
+OAuth redirect URI, `PUBLIC_BASE_URL`, the Whop webhook URL and redirecting
+the old address. It doesn't need GoHighLevel.
 
 ## 6. Launch check
 

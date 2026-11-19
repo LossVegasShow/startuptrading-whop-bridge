@@ -34,6 +34,9 @@ class Config:
     allowed_test_membership: str = os.getenv('ALLOWED_TEST_MEMBERSHIP','')
     license_writes: bool = os.getenv('LICENSE_WRITES_ENABLED','false').lower()=='true'
     public_base_url: str = os.getenv('PUBLIC_BASE_URL','http://127.0.0.1:8000').rstrip('/')
+    # Send visitors on any other hostname (e.g. the old *.onrender.com address)
+    # to PUBLIC_BASE_URL. Turn on only after the custom domain works over HTTPS.
+    canonical_redirect: bool = os.getenv('CANONICAL_REDIRECT','false').lower()=='true'
     affiliate_url: str = os.getenv('NINJATRADER_REFERRAL_URL','')
     smtp_host: str = os.getenv('SMTP_HOST','')
     smtp_port: int = int(os.getenv('SMTP_PORT','587'))
