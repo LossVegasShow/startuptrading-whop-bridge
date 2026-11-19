@@ -22,7 +22,14 @@ membership ends. The sales site should look modern and credible, not templated.
 > dashboard steps. **When access arrives, tell Claude which access you got and
 > work through the matching group in order.**
 
-### A. When you get DNS (Namecheap) access: move the activation app
+### A. When you get DNS (Namecheap) access: move the activation app ✅ done, verified live 2026-11-19
+
+`scripts/check_activate_domain.py`: 7/7 passed. `activate.startuptrading.com`
+serves the app over HTTPS, `PUBLIC_BASE_URL` and the Whop OAuth redirect use it,
+the old onrender.com address still answers webhooks, and the worker, Whop and
+NinjaTrader are configured (observe-only). Optional still: `CANONICAL_REDIRECT=true`,
+and removing the old Whop redirect URI after a week.
+
 
 Full runbook: **`ACTIVATE_DOMAIN.md`**. After each step, run
 `python scripts/check_activate_domain.py`; it says what's still missing.
@@ -47,7 +54,16 @@ Steps 2–8 also need **Render** and **Whop** dashboard access. Until group A is
 done, the activation app keeps working at
 `https://startuptrading-whop-bridge.onrender.com`.
 
-### B. When you get GoHighLevel access: publish the sales site (end of build)
+### B. When you get GoHighLevel access: publish the sales site (end of build) ⏳ partly done
+
+Live check 2026-11-19: `/welcome` is live and correct (purchase event fires;
+its GHL page title is still blank). The **membership sales page is not
+published yet**: `startuptrading.com/` is the existing GHL home page, which
+sells ATR Order Automation ($297) and the Trend Scanner ($497) one-time and links
+"Join the Discord" to whop.com/startuptrading. Decisions pending: where the
+membership page lives (suggested `/join`), how it sits next to the one-time
+products, and the Trend Scanner's name ("Market" vs "Momentum" Selector).
+
 
 Full guide: **`sales-site/SETUP.md`**. Rebuild first
 (`python sales-site/build.py`) if anything in `sales-site/` changed.
