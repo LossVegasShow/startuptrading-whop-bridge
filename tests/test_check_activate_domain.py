@@ -48,3 +48,9 @@ def test_tls_not_ready_has_render_hint():
     def get(url): raise ConnectionError('SSL: certificate verify failed')
     results = check.run_checks(D, OLD, get, ok_resolve)
     assert not results[-1][0] and 'Render' in results[-1][2]
+
+
+def test_behind_a_proxy_dns_failure_defers_to_https():
+    def no_local_dns(host): raise OSError('Name or service not known')
+    results = check.run_checks(D, OLD, fake_get(), no_local_dns, proxied=True)
+    assert all(ok for ok, _, _ in results) and len(results) > 1

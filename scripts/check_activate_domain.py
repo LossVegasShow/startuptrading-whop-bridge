@@ -8,6 +8,7 @@ Run it after each step in ACTIVATE_DOMAIN.md. It only reads (DNS lookups and
 GET requests); it never changes anything.
 """
 import argparse
+import os
 import socket
 import sys
 from urllib.parse import parse_qs, urlsplit
@@ -16,7 +17,7 @@ DEFAULT_DOMAIN = 'activate.startuptrading.com'
 DEFAULT_OLD = 'startuptrading-whop-bridge.onrender.com'
 
 
-def run_checks(domain, old_host, get, resolve):
+def run_checks(domain, old_host, get, resolve, proxied=False):
     """Return a list of (ok, title, detail). `get(url)` returns (status, headers, json_or_None);
     `resolve(host)` returns a list of IPs or raises OSError."""
     results = []
@@ -29,9 +30,13 @@ def run_checks(domain, old_host, get, resolve):
         ips = resolve(domain)
         add(bool(ips), 'DNS: domain resolves', ', '.join(ips))
     except OSError as exc:
-        add(False, 'DNS: domain resolves',
-            f'{exc}. Add the Namecheap CNAME "activate" -> {old_host} and wait a few minutes.')
-        return results
+        if not proxied:
+            add(False, 'DNS: domain resolves',
+                f'{exc}. Add the Namecheap CNAME "activate" -> {old_host} and wait a few minutes.')
+            return results
+        # Behind an HTTPS proxy the proxy resolves names; a local lookup can fail
+        # even when DNS is fine, so let the HTTPS check below decide.
+        add(True, 'DNS: checked via HTTPS (local lookup unavailable behind a proxy)', str(exc))
 
     base = f'https://{domain}'
     try:
@@ -92,7 +97,8 @@ def main(argv=None):
     ap.add_argument('--domain', default=DEFAULT_DOMAIN)
     ap.add_argument('--old', default=DEFAULT_OLD, help='old Render hostname ("" to skip)')
     args = ap.parse_args(argv)
-    results = run_checks(args.domain, args.old, _get, _resolve)
+    proxied = bool(os.getenv('HTTPS_PROXY') or os.getenv('https_proxy'))
+    results = run_checks(args.domain, args.old, _get, _resolve, proxied=proxied)
     for ok, title, detail in results:
         print(f'{"PASS" if ok else "FAIL"}  {title}' + (f'\n      {detail}' if detail else ''))
     failed = [r for r in results if not r[0]]
