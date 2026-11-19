@@ -164,6 +164,24 @@
 .sut .sut-amount span { color: var(--muted); font-size: 16px; }
 .sut-price .sut-ticks { margin: 24px 0 28px; }
 
+/* Billing toggle (CSS-only). Inputs sit first in .sut-price so the
+   sibling selector (~) can switch everything after them. */
+.sut .sut-bill-in { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.sut-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 24px;
+  border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg-2); }
+.sut .sut-toggle label { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px;
+  border-radius: 7px; cursor: pointer; font: 600 14px var(--sans); color: var(--muted); transition: background-color .15s ease, color .15s ease; }
+.sut .sut-toggle label:hover { color: var(--text); }
+.sut .sut-toggle em { font: 600 11px var(--mono); font-style: normal; letter-spacing: .02em; color: var(--up);
+  background: rgba(61,220,151,.12); padding: 2px 6px; border-radius: 999px; }
+.sut #sut-bill-m:checked ~ .sut-toggle .sut-toggle-m,
+.sut #sut-bill-y:checked ~ .sut-toggle .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.sut #sut-bill-m:focus-visible ~ .sut-toggle .sut-toggle-m,
+.sut #sut-bill-y:focus-visible ~ .sut-toggle .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sut #sut-bill-m:checked ~ * .sut-y, .sut #sut-bill-m:checked ~ .sut-y,
+.sut #sut-bill-y:checked ~ * .sut-m, .sut #sut-bill-y:checked ~ .sut-m { display: none; }
+.sut .sut-per { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
 /* Quotes */
 .sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
@@ -375,12 +393,22 @@
     <div>
       <p class="sut-eyebrow">05 · Pricing</p>
       <h2>One plan. Everything included.</h2>
-      <p class="sut-lead">No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
+      <p class="sut-lead">Everything, on either billing period. No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
     </div>
     <div class="sut-price">
+      <!-- Billing toggle: CSS-only (radio + sibling selectors), no script needed. -->
+      <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-m" checked>
+      <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-y">
+      <div class="sut-toggle" role="group" aria-label="Billing period">
+        <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
+        <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save 58%</em></label>
+      </div>
       <div class="sut-price-head">
         <span class="sut-tag">StartUpTrading membership</span>
-        <p class="sut-amount"><b>$99</b><span>/month</span></p>
+        <p class="sut-amount sut-m"><b>$99</b><span>/month</span></p>
+        <p class="sut-amount sut-y"><b>$495</b><span>/year</span></p>
+        <p class="sut-per sut-m">Billed monthly. Cancel anytime.</p>
+        <p class="sut-per sut-y">Works out to $41.25/month, billed once a year.</p>
       </div>
       <ul class="sut-ticks">
         <li>ATR Order Automation</li>
@@ -390,9 +418,10 @@
         <li>Walkthroughs, education and setup help</li>
         <li>Automatic licensing to your NinjaTrader account</li>
       </ul>
-      <a class="sut-btn sut-btn-lg sut-btn-block" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
-      <p class="sut-fine">Billed monthly through Whop. Cancel anytime.</p>
-      <!-- Annual plan ($495/yr) intentionally not shown until approved. -->
+      <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="https://whop.com/checkout/plan_B84PWLvXemyFX/" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
+      <p class="sut-fine sut-m">$99 billed monthly through Whop. Cancel anytime.</p>
+      <p class="sut-fine sut-y">$495 billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
     </div>
   </div>
 </section>
@@ -423,6 +452,7 @@
       <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
       <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
+      <details><summary>Is there an annual plan?</summary><p>Yes: $495 a year, which works out to $41.25 a month (about 58% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section.</p></details>
       <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
       <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
     </div>

@@ -112,6 +112,8 @@ instead.
       the page with a padlock.
 - [ ] Every "Join" button opens the Whop checkout for the **monthly plan**
       (`plan_qSXeS0xoDapGU`) and shows $99/month.
+- [ ] In Pricing, switching to **Annual** changes the button to the annual
+      checkout (`plan_B84PWLvXemyFX`), which shows $495/year in Whop.
 - [ ] Visiting `/?utm_source=test&utm_campaign=launch`, the Join links carry
       those tags.
 - [ ] `https://activate.startuptrading.com` shows the activation page and

@@ -35,8 +35,9 @@ placeholder box instead.
 
 ## C. Decisions
 
-- **Annual plan ($495/yr):** hidden. If approved, I'll add a monthly/annual
-  toggle to the pricing card.
+- **Annual plan ($495/yr):** approved and live on the page as a Monthly/Annual
+  toggle in pricing ("Save 58%", $41.25/month equivalent). Make sure the annual
+  plan is set to visible/purchasable in Whop.
 - **Domain:** `startuptrading.com` (confirmed).
 - **Terms and Privacy pages:** add the URLs to `site.config.json` and they
   appear in the footer. These are expected on any page that takes payment.

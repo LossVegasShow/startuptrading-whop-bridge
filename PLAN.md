@@ -167,8 +167,8 @@ licenses succeed. **It doesn't need a rebuild.**
       (`dist/index.html`). All CSS is scoped under `.sut` so GHL's styles can't
       clash.
 - [x] Sections: hero with demo frame, what's included, the three indicators,
-      trade room, Jack, how it works, pricing ($99/mo; annual hidden pending
-      approval), member quotes, FAQ, final CTA, risk disclosure.
+      trade room, Jack, how it works, pricing (Monthly $99 / Annual $495
+      toggle), member quotes, FAQ, final CTA, risk disclosure.
 - [x] Copy is concrete and makes no profit claims. No invented testimonials
       or numbers; missing facts and assets are dashed placeholder boxes.
 - [x] Every Join button goes to the Whop checkout from `site.config.json`, and
