@@ -54,7 +54,9 @@ def membership_entitlement(m):
     if membership_plan_id(m) not in PLANS: return None
     if membership_plan_conflict(m): return None
     status = m.get('status')
-    if status not in ('active','trialing'): return None
+    # 'canceling' = cancelled at period end but still paid up; access is kept
+    # until current_period_end, which is enforced below.
+    if status not in ('active','trialing','canceling'): return None
     end = parse_utc(m.get('current_period_end'))
     expires = parse_utc(m.get('expires_at'))
     if expires and (not end or expires < end): end = expires
