@@ -9,8 +9,7 @@ on **Render**. **Namecheap** DNS points the domain at both:
 | `www.startuptrading.com` | Sales page (GHL) | `CNAME` from GHL's domain screen |
 | `activate.startuptrading.com` | Activation app (Render) | `CNAME` → `startuptrading-whop-bridge.onrender.com` |
 
-> Replace `startuptrading.com` with the real domain throughout if it's
-> different, including in `site.config.json`.
+> Domain confirmed: `startuptrading.com`. Monthly plan confirmed: `plan_qSXeS0xoDapGU`.
 
 ---
 
@@ -111,8 +110,8 @@ instead.
 
 - [ ] `https://startuptrading.com` and `https://www.startuptrading.com` load
       the page with a padlock.
-- [ ] Every "Join" button opens the Whop checkout for the **monthly plan**.
-      Confirm the plan ID in `site.config.json` matches Whop exactly.
+- [ ] Every "Join" button opens the Whop checkout for the **monthly plan**
+      (`plan_qSXeS0xoDapGU`) and shows $99/month.
 - [ ] Visiting `/?utm_source=test&utm_campaign=launch`, the Join links carry
       those tags.
 - [ ] `https://activate.startuptrading.com` shows the activation page and

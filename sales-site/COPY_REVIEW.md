@@ -37,7 +37,7 @@ placeholder box instead.
 
 - **Annual plan ($495/yr):** hidden. If approved, I'll add a monthly/annual
   toggle to the pricing card.
-- **Domain:** the docs assume `startuptrading.com`. Confirm the real domain.
+- **Domain:** `startuptrading.com` (confirmed).
 - **Terms and Privacy pages:** add the URLs to `site.config.json` and they
   appear in the footer. These are expected on any page that takes payment.
 - **YouTube channel URL:** add it to `site.config.json` to show the
