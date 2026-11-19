@@ -1,0 +1,13 @@
+{% extends "_base.html" %}
+{% block title %}Your activation invitation{% endblock %}
+{% block content %}
+<section class="error-wrap">
+  <span class="eyebrow">Private invitation</span>
+  <h1>Activate your StartUpTrading indicators.</h1>
+  <p class="lead">This link was sent to you by StartUpTrading. Continue to confirm your membership email and connect your NinjaTrader account. It takes about three minutes.</p>
+  <form method="post" action="/activate/{{ token }}" class="actions">
+    <button>Continue to activation <span class="arrow" aria-hidden="true">→</span></button>
+  </form>
+  <p class="hint">This invitation works once and expires 72 hours after it was sent.</p>
+</section>
+{% endblock %}

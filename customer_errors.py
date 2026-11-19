@@ -17,6 +17,7 @@ JSON_ONLY_PREFIXES = ('/webhooks', '/health', '/admin', '/static')
 # phrases come before general ones.
 DETAIL_KEYS = [
     ('Wait a minute', 'wait'),
+    ('Too many codes requested today', 'code_cap'),
     ('Invalid or expired verification code', 'bad_code'),
     ('Valid NinjaTrader email required', 'bad_email'),
     ('Invalid onboarding path', 'bad_input'),
@@ -56,6 +57,9 @@ MESSAGES = {
     'bad_code': ("That code didn't work",
                  "Codes expire after 10 minutes and allow five attempts. Use the newest email, or send a fresh code.",
                  'onboarding'),
+    'code_cap': ('Too many codes today',
+                 "For your security you can request up to 10 codes a day. Try again tomorrow, or contact support and we'll help.",
+                 'support'),
     'wait': ('A code is already on its way',
              "You can request a new one 60 seconds after the last. Check your spam or promotions folder in the meantime.",
              'onboarding'),

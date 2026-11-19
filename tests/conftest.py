@@ -30,3 +30,10 @@ def _fresh_postgres():
         if tables:
             conn.execute('TRUNCATE ' + ','.join(tables) + ' RESTART IDENTITY CASCADE')
     yield
+
+
+@pytest.fixture(autouse=True)
+def _reset_admin_throttle():
+    from security import admin_throttle
+    admin_throttle.fails.clear()
+    yield
