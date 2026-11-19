@@ -44,8 +44,8 @@ class Config:
     admin_test_user_id: str = os.getenv('ADMIN_TEST_WHOP_USER_ID','').strip()
     admin_test_email: str = os.getenv('ADMIN_TEST_WHOP_EMAIL','').strip().lower()
     debug_otp: bool = os.getenv('LOCAL_DEMO_OTP','false').lower()=='true'
-    poll_seconds: int = int(os.getenv('RECONCILE_INTERVAL_SECONDS','300'))
-    run_reconciler: bool = os.getenv('RUN_RECONCILER','true').lower()=='true'
+    poll_seconds: int = int(os.getenv('RECONCILE_INTERVAL_SECONDS','900'))
+    run_reconciler: bool = os.getenv('RUN_RECONCILER','false').lower()=='true'
 
     ghl_api_key: str = os.getenv('GHL_API_KEY','')
     ghl_location_id: str = os.getenv('GHL_LOCATION_ID','')

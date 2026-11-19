@@ -26,7 +26,7 @@ There is **no replacement checkout or new paid product**. The existing StartUpTr
 
 Whop company ID: `biz_a1txPozoELC3Yc`  
 Whop product: `prod_Nr8ggb93WCyC1`  
-Monthly plan: `plan_qSxeS0xoDapGU`  
+Monthly plan: `plan_qSXeS0xoDapGU`  
 Annual plan: `plan_B84PWLvXemyFX`
 
 ## Licensing safety and account paths
@@ -76,6 +76,10 @@ Whop webhook signatures use the established `webhook-id.webhook-timestamp.raw_bo
 - `security.py`: signed webhook verification, random token hashing, admin login
 - `templates/` and `static/`: branded customer and operator interfaces
 - `tests/`: offline contract and security tests
+
+## Development workflow
+
+Make changes on a branch and open a pull request; do not upload files through the GitHub web UI. `.github/workflows/tests.yml` runs `python -m pytest` and a Docker build on every pull request. Configure Render to auto-deploy `main` only after CI passes. See `PLAN.md` for the launch plan.
 
 No Whop product, customer, price, or license was modified while building and testing this ZIP.
 
