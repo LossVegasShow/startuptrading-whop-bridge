@@ -279,6 +279,11 @@ licenses succeed. **It doesn't need a rebuild.**
 - [x] Monthly/Annual toggle and an embedded Whop checkout in Pricing: buyers
       pay on the page, then Whop redirects them straight to activation. The
       `embed_checkout` switch falls back to hosted-checkout buttons.
+- [x] "Not ready yet?" path for visitors who won't pay yet: offer Jack's free
+      ATR indicator (`startuptrading.com/indicators`) under Pricing, in the final
+      CTA and the FAQ, with a Free vs Membership comparison; a once-a-week
+      desktop exit-intent popup (switchable); every link tagged
+      `utm_campaign=not_ready` + placement, keeping the visitor's original source.
 - [x] Thank-you page (`/welcome`) on GHL: Whop redirects buyers there after
       payment; one main "Activate my indicators" action, then the Discord and
       install steps, plus support. Hook for purchase-conversion tracking.

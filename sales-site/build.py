@@ -16,6 +16,7 @@ import html
 import json
 import random
 import re
+from urllib.parse import urlencode, urlsplit, urlunsplit, parse_qsl
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -41,6 +42,19 @@ PAGES = {
                 'Welcome to StartUpTrading',
                 'Your StartUpTrading membership: next steps to activate your indicators.'),
 }
+
+
+# Where the free-indicator offer appears; each link is tagged so free signups
+# from the sales page (and which spot) show up in analytics.
+FREE_PLACEMENTS = ('pricing', 'final', 'faq', 'exit')
+
+
+def tagged(url, placement):
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query))
+    query.update({'utm_source': 'startuptrading', 'utm_medium': 'sales_page',
+                  'utm_campaign': 'not_ready', 'utm_content': placement})
+    return urlunsplit(parts._replace(query=urlencode(query)))
 
 
 def candles(seed=7, n=64, w=640, h=300):
@@ -91,6 +105,9 @@ def render(cfg, name='sales'):
     values = {k: html.escape(str(v), quote=True) for k, v in cfg.items()}
     values['candles'] = candles()
     values['cta_attr'] = '' if embed_on else ' data-checkout'
+    cfg['exit_offer'] = 'true' if str(cfg.get('exit_offer', '')).lower() == 'true' and cfg.get('free_indicator_url') else ''
+    for place in FREE_PLACEMENTS:
+        values[f'free_url_{place}'] = html.escape(tagged(cfg['free_indicator_url'], place), quote=True) if cfg.get('free_indicator_url') else ''
 
     def sub(m):
         key = m.group(1)
