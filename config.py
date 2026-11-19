@@ -10,6 +10,10 @@ EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_
 
 @dataclass
 class Config:
+    database_url: str = os.getenv('DATABASE_URL','')
+    require_database_url: bool = os.getenv('REQUIRE_PERSISTENT_DB','false').lower()=='true'
+    resend_api_key: str = os.getenv('RESEND_API_KEY','')
+    resend_from: str = os.getenv('RESEND_FROM','')
     db: str = os.getenv('DATABASE_PATH', str(Path(__file__).resolve().parent/'data'/'startuptrading.db'))
     whop_api_key: str = os.getenv('WHOP_API_KEY','')
     whop_client_id: str = os.getenv('WHOP_CLIENT_ID','')
