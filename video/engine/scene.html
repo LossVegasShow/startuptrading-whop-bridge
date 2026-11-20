@@ -1,0 +1,255 @@
+<!doctype html>
+<!-- One page renders every scene type. The renderer sets window.SCENE (the scene's
+     params) and calls window.draw(t) for each frame, t = seconds since the scene
+     started. Drawing is deterministic: same t, same frame. 1920x1080 or 1080x1920. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: Geist; src: url(fonts/Geist-Variable.woff2) format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Geist Mono'; src: url(fonts/GeistMono-Variable.woff2) format('woff2'); font-weight: 100 900; }
+html,body{margin:0;background:#07090d;overflow:hidden}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const C = { bg:'#07090d', bg2:'#0b0e14', card:'#10151d', line:'#1d2530', line2:'#2a3441', text:'#ecf0f5', text2:'#b3bcc9',
+  muted:'#7b8698', accent:'#fa7b39', up:'#3ddc97', down:'#ff6b6b' };
+const SANS = 'Geist, Inter, system-ui, sans-serif', MONO = '"Geist Mono", ui-monospace, Menlo, monospace';
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+let W = 1920, H = 1080;
+
+// ---- helpers ---------------------------------------------------------------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };            // easeOutCubic
+const inout = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const prog = (t, start, dur) => ease((t - start) / dur);
+function font(w, px, fam = SANS) { g.font = `${w} ${px}px ${fam}`; }
+function txt(s, x, y, { w = 600, px = 40, fam = SANS, col = C.text, align = 'left', alpha = 1, base = 'alphabetic' } = {}) {
+  g.save(); g.globalAlpha *= alpha; font(w, px, fam); g.fillStyle = col; g.textAlign = align; g.textBaseline = base; g.fillText(s, x, y); g.restore();
+}
+function rrect(x, y, w, h, r, fill, stroke, lw = 2) {
+  g.beginPath(); g.roundRect(x, y, w, h, r); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.stroke(); }
+}
+function wrap(s, maxW, w, px, fam = SANS) {
+  font(w, px, fam); const words = String(s).split(' '), lines = []; let cur = '';
+  for (const word of words) { const t = cur ? cur + ' ' + word : word; if (g.measureText(t).width > maxW && cur) { lines.push(cur); cur = word; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+function background(t) {
+  const grd = g.createRadialGradient(W * .3, H * .35, 0, W * .3, H * .35, Math.max(W, H) * .8);
+  grd.addColorStop(0, '#111a26'); grd.addColorStop(1, C.bg); g.fillStyle = grd; g.fillRect(0, 0, W, H);
+  // faint grid
+  g.save(); g.globalAlpha = .35; g.strokeStyle = '#121925'; g.lineWidth = 1;
+  for (let x = 0; x < W; x += 80) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
+  for (let y = 0; y < H; y += 80) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
+  g.restore();
+}
+function brand(S) {
+  if (!S.brand) return;
+  txt(S.brand.toUpperCase(), 64, H - 52, { w: 700, px: 22, col: C.muted, alpha: .8 });
+  if (S.step) txt(S.step, W - 64, 76, { w: 600, px: 26, fam: MONO, col: C.accent, align: 'right' });
+}
+function sourceNote(s) { if (s) txt(s, W - 64, H - 52, { w: 500, px: 20, col: C.muted, align: 'right', alpha: .9 }); }
+const money = v => '$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+// ---- scene types -----------------------------------------------------------
+const SCENES = {
+  // Big statement, words revealed in order. {lines:[...], highlight:"word"}
+  hook(S, t) {
+    const lines = S.lines || [S.text], px = S.px || 92, lh = px * 1.18;
+    const all = lines.map(l => l.split(' ')); let k = 0; const total = all.flat().length;
+    const y0 = H / 2 - (lines.length * lh) / 2 + px * .8;
+    lines.forEach((line, li) => {
+      font(800, px); const words = all[li]; let x = S.align === 'left' ? 140 : W / 2 - g.measureText(line).width / 2;
+      words.forEach(word => {
+        const p = prog(t, .12 + (k / Math.max(total, 1)) * (S.reveal || 1.2), .35);
+        const hl = (S.highlight || []).includes(word.replace(/[.,?!]/g, ''));
+        g.save(); g.globalAlpha = p; g.translate(0, (1 - p) * 24);
+        txt(word, x, y0 + li * lh, { w: 800, px, col: hl ? C.accent : C.text }); g.restore();
+        font(800, px); x += g.measureText(word + ' ').width; k++;
+      });
+    });
+    if (S.sub) txt(S.sub, W / 2, y0 + lines.length * lh + 30, { w: 500, px: 34, col: C.text2, align: 'center', alpha: prog(t, 1.4, .5) });
+  },
+
+  // Roadmap with a highlighted current step. {title, items:[...], active:index}
+  steps(S, t) {
+    txt(S.title || 'Three steps', 140, 230, { w: 700, px: 40, col: C.muted, alpha: prog(t, 0, .4) });
+    S.items.forEach((it, i) => {
+      const p = prog(t, .2 + i * .25, .45), y = 340 + i * 170, on = S.active === undefined || S.active === i;
+      g.save(); g.globalAlpha = p * (on ? 1 : .38); g.translate((1 - p) * 40, 0);
+      rrect(140, y, 1640, 130, 18, on ? 'rgba(250,123,57,.08)' : C.card, on ? C.accent : C.line, on ? 3 : 2);
+      txt(String(i + 1).padStart(2, '0'), 200, y + 84, { w: 700, px: 46, fam: MONO, col: C.accent });
+      txt(it, 320, y + 82, { w: 650, px: 48 });
+      g.restore();
+    });
+  },
+
+  // Formula that fills in with numbers and rounds down.
+  // {risk, stop, ppt, sym, unit:'point'}
+  formula(S, t) {
+    const risk = S.risk, stop = S.stop, ppt = S.ppt, per = stop * ppt, raw = risk / per, n = Math.floor(raw + 1e-9);
+    txt(S.title || 'The sizing formula', W / 2, 190, { w: 600, px: 40, col: C.muted, align: 'center', alpha: prog(t, 0, .4) });
+    // row 1: words
+    const p1 = prog(t, .2, .5);
+    txt('Contracts  =  Risk  ÷  ( Stop  ×  $ per point )', W / 2, 360, { w: 700, px: 64, align: 'center', alpha: p1 });
+    // row 2: numbers
+    const p2 = prog(t, 1.6, .5);
+    txt(`${S.sym}:  ${money(risk)}  ÷  ( ${stop} pts  ×  ${money(ppt)} )`, W / 2, 520, { w: 700, px: 64, fam: MONO, col: C.text2, align: 'center', alpha: p2 });
+    // row 3: per contract and raw
+    const p3 = prog(t, 3.0, .5);
+    txt(`=  ${money(risk)}  ÷  ${money(per)}  =  ${(Math.floor(raw * 100) / 100).toFixed(2)}`, W / 2, 660, { w: 700, px: 64, fam: MONO, align: 'center', alpha: p3 });
+    // row 4: round down result
+    const p4 = prog(t, 4.4, .5);
+    g.save(); g.globalAlpha = p4;
+    rrect(W / 2 - 430, 740, 860, 160, 22, 'rgba(250,123,57,.10)', C.accent, 3);
+    txt(n === 0 ? 'Round down:  0 contracts' : `Round down:  ${n} contract${n > 1 ? 's' : ''}`, W / 2, 822, { w: 800, px: 62, col: n === 0 ? C.down : C.accent, align: 'center' });
+    txt(n === 0 ? `One ${S.sym} risks ${money(per)}, over your ${money(risk)} limit` : `Real risk: ${money(n * per)}, under your ${money(risk)} limit`,
+      W / 2, 878, { w: 500, px: 30, col: C.text2, align: 'center' });
+    g.restore();
+  },
+
+  // Contract cards side by side. {risk, stop, cards:[{sym,name,ppt}]}
+  contracts(S, t) {
+    txt(S.title || 'Same trade, three sizes', W / 2, 180, { w: 700, px: 52, align: 'center', alpha: prog(t, 0, .4) });
+    if (S.subtitle) txt(S.subtitle, W / 2, 236, { w: 500, px: 30, col: C.muted, align: 'center', alpha: prog(t, .2, .4) });
+    const n = S.cards.length, cw = 480, gap = 60, x0 = W / 2 - (n * cw + (n - 1) * gap) / 2;
+    S.cards.forEach((c, i) => {
+      const p = prog(t, .4 + i * .35, .5), x = x0 + i * (cw + gap), y = 320;
+      const per = S.stop * c.ppt, qty = Math.floor(S.risk / per + 1e-9);
+      g.save(); g.globalAlpha = p; g.translate(0, (1 - p) * 40);
+      rrect(x, y, cw, 560, 22, C.card, qty === 0 ? 'rgba(255,107,107,.6)' : C.line2, 2);
+      txt(c.sym, x + 40, y + 90, { w: 800, px: 64, fam: MONO, col: C.accent });
+      txt(c.name, x + 40, y + 140, { w: 500, px: 28, col: C.text2 });
+      const rows = [['$ per point', money(c.ppt)], ['Risk per contract', money(per)], ['Contracts', String(qty)], ['Real risk', money(qty * per)]];
+      rows.forEach(([k, v], j) => {
+        const yy = y + 240 + j * 76, pr = prog(t, 1.4 + i * .35 + j * .12, .4);
+        g.save(); g.globalAlpha *= pr;
+        txt(k, x + 40, yy, { w: 500, px: 30, col: C.muted });
+        txt(v, x + cw - 40, yy, { w: 700, px: 38, fam: MONO, col: k === 'Contracts' ? (qty === 0 ? C.down : C.up) : C.text, align: 'right' });
+        g.restore();
+      });
+      g.restore();
+    });
+    if (S.note) txt(S.note, W / 2, 960, { w: 500, px: 32, col: C.text2, align: 'center', alpha: prog(t, 3, .5) });
+  },
+
+  // Candlestick chart from data, revealed left to right, optional ATR panel, stop line, labels.
+  // {bars:[[o,h,l,c],...], atr:[...], stopAt, entryAt, atrLabel, label, source}
+  chart(S, t) {
+    const bars = S.bars, n = bars.length, reveal = S.reveal || 2.5;
+    const shown = Math.max(1, Math.round(n * clamp(t / reveal)));
+    const L = 140, R = W - 220, T = 150, B = S.atr ? 760 : 900, plotR = S.stopAt ? R - 330 : R;
+    let hi = -Infinity, lo = Infinity; bars.forEach(b => { hi = Math.max(hi, b[1]); lo = Math.min(lo, b[2]); });
+    if (S.stopAt) lo = Math.min(lo, S.stopAt); const pad = (hi - lo) * .08; hi += pad; lo -= pad;
+    const X = i => L + (i + .5) * (plotR - L) / n, Y = v => T + (hi - v) / (hi - lo) * (B - T), bw = (plotR - L) / n * .62;
+    if (S.label) txt(S.label, L, 110, { w: 700, px: 40, alpha: prog(t, 0, .4) });
+    // price axis
+    g.strokeStyle = C.line; g.lineWidth = 1;
+    const tk = S.tick || 0.25;
+    for (let k = 0; k <= 4; k++) { const v = Math.round((lo + (hi - lo) * k / 4) / tk) * tk, y = Y(v); g.beginPath(); g.moveTo(L, y); g.lineTo(R, y); g.stroke();
+      txt(v.toFixed(2), R + 20, y + 8, { w: 500, px: 22, fam: MONO, col: C.muted }); }
+    for (let i = 0; i < shown; i++) {
+      const [o, h, l, c] = bars[i], up = c >= o, col = up ? C.up : C.down;
+      g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.moveTo(X(i), Y(h)); g.lineTo(X(i), Y(l)); g.stroke();
+      g.fillStyle = col; const y1 = Y(Math.max(o, c)), y2 = Y(Math.min(o, c)); g.fillRect(X(i) - bw / 2, y1, bw, Math.max(2, y2 - y1));
+    }
+    if (S.atr) {
+      const aT = 820, aB = 960; let ah = Math.max(...S.atr) * 1.15, al = Math.min(...S.atr) * .85;
+      txt(S.atrLabel || 'ATR (14)', L, aT - 16, { w: 600, px: 24, col: C.muted });
+      g.strokeStyle = C.accent; g.lineWidth = 3; g.beginPath();
+      for (let i = 0; i < shown; i++) { const x = X(i), y = aB - (S.atr[i] - al) / (ah - al) * (aB - aT); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+      const last = S.atr[shown - 1]; txt(last.toFixed(2), R + 20, aB - (last - al) / (ah - al) * (aB - aT) + 8, { w: 700, px: 24, fam: MONO, col: C.accent });
+    }
+    const pa = prog(t, reveal + .2, .6);
+    if (S.entryAt && pa > 0) {
+      g.save(); g.globalAlpha = pa; g.setLineDash([]); g.strokeStyle = C.text2; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(L, Y(S.entryAt)); g.lineTo(R, Y(S.entryAt)); g.stroke();
+      rrect(R - 230, Y(S.entryAt) - 46, 220, 38, 8, C.card, C.line2); txt('ENTRY ' + S.entryAt.toFixed(2), R - 120, Y(S.entryAt) - 20, { w: 700, px: 20, fam: MONO, align: 'center' });
+      g.restore();
+    }
+    const ps = prog(t, reveal + .7, .6);
+    if (S.stopAt && ps > 0) {
+      g.save(); g.globalAlpha = ps; g.setLineDash([14, 10]); g.strokeStyle = C.down; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(L, Y(S.stopAt)); g.lineTo(L + (R - L) * ps, Y(S.stopAt)); g.stroke(); g.setLineDash([]);
+      rrect(R - 350, Y(S.stopAt) + 10, 340, 40, 8, C.down); txt(S.stopLabel || ('STOP ' + S.stopAt.toFixed(2)), R - 180, Y(S.stopAt) + 37, { w: 700, px: 20, fam: MONO, col: '#1a0606', align: 'center' });
+      g.restore();
+    }
+    sourceNote(S.source);
+  },
+
+  // The Risk Card, centred. {m, entry, stop, tick, qty, risk, state, res}
+  riskcard(S, t) {
+    const p = prog(t, .1, .5), w = 900, h = S.state === 'result' ? 520 : 480, x = W / 2 - w / 2, y = H / 2 - h / 2;
+    g.save(); g.globalAlpha = p; g.translate(0, (1 - p) * 30);
+    rrect(x, y, w, h, 22, 'rgba(11,14,20,.97)', C.line2, 2); g.fillStyle = C.accent; g.fillRect(x, y + 30, 8, h - 60);
+    txt('RISK CARD · ' + S.m, x + 60, y + 80, { w: 700, px: 34, fam: MONO, col: C.accent });
+    rrect(x + w - 190, y + 48, 130, 46, 8, null, C.line2); txt(S.state === 'result' ? 'RESULT' : 'PLAN', x + w - 125, y + 80, { w: 700, px: 22, fam: MONO, col: C.muted, align: 'center' });
+    const rows = [];
+    if (S.entry) rows.push(['Entry', S.entry]);
+    rows.push(['Stop', `${S.stop} ticks (${(S.stop * S.tick).toFixed(2)} pts)`], ['Size', `${S.qty} contract${S.qty === 1 ? '' : 's'}`]);
+    if (S.state !== 'result') rows.push(['Planned risk', money(S.risk)]);
+    rows.forEach(([k, v], i) => {
+      const yy = y + 170 + i * 76, pr = prog(t, .5 + i * .2, .4);
+      g.save(); g.globalAlpha *= pr; g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(x + 60, yy - 50); g.lineTo(x + w - 60, yy - 50); g.stroke();
+      txt(k, x + 60, yy, { w: 500, px: 36, col: C.muted }); txt(v, x + w - 60, yy, { w: 700, px: 40, fam: MONO, align: 'right' }); g.restore();
+    });
+    if (S.state === 'result') {
+      const pr = prog(t, 1.5, .5), r = S.res;
+      txt((r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r) + ' ticks', x + 60, y + h - 50, { w: 800, px: 64, fam: MONO, col: r < 0 ? C.down : C.up, alpha: pr });
+      txt(r < 0 && Math.abs(r) <= S.stop ? 'stopped as planned' : '', x + 420, y + h - 60, { w: 500, px: 30, col: C.muted, alpha: pr });
+    }
+    g.restore();
+  },
+
+  // A short quote or rule, large, with an optional label.
+  statement(S, t) {
+    const lines = wrap(S.text, W - 320, 700, S.px || 72), lh = (S.px || 72) * 1.25;
+    const y0 = H / 2 - lines.length * lh / 2 + (S.px || 72) * .7;
+    if (S.label) txt(S.label, W / 2, y0 - 110, { w: 600, px: 30, fam: MONO, col: C.accent, align: 'center', alpha: prog(t, 0, .4) });
+    lines.forEach((l, i) => txt(l, W / 2, y0 + i * lh, { w: 700, px: S.px || 72, col: C.text, align: 'center', alpha: prog(t, .15 + i * .2, .5) }));
+  },
+
+  // Recap list, ticks in.
+  recap(S, t) {
+    txt(S.title || 'Recap', 140, 230, { w: 700, px: 44, col: C.accent, alpha: prog(t, 0, .4) });
+    S.items.forEach((it, i) => {
+      const p = prog(t, .3 + i * .5, .4), y = 360 + i * 140;
+      g.save(); g.globalAlpha = p;
+      g.strokeStyle = C.up; g.lineWidth = 6; g.beginPath(); g.moveTo(150, y - 20); g.lineTo(170, y); g.lineTo(205, y - 40); g.stroke();
+      txt(it, 250, y, { w: 600, px: 52 }); g.restore();
+    });
+  },
+
+  // End card: next video + calculator.
+  endcard(S, t) {
+    txt('Next', 140, 250, { w: 600, px: 36, col: C.muted, alpha: prog(t, 0, .4) });
+    const lines = wrap(S.next, 820, 800, 66);
+    lines.forEach((l, i) => txt(l, 140, 340 + i * 80, { w: 800, px: 66, alpha: prog(t, .2, .5) }));
+    g.save(); g.globalAlpha = prog(t, .2, .5); g.setLineDash([16, 12]);
+    rrect(1060, 300, 720, 405, 18, null, C.line2, 3); rrect(140, 720, 820, 160, 18, null, C.line2, 3); g.restore();
+    txt('Free position-size calculator: link in the description', 140, 960, { w: 500, px: 30, col: C.text2, alpha: prog(t, .6, .5) });
+  },
+
+  // Title card for Shorts or chapter breaks.
+  chapter(S, t) {
+    txt(S.kicker || '', W / 2, H / 2 - 70, { w: 600, px: 32, fam: MONO, col: C.accent, align: 'center', alpha: prog(t, 0, .4) });
+    const lines = wrap(S.text, W - 300, 800, S.px || 84);
+    lines.forEach((l, i) => txt(l, W / 2, H / 2 + 30 + i * (S.px || 84) * 1.15, { w: 800, px: S.px || 84, align: 'center', alpha: prog(t, .15, .5) }));
+  },
+};
+
+window.draw = function (t) {
+  const S = window.SCENE || {};
+  W = S.w || 1920; H = S.h || 1080; if (cv.width !== W) { cv.width = W; cv.height = H; }
+  background(t);
+  (SCENES[S.type] || SCENES.statement)(S, t);
+  brand(S);
+  if (S.disclaimer) txt(S.disclaimer, W / 2, H - 22, { w: 500, px: 18, col: C.muted, align: 'center', alpha: .85 });
+};
+window.ready = Promise.all([document.fonts.load('800 40px Geist'), document.fonts.load('700 40px "Geist Mono"')]).then(() => document.fonts.ready);
+</script>
+</body>
+</html>
