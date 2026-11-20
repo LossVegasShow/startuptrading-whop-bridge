@@ -8,7 +8,7 @@ import datetime as dt
 import json
 from pathlib import Path
 
-from . import agents, compliance, desks, lesson_desk
+from . import agents, compliance, desks
 
 READY = 'ready_for_review'
 NEEDS_CHANGES = 'needs_changes'
@@ -62,7 +62,7 @@ def read_metrics(metrics_dir):
 
 
 def run(client, out_root, metrics_dir=None, today=None, max_briefs=5, outreach=0, contacted_path=None,
-        transcripts_dir=None, lessons=0, ideas_path=None):
+        transcripts_dir=None):
     """One weekly run. outreach = how many prospects to find (0 skips the outreach desk)."""
     today = today or dt.date.today()
     out = Path(out_root) / today.isoformat()
@@ -76,26 +76,17 @@ def run(client, out_root, metrics_dir=None, today=None, max_briefs=5, outreach=0
 
     outreach_items = _desk(lambda: desks.run_outreach(client, outreach, contacted_path)) if outreach else []
     clip_items = _desk(lambda: desks.run_clips(client, transcripts_dir)) if transcripts_dir else []
-    lesson_items = _desk(lambda: lesson_desk.run_lessons(client, ideas_path, lessons)) if lessons and ideas_path else []
 
     date = today.isoformat()
     result = {'date': date, 'theme': plan.theme, 'rationale': plan.rationale,
               'research': report.model_dump(), 'kpis': kpis.model_dump() if kpis else None, 'items': items,
-              'outreach': outreach_items, 'clips': clip_items, 'lessons': lesson_items}
+              'outreach': outreach_items, 'clips': clip_items}
     (out / 'queue.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
     (out / 'queue.md').write_text(render_markdown(result), encoding='utf-8')
     if outreach_items:
         (out / 'outreach.md').write_text(desks.render_outreach(outreach_items, date), encoding='utf-8')
     if clip_items:
         (out / 'clips.md').write_text(desks.render_clips(clip_items, date), encoding='utf-8')
-    if lesson_items:
-        ldir = out / 'lessons'
-        ldir.mkdir(exist_ok=True)
-        (ldir / 'index.md').write_text(lesson_desk.render_index(lesson_items, date), encoding='utf-8')
-        for item in lesson_items:
-            if item.get('package'):
-                name = f"rank-{int(item['idea']['rank']):03d}-{lesson_desk.slugify(item['idea']['title'])}.md"
-                (ldir / name).write_text(lesson_desk.render_package(item), encoding='utf-8')
     return out, result
 
 
@@ -123,8 +114,6 @@ def render_markdown(r):
         extra.append(f"{sum(i.get('status') == READY for i in r['outreach'])} outreach pitches in `outreach.md`")
     if r.get('clips'):
         extra.append(f"{sum(i.get('status') == READY for i in r['clips'])} clips in `clips.md`")
-    if r.get('lessons'):
-        extra.append(f"{sum(i.get('status') == READY for i in r['lessons'])} Lesson packages in `lessons/`")
     if extra:
         lines += ['Also this week: ' + '; '.join(extra) + '.', '']
     lines += ['## Record this week', '',

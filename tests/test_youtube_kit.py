@@ -10,9 +10,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from marketing import compliance, lesson_desk, pipeline
-from marketing.models import (BeatStep, ContentBrief, ContentPack, LessonPackage, ResearchReport, ReviewResult,
-                              ShortScript, WeeklyPlan)
+from marketing import compliance
+from youtube import lesson_desk
+from youtube.lesson_desk import BeatStep, LessonPackage, ShortScript
 
 ROOT = Path(__file__).resolve().parents[1]
 YT = ROOT / 'youtube'
@@ -121,20 +121,10 @@ class Fake:
 
     def _parse(self, **kw):
         self.calls.append(kw)
-        fmt = kw['output_format']
-        if fmt is LessonPackage and self.refuse:
+        assert kw['output_format'] is LessonPackage
+        if self.refuse:
             return SimpleNamespace(stop_reason='refusal', parsed_output=None, content=[])
-        b = ContentBrief(id='b', title='B', pillar='live', angle='a', record_this='r', channels=['x'],
-                         call_to_action='free_indicator')
-        cp = ContentPack(brief_id='b', youtube_title='t', youtube_description='d', shorts_script='s',
-                         x_posts=['x'], email_subject='e', email_body='b')
-        out = {LessonPackage: lambda: self.pkg,
-               ResearchReport: lambda: ResearchReport(competitor_moves=[], audience_questions=[], trending_topics=[],
-                                                      content_ideas=[]),
-               WeeklyPlan: lambda: WeeklyPlan(theme='T', rationale='R', briefs=[b]),
-               ContentPack: lambda: cp,
-               ReviewResult: lambda: ReviewResult(approved=True, issues=[], revised=cp)}[fmt]()
-        return SimpleNamespace(stop_reason='end_turn', parsed_output=out, content=[])
+        return SimpleNamespace(stop_reason='end_turn', parsed_output=self.pkg, content=[])
 
 
 def test_next_ideas_skip_packaged_and_live_formats():
@@ -160,12 +150,21 @@ def test_lesson_with_banned_phrase_is_held():
     assert '⚠ hook' in lesson_desk.render_package(items[0])
 
 
-def test_weekly_run_writes_lesson_files(tmp_path):
-    out, result = pipeline.run(Fake(), tmp_path, today=dt.date(2026, 11, 23), max_briefs=1, lessons=2,
-                               ideas_path=YT / 'ideas.csv')
-    files = sorted(p.name for p in (out / 'lessons').iterdir())
+def test_run_writes_drafts_and_uses_the_shared_brand_brief(tmp_path):
+    c = Fake()
+    out, items = lesson_desk.run(c, YT / 'ideas.csv', tmp_path, count=2, today=dt.date(2026, 11, 23))
+    files = sorted(p.name for p in out.iterdir())
+    assert out == tmp_path / '2026-11-23'
     assert files[0] == 'index.md' and len(files) == 3
-    assert '2 Lesson packages in `lessons/`' in (out / 'queue.md').read_text()
+    kw = c.calls[0]
+    assert kw['model'] == 'claude-opus-5-5' and 'StartUpTrading brand brief' in kw['system'][0]['text']
+    assert kw['system'][0]['cache_control'] == {'type': 'ephemeral'}
+
+
+def test_cli_without_key_exits_2(monkeypatch, capsys):
+    monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+    assert lesson_desk.main([]) == 2
+    assert 'ANTHROPIC_API_KEY' in capsys.readouterr().err
 
 
 def test_failed_lesson_is_reported():

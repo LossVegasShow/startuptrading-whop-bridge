@@ -14,12 +14,15 @@ plan" tab); this folder is what the team works from.
 | `assets/risk-card.html` | The Risk Card overlay. Add it to OBS as a Browser source (1920x1080); build the URL with `assets/risk-card-maker.html` |
 | `assets/thumbnail.html` | The thumbnail template (1280x720): `?words=THE%20MATH&face=jack.png&chart=chart.png&market=ES&stop=24&qty=1` |
 | `assets/banner.html`, `avatar.html`, `end-screen.html` | Channel art templates |
+| `lesson_desk.py` | The Lesson desk: drafts the next Lesson packages from `ideas.csv` |
 | `assets/out/` | Rendered PNGs: banner, avatar, end screen, Risk Card examples, thumbnail layouts for videos 001–004 |
 
 ## Weekly loop
 
-1. **Sunday:** the marketing-weekly GitHub Action runs. Besides content, outreach and clips, it now drafts
-   **2 Lesson packages** from the top unused ideas (`marketing/out/<date>/lessons/`).
+1. **Sunday:** the `youtube-lessons-weekly` GitHub Action drafts **2 Lesson packages** from the top unused
+   ideas (shown on the run page and attached as a download). Run it by hand with
+   `ANTHROPIC_API_KEY=... python -m youtube.lesson_desk --count 2` (drafts go to `youtube/drafts/`, which git
+   ignores). It reuses the marketing team's brand brief, model settings and phrase rules without changing them.
 2. **Monday:** review the drafts. Copy the ones you approve to `production/NNN-slug/package.md` and set their
    row in `ideas.csv` to `packaged`. Jack fills the `[Jack: …]` brackets.
 3. **Tuesday / Thursday:** record after the stream, edit, publish at 6:00 pm ET using the package's publish sheet.
