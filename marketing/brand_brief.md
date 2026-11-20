@@ -33,6 +33,10 @@ the next run. Anything NOT in this file must not be stated as fact.
 - Join page: https://startuptrading.com/join
 - Free entry point: Jack's free ATR indicator and risk calculator at
   https://startuptrading.com/indicators (no card needed).
+- Free web tool (any platform, no sign-up): futures position-size calculator
+  and prop-firm risk planner at
+  https://startuptrading.com/futures-position-size-calculator
+- Jack's Instagram: @trader (https://instagram.com/trader).
 - NinjaTrader 8 desktop (Windows) is required.
 
 ## Positioning
@@ -47,6 +51,9 @@ Message pillars:
 3. bundle: everything in one place. Three tools, the room and Jack for the
    price of a NinjaTrader monthly license.
 4. easy_start: licensed in about 3 minutes, cancel anytime, free indicator first.
+
+Signature line: "I show you my risk, not my profits." It turns the compliance
+rules into the brand: no lifestyle shots, nothing but the process.
 
 ## Voice
 

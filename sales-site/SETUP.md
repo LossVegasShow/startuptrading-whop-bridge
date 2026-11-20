@@ -105,6 +105,22 @@ On the current home page (`/`) in GHL:
   "rejoin" link in the access-ended email and the "Become a member" button
   on the activation app's no-membership page.
 
+### 2d. Add the free calculator page (`/futures-position-size-calculator`)
+
+A free position-size calculator and prop-firm risk planner. It works for traders on
+any platform, so it can rank in search and be shared in other communities. Every
+button leads to the free indicator (tagged `utm_campaign=calculator`) or `/join`.
+
+1. In the same GHL site, add a page named "Futures position size calculator"
+   with path **`/futures-position-size-calculator`**.
+2. Build it like step 2, but paste **`dist/calculator-embed.html`** into the Code element.
+3. **SEO:** title *Futures Position Size Calculator & Prop-Firm Risk Planner (Free)*.
+   Description *Free futures position size calculator for ES, NQ, MES, MNQ, CL, GC
+   and more. Size from ATR or a fixed stop, and plan risk per trade for a prop-firm
+   drawdown.* Leave it indexable.
+4. Share links can preselect a contract: `…/futures-position-size-calculator?c=MES`.
+5. Link it from the `/indicators` page and from `@trader`'s bio links.
+
 ## 3. Connect the domain in GoHighLevel
 
 1. GHL **Settings → Domains → Add domain** → enter `startuptrading.com`.

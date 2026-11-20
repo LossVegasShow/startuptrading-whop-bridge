@@ -9,6 +9,8 @@ for each page in PAGES:
 
   sales page:     dist/index.html   + dist/ghl-embed.html     (GHL path /)
   thank-you page: dist/welcome.html + dist/welcome-embed.html (GHL path /welcome)
+  calculator:     dist/calculator.html + dist/calculator-embed.html
+                  (GHL path /futures-position-size-calculator)
 
 Everything is scoped under `.sut` so GoHighLevel's own styles can't clash.
 """
@@ -41,6 +43,10 @@ PAGES = {
     'welcome': ('welcome.html', 'welcome.html', 'welcome-embed.html',
                 'Welcome to StartUpTrading',
                 'Your StartUpTrading membership: next steps to activate your indicators.'),
+    'calculator': ('calculator.html', 'calculator.html', 'calculator-embed.html',
+                   'Futures Position Size Calculator & Prop-Firm Risk Planner (Free)',
+                   'Free futures position size calculator for ES, NQ, MES, MNQ, CL, GC and more. Size from ATR '
+                   'or a fixed stop, and plan risk per trade for a prop-firm drawdown.'),
 }
 
 
@@ -49,11 +55,11 @@ PAGES = {
 FREE_PLACEMENTS = ('pricing', 'final', 'faq', 'exit')
 
 
-def tagged(url, placement):
+def tagged(url, placement, campaign='not_ready'):
     parts = urlsplit(url)
     query = dict(parse_qsl(parts.query))
     query.update({'utm_source': 'startuptrading', 'utm_medium': 'sales_page',
-                  'utm_campaign': 'not_ready', 'utm_content': placement})
+                  'utm_campaign': campaign, 'utm_content': placement})
     return urlunsplit(parts._replace(query=urlencode(query)))
 
 
@@ -108,6 +114,9 @@ def render(cfg, name='sales'):
     cfg['exit_offer'] = 'true' if str(cfg.get('exit_offer', '')).lower() == 'true' and cfg.get('free_indicator_url') else ''
     for place in FREE_PLACEMENTS:
         values[f'free_url_{place}'] = html.escape(tagged(cfg['free_indicator_url'], place), quote=True) if cfg.get('free_indicator_url') else ''
+    # The free calculator is its own campaign, so its free-indicator signups are counted separately.
+    values['free_url_calc'] = html.escape(tagged(cfg['free_indicator_url'], 'calculator', campaign='calculator'),
+                                          quote=True) if cfg.get('free_indicator_url') else ''
 
     def sub(m):
         key = m.group(1)

@@ -185,3 +185,53 @@ def test_exit_offer_is_accessible_and_switchable():
     cfg = dict(cfg, free_indicator_url='')
     none, _ = load_build().render(cfg)
     assert 'data-free' not in none.split('<script>')[0] and 'id="sut-exit"' not in none
+
+
+# ---- free calculator page --------------------------------------------------
+
+def calculator():
+    cfg = json.loads((SITE / 'site.config.json').read_text())
+    return cfg, *load_build().render(cfg, 'calculator')
+
+
+def test_calculator_page_is_indexable_and_tagged():
+    cfg, embed, full = calculator()
+    assert 'noindex' not in full
+    assert 'Futures Position Size Calculator' in full
+    assert 'utm_campaign=calculator' in embed and 'data-free' in embed
+    assert f'href="{cfg["join_url"]}"' in embed
+    assert '{{' not in embed and '<div data-whop-checkout-plan-id=' not in embed  # no checkout here
+
+
+def test_calculator_copy_passes_marketing_compliance():
+    from marketing import compliance
+    _, embed, _ = calculator()
+    body = embed.split('<footer')[0]
+    text = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', body, flags=re.S)
+    assert compliance.check_text(text) == []
+
+
+def test_calculator_math(tmp_path):
+    import shutil
+    import subprocess
+    import pytest
+    node = shutil.which('node')
+    if not node:
+        pytest.skip('node not installed')
+    _, embed, _ = calculator()
+    core = embed.split('/*calc-core*/')[1].split('/*end-calc-core*/')[0]
+    script = tmp_path / 'calc.js'
+    script.write_text(core + '''
+console.log(JSON.stringify([
+  sutSize('ES', 1000, 6), sutSize('ES', 200, 6), sutSize('MES', 200, 6), sutSize('CL', 500, 0.25),
+  sutSize('ES', 0, 6), sutSize('XX', 100, 1), sutProp(2500, 0, 10), sutProp(2500, 400, 10), sutProp(0, 0, 10)
+]));''')
+    out = json.loads(subprocess.run([node, str(script)], capture_output=True, text=True, check=True).stdout)
+    es, es_small, mes, cl, zero, unknown, prop, prop_daily, prop_bad = out
+    assert es == {'contracts': 3, 'perContract': 300, 'actualRisk': 900, 'ticks': 24, 'micro': None}
+    assert es_small['contracts'] == 0 and es_small['micro'] == 'MES'
+    assert mes['contracts'] == 6 and mes['actualRisk'] == 180
+    assert cl['contracts'] == 2 and cl['actualRisk'] == 500   # never above the risk set
+    assert zero is None and unknown is None and prop_bad is None
+    assert prop == {'perTrade': 250, 'dailyStop': 750}
+    assert prop_daily == {'perTrade': 200, 'dailyStop': 400}

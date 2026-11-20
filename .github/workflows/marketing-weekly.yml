@@ -42,10 +42,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           BRIEFS: ${{ github.event.inputs.briefs || '5' }}
-        run: python -m marketing --out marketing/out --metrics marketing/metrics --briefs "$BRIEFS"
+        run: python -m marketing --out marketing/out --metrics marketing/metrics --briefs "$BRIEFS" --prospects 10
       - name: Show the queue on the run page
         if: env.skip != '1'
-        run: cat marketing/out/*/queue.md >> "$GITHUB_STEP_SUMMARY"
+        run: cat marketing/out/*/queue.md marketing/out/*/outreach.md marketing/out/*/clips.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: env.skip != '1'
         with:
