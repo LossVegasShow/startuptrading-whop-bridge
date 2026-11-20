@@ -1,0 +1,54 @@
+name: marketing-weekly
+
+# Runs the AI marketing team once a week and produces a review queue.
+# It never posts anything: a person approves each piece first.
+on:
+  schedule:
+    - cron: '17 22 * * 0'   # Sundays 22:17 UTC (5:17 pm ET), ready before the Monday open
+  workflow_dispatch:
+    inputs:
+      briefs:
+        description: 'How many content pieces to produce'
+        default: '5'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marketing-weekly
+  cancel-in-progress: false
+
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r marketing/requirements.txt
+      - name: Check the API key secret is set
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY secret is not set. See marketing/README.md. Skipping."
+            echo "skip=1" >> "$GITHUB_ENV"
+          fi
+      - name: Run the marketing team
+        if: env.skip != '1'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRIEFS: ${{ github.event.inputs.briefs || '5' }}
+        run: python -m marketing --out marketing/out --metrics marketing/metrics --briefs "$BRIEFS"
+      - name: Show the queue on the run page
+        if: env.skip != '1'
+        run: cat marketing/out/*/queue.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: env.skip != '1'
+        with:
+          name: marketing-queue-${{ github.run_number }}
+          path: marketing/out/
+          retention-days: 90
