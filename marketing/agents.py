@@ -10,8 +10,8 @@ same `messages.parse` method). Nothing here publishes anything.
 import json
 from pathlib import Path
 
-from .models import (ClipList, ContentBrief, ContentPack, KPIReport, PitchList, ProspectList, ResearchReport,
-                     ReviewResult, WeeklyPlan)
+from .models import (ClipList, ContentBrief, ContentPack, KPIReport, LessonPackage, PitchList, ProspectList,
+                     ResearchReport, ReviewResult, WeeklyPlan)
 
 MODEL = 'claude-opus-5-5'
 MAX_TOKENS = 16000
@@ -158,3 +158,23 @@ def find_clips(client, name, transcript, max_clips=6):
     prompt = (f'Transcript file: {name}\nPick up to {max_clips} clips.\n\n'
               '<transcript>\n' + transcript + '\n</transcript>')
     return _ask(client, CLIPPER, prompt, ClipList, effort='medium')
+
+
+LESSON_WRITER = """Role: YouTube Producer for the channel "Jack Gleason | StartUpTrading".
+Turn one idea from the ranked idea list into a complete Lesson package for an 8 to 12 minute video, in Jack's
+voice. Rules from the channel's production system:
+- Package first: three genuinely different titles (search phrase first where it fits, one number or market,
+  no hype words); thumbnail words that add to the title.
+- The hook shows the problem and the promise in the first 15 seconds. No intro, no asking for subscribes.
+- Use one structure: Problem-Solve, Story, Breakdown or Showdown, with a twist beat where the obvious answer
+  is wrong.
+- Use real, checkable numbers for any sizing example (ES $50/pt, MES $5/pt, NQ $20/pt, MNQ $2/pt, E-nano S&P
+  $0.50/pt; contracts = risk / (stop points x $ per point), always rounded down).
+- Never invent Jack's trades, dates, results or personal rules: put them in jack_facts_needed as brackets.
+- Results are only ever in ticks. Never profit, income, win-rate or guarantee language.
+- One call to action: the free calculator, then the next video."""
+
+
+def write_lesson(client, idea):
+    prompt = 'Idea from the ranked list:\n' + json.dumps(idea, indent=1)
+    return _ask(client, LESSON_WRITER, prompt, LessonPackage, effort='high')

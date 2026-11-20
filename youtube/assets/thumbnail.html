@@ -1,0 +1,64 @@
+<!doctype html>
+<!-- Thumbnail template, 1280x720. Three layers: Jack's face, one chart element,
+     2-3 words in the brand orange. Parameters:
+       words   the 2-3 words, e.g. THE MATH            (required)
+       face    path or URL to a cut-out photo of Jack  (optional; placeholder if absent)
+       chart   path or URL to a chart crop             (optional; placeholder if absent)
+       market  shown on the mini Risk Card, e.g. ES    (optional; card hidden if absent)
+       stop, qty  mini Risk Card values                (optional)
+       flip    1 = face on the left                     (optional)
+     Render to PNG with: node youtube/assets/render.js -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin:0; width:1280px; height:720px; overflow:hidden; background:#07090d; }
+  .t { position:relative; width:1280px; height:720px; overflow:hidden; font-family: Geist, Inter, system-ui, sans-serif;
+    background: radial-gradient(120% 90% at 20% 30%, #121a26 0%, #07090d 60%); }
+  .chart { position:absolute; left:40px; top:200px; width:700px; height:470px; border-radius:18px; overflow:hidden;
+    border:2px solid #1d2530; background:#0b0e14; }
+  .chart img { width:100%; height:100%; object-fit:cover; }
+  .ph { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#3a4656;
+    font:600 28px Inter, sans-serif; letter-spacing:.12em; border:3px dashed #2a3441; border-radius:inherit; }
+  .stopline { position:absolute; left:0; right:0; top:62%; border-top:4px dashed #ff6b6b; }
+  .stoptag { position:absolute; right:14px; top:calc(62% - 40px); background:#ff6b6b; color:#1a0606; font:700 22px/1 ui-monospace, Menlo, monospace; padding:8px 10px; border-radius:6px; }
+  .face { position:absolute; right:30px; bottom:0; width:500px; height:640px; }
+  .face img { width:100%; height:100%; object-fit:contain; object-position:bottom; }
+  .face .ph { border-radius:240px 240px 0 0; }
+  .words { position:absolute; left:48px; top:34px; font:900 118px/0.95 Inter, system-ui, sans-serif; letter-spacing:-.03em;
+    color:#fa7b39; text-transform:uppercase; text-shadow:0 6px 0 #170b03, 0 10px 30px rgba(0,0,0,.6); max-width:820px; }
+  .mini { position:absolute; left:470px; top:548px; width:250px; padding:16px 18px 14px 22px; background:rgba(11,14,20,.96);
+    border:1px solid #2a3441; border-radius:12px; color:#ecf0f5; font:600 22px/1.3 ui-monospace, Menlo, monospace; }
+  .mini::before { content:""; position:absolute; left:0; top:12px; bottom:12px; width:5px; background:#fa7b39; border-radius:0 3px 3px 0; }
+  .mini b { display:block; color:#fa7b39; font-size:16px; letter-spacing:.1em; margin-bottom:6px; }
+  .flip .chart { left:auto; right:40px } .flip .face { right:auto; left:30px } .flip .words { left:auto; right:48px; text-align:right }
+  .flip .mini { left:auto; right:470px }
+  .brand { position:absolute; left:48px; bottom:26px; font:700 18px/1 Inter, sans-serif; letter-spacing:.14em; color:#7b8698; }
+  .flip .brand { left:auto; right:48px }
+</style>
+</head>
+<body>
+<div class="t" id="t">
+  <div class="chart" id="chart"><div class="ph" id="chart-ph">CHART</div><div class="stopline"></div><div class="stoptag" id="stoptag" hidden></div></div>
+  <div class="face" id="face"><div class="ph" id="face-ph">JACK PHOTO</div></div>
+  <div class="words" id="words"></div>
+  <div class="mini" id="mini" hidden><b id="mini-m"></b><span id="mini-v"></span></div>
+  <div class="brand">STARTUPTRADING</div>
+</div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), $ = function (i) { return document.getElementById(i); };
+  $('words').textContent = (q.get('words') || 'YOUR WORDS').slice(0, 24);
+  function img(id, src) { if (!src) return; var el = document.createElement('img'); el.src = src; el.alt = ''; $(id).insertBefore(el, $(id).firstChild); $(id + '-ph').remove(); }
+  img('chart', q.get('chart')); img('face', q.get('face'));
+  if (q.get('market')) {
+    $('mini').hidden = false; $('mini-m').textContent = 'RISK CARD · ' + q.get('market').toUpperCase().slice(0, 6);
+    var parts = []; if (q.get('stop')) parts.push(q.get('stop') + ' ticks'); if (q.get('qty')) parts.push(q.get('qty') + ' ct');
+    $('mini-v').textContent = parts.join(' · ');
+  }
+  if (q.get('stop')) { $('stoptag').hidden = false; $('stoptag').textContent = 'STOP ' + q.get('stop') + 't'; }
+  if (q.get('flip') === '1') $('t').classList.add('flip');
+})();
+</script>
+</body>
+</html>

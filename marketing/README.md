@@ -26,6 +26,7 @@ Two more desks run in the same job:
 | Desk | Does | Output |
 |---|---|---|
 | Outreach | Searches for podcasts, prop firms, trading Discords, newsletters, YouTube channels, journalists and events that fit Jack, then drafts a personal pitch and a 7-day follow-up for each. Contact routes are copied only from what each prospect publishes, never guessed. | `outreach.md` |
+| Lessons | Takes the next unused ideas from `youtube/ideas.csv` and drafts full Lesson packages (titles, thumbnail words, hook, beat sheet, description, chapters, pinned comment, Shorts), with every fact only Jack can supply left as a bracket. See `youtube/README.md`. | `lessons/` |
 | Clips | Reads stream transcripts in `marketing/transcripts/` and picks the best 30–60 s moments, with timestamps, a hook, and captions in English and Spanish. Each caption carries the risk line. | `clips.md` |
 
 Pitches and captions go through the same phrase rules, including Spanish

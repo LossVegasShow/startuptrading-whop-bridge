@@ -1,0 +1,12 @@
+[
+  {"out": "banner.png", "page": "banner.html", "w": 2560, "h": 1440},
+  {"out": "banner-safe-area-guide.png", "page": "banner.html", "params": {"guide": 1}, "w": 2560, "h": 1440},
+  {"out": "avatar.png", "page": "avatar.html", "w": 800, "h": 800},
+  {"out": "end-screen.png", "page": "end-screen.html", "w": 1920, "h": 1080},
+  {"out": "risk-card-plan-example.png", "page": "risk-card.html", "params": {"m": "ES", "entry": "5125.25-5126.00", "stop": 24, "qty": 1, "risk": 300}, "w": 1920, "h": 1080, "transparent": true},
+  {"out": "risk-card-result-example.png", "page": "risk-card.html", "params": {"m": "ES", "stop": 24, "qty": 1, "state": "result", "res": -24}, "w": 1920, "h": 1080, "transparent": true},
+  {"out": "thumb-001-how-many-contracts.png", "page": "thumbnail.html", "params": {"words": "THE MATH", "market": "ES", "stop": 24, "qty": 1}, "w": 1280, "h": 720},
+  {"out": "thumb-002-first-5000.png", "page": "thumbnail.html", "params": {"words": "MY FIRST $5,000", "flip": 1}, "w": 1280, "h": 720},
+  {"out": "thumb-003-e-nano.png", "page": "thumbnail.html", "params": {"words": "1/100TH", "market": "E-NANO", "stop": 24, "qty": 33}, "w": 1280, "h": 720},
+  {"out": "thumb-004-trailing-drawdown.png", "page": "thumbnail.html", "params": {"words": "IT MOVES", "flip": 1}, "w": 1280, "h": 720}
+]

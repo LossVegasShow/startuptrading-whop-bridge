@@ -1,0 +1,90 @@
+<!doctype html>
+<!-- The Risk Card: the channel's signature overlay.
+     Use as an OBS "Browser" source (1920x1080, transparent), or open
+     risk-card-maker.html to build the URL. Parameters (all optional):
+       m      market symbol, e.g. ES, MES, NQ, MNQ, CL, GC          (default ES)
+       entry  entry zone text, e.g. 5125.25-5126.00
+       stop   stop distance in ticks                                (required for plan)
+       qty    contracts
+       risk   planned dollar risk (plan only; results never show dollars)
+       state  plan | result                                          (default plan)
+       res    result in ticks, signed, e.g. -24 or 40               (result only)
+       pos    bl | br | tl | tr  corner of the 1920x1080 canvas      (default bl)
+     Brand rule: results are shown in ticks only, never dollars. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Risk Card</title>
+<style>
+  :root { --bg:#0b0e14; --line:#2a3441; --text:#ecf0f5; --muted:#8a96a8; --accent:#fa7b39; --up:#3ddc97; --down:#ff6b6b; }
+  html, body { margin:0; width:1920px; height:1080px; background:transparent; overflow:hidden; }
+  .card { position:absolute; width:560px; box-sizing:border-box; padding:26px 30px 24px 38px;
+    background:rgba(11,14,20,.94); border:1px solid var(--line); border-radius:14px; color:var(--text);
+    font-family: Geist, Inter, "Segoe UI", system-ui, sans-serif; box-shadow:0 10px 40px rgba(0,0,0,.45); }
+  .card::before { content:""; position:absolute; left:0; top:18px; bottom:18px; width:6px; border-radius:0 4px 4px 0; background:var(--accent); }
+  .bl { left:64px; bottom:64px } .br { right:64px; bottom:64px } .tl { left:64px; top:64px } .tr { right:64px; top:64px }
+  .head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; }
+  .title { font:600 20px/1 "Geist Mono", ui-monospace, Menlo, monospace; letter-spacing:.08em; color:var(--accent); }
+  .badge { font:600 15px/1 "Geist Mono", ui-monospace, Menlo, monospace; letter-spacing:.1em; color:var(--muted);
+    border:1px solid var(--line); padding:7px 10px; border-radius:6px; }
+  .row { display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-top:1px solid #1d2530; font-size:24px; }
+  .row:first-of-type { border-top:0 }
+  .k { color:var(--muted); font-weight:500; }
+  .v { font:600 26px/1.2 "Geist Mono", ui-monospace, Menlo, monospace; }
+  .result { margin-top:14px; padding-top:16px; border-top:1px solid var(--line); display:flex; align-items:baseline; gap:14px; }
+  .result .big { font:700 44px/1 "Geist Mono", ui-monospace, Menlo, monospace; }
+  .result .note { color:var(--muted); font-size:20px; }
+  .pos { color:var(--up) } .neg { color:var(--down) }
+  [hidden] { display:none !important }
+</style>
+</head>
+<body>
+<div class="card bl" id="card">
+  <div class="head"><span class="title" id="title">RISK CARD · ES</span><span class="badge" id="badge">PLAN</span></div>
+  <div class="row" id="row-entry"><span class="k">Entry</span><span class="v" id="entry"></span></div>
+  <div class="row"><span class="k">Stop</span><span class="v" id="stop"></span></div>
+  <div class="row"><span class="k">Size</span><span class="v" id="qty"></span></div>
+  <div class="row" id="row-risk"><span class="k">Planned risk</span><span class="v" id="risk"></span></div>
+  <div class="result" id="result" hidden><span class="big" id="res"></span><span class="note" id="res-note"></span></div>
+</div>
+<script>
+/*risk-card-core*/
+var TICK = { ES:0.25, MES:0.25, NQ:0.25, MNQ:0.25, YM:1, MYM:1, RTY:0.1, M2K:0.1, CL:0.01, MCL:0.01, GC:0.1, MGC:0.1 };
+function riskCardModel(q) {
+  var m = (q.m || 'ES').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || 'ES';
+  var ticks = parseInt(q.stop, 10), qty = parseInt(q.qty, 10), risk = parseFloat(q.risk), res = parseInt(q.res, 10);
+  var tick = TICK[m];
+  var state = q.state === 'result' ? 'result' : 'plan';
+  var model = {
+    title: 'RISK CARD · ' + m,
+    badge: state === 'result' ? 'RESULT' : 'PLAN',
+    entry: (q.entry || '').slice(0, 28),
+    stop: isFinite(ticks) && ticks > 0 ? ticks + ' ticks' + (tick ? ' (' + (ticks * tick).toFixed(2) + ' pts)' : '') : '—',
+    qty: isFinite(qty) && qty > 0 ? qty + (qty === 1 ? ' contract' : ' contracts') : '—',
+    risk: isFinite(risk) && risk > 0 ? '$' + Math.round(risk).toLocaleString('en-US') : '—',
+    showRisk: state === 'plan',
+    showResult: state === 'result' && isFinite(res),
+    res: isFinite(res) ? (res > 0 ? '+' : res < 0 ? '−' : '') + Math.abs(res) + ' ticks' : '',
+    resClass: res > 0 ? 'pos' : res < 0 ? 'neg' : '',
+    resNote: res < 0 && isFinite(ticks) && Math.abs(res) <= ticks ? 'stopped as planned' : (res < 0 ? 'beyond the plan' : (res > 0 ? 'closed' : 'scratch'))
+  };
+  return model;
+}
+/*end-risk-card-core*/
+(function () {
+  var p = new URLSearchParams(location.search), q = {};
+  p.forEach(function (v, k) { q[k] = v; });
+  var d = riskCardModel(q);
+  var $ = function (id) { return document.getElementById(id); };
+  $('title').textContent = d.title; $('badge').textContent = d.badge;
+  $('entry').textContent = d.entry; $('row-entry').hidden = !d.entry;
+  $('stop').textContent = d.stop; $('qty').textContent = d.qty; $('risk').textContent = d.risk;
+  $('row-risk').hidden = !d.showRisk;
+  $('result').hidden = !d.showResult; $('res').textContent = d.res; $('res').className = 'big ' + d.resClass;
+  $('res-note').textContent = d.resNote;
+  var pos = ['bl', 'br', 'tl', 'tr'].indexOf(q.pos) >= 0 ? q.pos : 'bl';
+  $('card').className = 'card ' + pos;
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,8 @@ def main(argv=None):
     ap.add_argument('--contacted', default='marketing/outreach/contacted.txt',
                     help='Names the outreach desk should skip.')
     ap.add_argument('--transcripts', default='marketing/transcripts', help='Stream transcripts for the clip desk.')
+    ap.add_argument('--lessons', type=int, default=2, help='Lesson packages to draft from the idea list (0 to skip).')
+    ap.add_argument('--ideas', default='youtube/ideas.csv', help='The ranked idea list.')
     args = ap.parse_args(argv)
 
     if not os.environ.get('ANTHROPIC_API_KEY'):
@@ -30,7 +32,8 @@ def main(argv=None):
     try:
         out, result = pipeline.run(client, args.out, args.metrics, max_briefs=args.briefs,
                                    outreach=args.prospects, contacted_path=args.contacted,
-                                   transcripts_dir=args.transcripts)
+                                   transcripts_dir=args.transcripts, lessons=args.lessons,
+                                   ideas_path=args.ideas)
     except anthropic.AuthenticationError:
         print('The Anthropic API key was rejected. Check the ANTHROPIC_API_KEY secret.', file=sys.stderr)
         return 1
@@ -48,7 +51,8 @@ def main(argv=None):
         return 1
     ready = sum(i['status'] == pipeline.READY for i in result['items'])
     print(f"Wrote {out}/queue.md: {ready} of {len(result['items'])} pieces ready for review, "
-          f"{len(result['outreach'])} outreach items, {len(result['clips'])} clips.")
+          f"{len(result['outreach'])} outreach items, {len(result['clips'])} clips, "
+          f"{len(result['lessons'])} Lesson packages.")
     return 0
 
 

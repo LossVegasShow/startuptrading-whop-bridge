@@ -108,3 +108,35 @@ class Clip(BaseModel):
 
 class ClipList(BaseModel):
     clips: List[Clip]
+
+
+# ---- Lesson desk -----------------------------------------------------------
+
+class BeatStep(BaseModel):
+    name: str
+    point: str = Field(description='The key point, one sentence.')
+    number_to_say: str = Field(description='The concrete number or example said on camera, or "none".')
+    chart_to_show: str = Field(description='What is on screen during this step.')
+
+
+class ShortScript(BaseModel):
+    hook: str = Field(description='The first line, said in the first second. Under 40 characters.')
+    script: str = Field(description='30 to 60 seconds of speech.')
+
+
+class LessonPackage(BaseModel):
+    titles: List[str] = Field(description='Exactly 3 genuinely different title options, under 70 characters each.')
+    thumbnail_words: str = Field(description='2 or 3 words for the thumbnail that add to the title, not repeat it.')
+    thumbnail_concept: str = Field(description='Jack\'s expression plus one chart element.')
+    hook: str = Field(description='The first line, word for word, showing the problem and the promise.')
+    roadmap: str = Field(description='One sentence naming the three steps.')
+    structure: Literal['Problem-Solve', 'Story', 'Breakdown', 'Showdown']
+    steps: List[BeatStep]
+    twist: str = Field(description='Where the obvious answer is wrong.')
+    recap: List[str] = Field(description='Three short recap lines.')
+    description_first_lines: str = Field(description='Two sentences with the search phrase, for the top of the description.')
+    chapters: List[str] = Field(description='5 to 7 chapters as "m:ss Name", starting at 0:00.')
+    pinned_comment: str
+    shorts: List[ShortScript] = Field(description='Two Shorts cut from this Lesson.')
+    jack_facts_needed: List[str] = Field(
+        description='Every fact only Jack can supply (a real chart, a date, his own rule or story), as brackets to fill.')
