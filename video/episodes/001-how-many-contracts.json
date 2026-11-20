@@ -1,0 +1,229 @@
+{
+ "id": "001-how-many-contracts",
+ "title": "How Many Contracts Should You Trade? The ATR Math Behind Every Trade",
+ "voice_id": "nPczCjzI2devNBz1zQrb",
+ "model": "eleven_multilingual_v2",
+ "brand": "The Risk Desk",
+ "disclaimer": "Education only, not financial advice. Futures trading involves substantial risk of loss.",
+ "fps": 30,
+ "scenes": [
+  {
+   "type": "hook",
+   "lines": [
+    "Most traders pick their size",
+    "before they look at the chart."
+   ],
+   "highlight": [
+    "size"
+   ],
+   "say": "Most traders pick their size before they ever look at the chart. Two contracts, because yesterday was one. Five, because they feel good.",
+   "anim": 2.4,
+   "chapter": "The backwards way"
+  },
+  {
+   "type": "statement",
+   "label": "THE PROBLEM",
+   "text": "Then they squeeze the stop to fit the size. That's backwards.",
+   "say": "Then they squeeze the stop to fit that size. That's backwards, and it's how a lot of accounts end. In the next few minutes you'll get one formula that tells you exactly how many contracts to trade, on any setup, in any market.",
+   "anim": 1.6
+  },
+  {
+   "type": "steps",
+   "title": "Three steps",
+   "items": [
+    "Decide your dollar risk",
+    "Let ATR set the stop",
+    "Let the stop set the size"
+   ],
+   "say": "Three steps. Decide your dollar risk first. Let the market's volatility set your stop. Then let the stop decide your size.",
+   "anim": 1.6,
+   "chapter": "Three steps"
+  },
+  {
+   "type": "steps",
+   "title": "Step 1 of 3",
+   "items": [
+    "Decide your dollar risk",
+    "Let ATR set the stop",
+    "Let the stop set the size"
+   ],
+   "active": 0,
+   "step": "1 / 3",
+   "say": "Step one. Decide the dollar risk before anything else. It's the only number you get to choose: how much you're willing to lose if this trade is wrong.",
+   "anim": 1.2,
+   "chapter": "Step 1: your dollar risk"
+  },
+  {
+   "type": "statement",
+   "label": "EXAMPLE",
+   "text": "1% of a $25,000 account = $250 per trade",
+   "step": "1 / 3",
+   "say": "A common starting point is one percent of the account or less. On a twenty-five thousand dollar account, that's two hundred and fifty dollars. Whatever your number is, you set it before the open, and it doesn't change because a setup looks good.",
+   "anim": 1.4
+  },
+  {
+   "type": "steps",
+   "title": "Step 2 of 3",
+   "items": [
+    "Decide your dollar risk",
+    "Let ATR set the stop",
+    "Let the stop set the size"
+   ],
+   "active": 1,
+   "step": "2 / 3",
+   "say": "Step two. Let the market set the stop.",
+   "anim": 1.2,
+   "chapter": "Step 2: let ATR set the stop"
+  },
+  {
+   "type": "chart",
+   "label": "ES · 5-minute",
+   "step": "2 / 3",
+   "data": {
+    "seed": 2,
+    "n": 70,
+    "start": 5125,
+    "vol": 2.4,
+    "atr": true
+   },
+   "reveal": 3.0,
+   "say": "Here's where most people go wrong. They use the same stop every single day. Four points on ES, always four. But the market doesn't move the same amount every day. A quiet Tuesday and a CPI morning are completely different animals.",
+   "anim": 3.6
+  },
+  {
+   "type": "chart",
+   "label": "ES · 5-minute · ATR (14) about 4 points",
+   "step": "2 / 3",
+   "data": {
+    "seed": 2,
+    "n": 70,
+    "start": 5125,
+    "vol": 2.4,
+    "atr": true,
+    "stop_atr_mult": 1.5
+   },
+   "reveal": 0.6,
+   "say": "ATR, the average true range, measures how far the market has been moving per bar. On this five-minute chart it's reading about four points. Put the stop about one and a half ATRs away, and that's a six-point stop. On a busier day ATR might read eight, and the stop goes to twelve. The stop breathes with the market.",
+   "anim": 2.6
+  },
+  {
+   "type": "steps",
+   "title": "Step 3 of 3",
+   "items": [
+    "Decide your dollar risk",
+    "Let ATR set the stop",
+    "Let the stop set the size"
+   ],
+   "active": 2,
+   "step": "3 / 3",
+   "say": "Step three. Let the stop decide the size.",
+   "anim": 1.2,
+   "chapter": "Step 3: let the stop set the size"
+  },
+  {
+   "type": "statement",
+   "label": "CONTRACT VALUE",
+   "text": "ES = $50 per point. A 6-point stop = $300 per contract.",
+   "step": "3 / 3",
+   "say": "Every futures contract has a dollar value per point. The E-mini S&P, ES, is fifty dollars a point. So a six-point stop on one ES contract risks six times fifty: three hundred dollars.",
+   "anim": 1.4
+  },
+  {
+   "type": "formula",
+   "title": "The sizing formula",
+   "sym": "ES",
+   "risk": 500,
+   "stop": 6,
+   "ppt": 50,
+   "step": "3 / 3",
+   "say": "Here's the formula. Contracts equals your risk, divided by the stop in points, times the dollars per point. Say your risk is five hundred dollars. Five hundred, divided by three hundred, is one point six six. Round down, always down, and that's one contract. Your real risk is three hundred dollars, under your limit. Notice you didn't choose one contract. The market did.",
+   "anim": 5.4,
+   "chapter": "The formula"
+  },
+  {
+   "type": "formula",
+   "title": "Same math on the Nasdaq",
+   "sym": "NQ",
+   "risk": 500,
+   "stop": 30,
+   "ppt": 20,
+   "step": "3 / 3",
+   "say": "Now the Nasdaq. NQ is twenty dollars a point, but it moves a lot more. With ATR around twenty points, one and a half ATRs is a thirty-point stop. Thirty times twenty is six hundred dollars for one contract. Your limit is five hundred. The math says zero.",
+   "anim": 5.4
+  },
+  {
+   "type": "hook",
+   "lines": [
+    "When the math says zero,",
+    "listen to it."
+   ],
+   "highlight": [
+    "zero,"
+   ],
+   "say": "This is the most important part. When the math says zero, it's telling you that one full contract is too much for your account on this setup, today. You have two honest choices. Skip the trade, or go to the micro.",
+   "anim": 1.8,
+   "chapter": "When the math says zero"
+  },
+  {
+   "type": "contracts",
+   "title": "Same 30-point stop, two sizes",
+   "subtitle": "$500 of risk per trade",
+   "risk": 500,
+   "stop": 30,
+   "cards": [
+    {
+     "sym": "NQ",
+     "name": "E-mini Nasdaq-100",
+     "ppt": 20
+    },
+    {
+     "sym": "MNQ",
+     "name": "Micro E-mini Nasdaq-100",
+     "ppt": 2
+    }
+   ],
+   "note": "Same stop, same idea. Now the size fits.",
+   "say": "The Micro Nasdaq, MNQ, is a tenth of the size: two dollars a point. The same thirty-point stop is sixty dollars a contract. Five hundred, divided by sixty, rounds down to eight micros, four hundred and eighty dollars of real risk. Same stop, same idea, and now the size fits.",
+   "anim": 3.6
+  },
+  {
+   "type": "statement",
+   "label": "THE RULE",
+   "text": "Never shrink the stop to make the size fit.",
+   "say": "What you don't do is take one NQ anyway, and pull the stop in to twenty points so it fits. That's the trade that gets stopped out by noise, and then runs without you.",
+   "anim": 1.4
+  },
+  {
+   "type": "riskcard",
+   "m": "ES",
+   "entry": "5125.25-5126.00",
+   "stop": 24,
+   "tick": 0.25,
+   "qty": 1,
+   "risk": 300,
+   "state": "plan",
+   "say": "Put it all on one card before you click: the market, the stop in ticks, the number of contracts, and the dollars at risk. Jack Gleason, who has traded futures since 2008 and built the StartUpTrading tools, plans every trade this way. If it isn't on the card, it isn't a trade.",
+   "anim": 2.0
+  },
+  {
+   "type": "recap",
+   "title": "Recap",
+   "items": [
+    "Decide the dollar risk first",
+    "Let ATR set the stop",
+    "Let the stop set the size, rounded down",
+    "If it says zero: skip it, or go micro"
+   ],
+   "say": "So. Decide the dollar risk first. Let ATR set the stop. Let the stop set the size, and round down. And if the math says zero, skip it, or go micro.",
+   "anim": 2.4,
+   "chapter": "Recap"
+  },
+  {
+   "type": "endcard",
+   "next": "Where Should Your Stop Loss Go? ATR Stops for Futures",
+   "say": "There's a free position-size calculator for fourteen futures contracts in the description, so you never have to do this math by hand. Next: where your stop should actually go. It's on screen now.",
+   "anim": 1.2,
+   "min": 20
+  }
+ ]
+}
