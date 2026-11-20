@@ -1,0 +1,21 @@
+{
+ "episode": "001-how-many-contracts",
+ "title": "How Many Contracts Should You Trade? The ATR Math Behind Every Trade",
+ "publish_at": "2026-11-24T23:00:00Z",
+ "privacy": "private",
+ "contains_synthetic_media": true,
+ "thumbnail": "video/thumbnails/001-how-many-contracts.png",
+ "tags": [
+  "futures position size",
+  "how many contracts",
+  "ATR stop loss",
+  "ES futures",
+  "NQ futures",
+  "micro futures",
+  "MNQ",
+  "risk management",
+  "day trading futures",
+  "NinjaTrader"
+ ],
+ "description": "How many contracts should you trade? Here's the ATR sizing math for ES and NQ futures, with worked examples, including when the answer is zero.\n\nFree position-size calculator (14 contracts, ATR stops): https://startuptrading.com/futures-position-size-calculator?utm_source=youtube&utm_medium=description&utm_campaign=how-many-contracts\nFree ATR indicator for NinjaTrader: https://startuptrading.com/indicators?utm_source=youtube&utm_medium=description&utm_campaign=how-many-contracts\n\n{chapters}\n\nNarrated with an AI voice. Charts marked \"illustration\" are not live market data. This channel is affiliated with StartUpTrading, the company behind the tools mentioned.\n\nFutures trading involves substantial risk of loss and is not suitable for every investor. Past performance is not indicative of future results. Education only, not financial advice. NinjaTrader® is a registered trademark of NinjaTrader Group, LLC; this channel is not affiliated with NinjaTrader."
+}
