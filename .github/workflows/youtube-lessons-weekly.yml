@@ -1,0 +1,54 @@
+name: youtube-lessons-weekly
+
+# Drafts the next 2 Lesson packages from youtube/ideas.csv for review.
+# Separate from marketing-weekly; it only reads the marketing code. Nothing is published.
+on:
+  schedule:
+    - cron: '47 22 * * 0'   # Sundays 22:47 UTC (5:47 pm ET), after marketing-weekly
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'How many Lesson packages to draft'
+        default: '2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: youtube-lessons-weekly
+  cancel-in-progress: false
+
+jobs:
+  lessons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r marketing/requirements.txt
+      - name: Check the API key secret is set
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY secret is not set. See marketing/README.md. Skipping."
+            echo "skip=1" >> "$GITHUB_ENV"
+          fi
+      - name: Draft Lesson packages
+        if: env.skip != '1'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          COUNT: ${{ github.event.inputs.count || '2' }}
+        run: python -m youtube.lesson_desk --count "$COUNT" --out youtube/drafts
+      - name: Show the drafts on the run page
+        if: env.skip != '1'
+        run: cat youtube/drafts/*/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: env.skip != '1'
+        with:
+          name: lesson-drafts-${{ github.run_number }}
+          path: youtube/drafts/
+          retention-days: 90

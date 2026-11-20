@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- End-screen background, 1920x1080, for the last 20 seconds of every Lesson.
+     The two dashed boxes are where YouTube's end-screen elements go (video + playlist),
+     the circle is the subscribe element. Parameter: next = the next video's title. -->
+<html lang="en"><head><meta charset="utf-8"><style>
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#07090d}
+.e{position:relative;width:1920px;height:1080px;font-family:Geist,Inter,system-ui,sans-serif;background:radial-gradient(70% 60% at 50% 40%,#121a26 0%,#07090d 70%);color:#ecf0f5}
+.h{position:absolute;left:0;right:0;top:120px;text-align:center;font:800 72px/1.1 Inter,system-ui,sans-serif;letter-spacing:-.02em}
+.h span{color:#fa7b39}
+.slot{position:absolute;top:360px;width:720px;height:405px;border:4px dashed #2a3441;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#3a4656;font:600 30px Inter,sans-serif;letter-spacing:.1em}
+.s1{left:180px}.s2{right:180px}
+.sub{position:absolute;left:50%;top:840px;transform:translateX(-50%);width:180px;height:180px;border-radius:50%;border:4px dashed #2a3441}
+.foot{position:absolute;left:0;right:0;bottom:36px;text-align:center;font:600 30px/1 ui-monospace,Menlo,monospace;color:#7b8698;letter-spacing:.06em}
+</style></head><body><div class="e">
+<div class="h">Next: <span id="next">the next Lesson</span></div>
+<div class="slot s1">NEXT VIDEO</div><div class="slot s2">PLAYLIST</div><div class="sub"></div>
+<div class="foot">LIVE WEEKDAYS 9:00 ET · I SHOW YOU MY RISK, NOT MY PROFITS</div>
+</div><script>var n=new URLSearchParams(location.search).get('next');if(n)document.getElementById('next').textContent=n.slice(0,60);</script></body></html>
