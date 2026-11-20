@@ -1,0 +1,194 @@
+<div class="sut" id="top" data-page="calculator">
+<!-- Free futures position-size calculator + prop-firm risk planner
+     (GHL path /futures-position-size-calculator). Built by sales-site/build.py;
+     edit src/, not dist/. Works without NinjaTrader, so it reaches traders on
+     any platform and points them to the free indicator. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <span class="sut-logo">
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
+      STARTUPTRADING
+    </span>
+    <nav class="sut-links sut-links-always" aria-label="More">
+      <a href="{{free_url_calc}}" data-free>Free ATR indicator</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sut-hero sut-calc-hero">
+  <div class="sut-wrap">
+    <p class="sut-eyebrow">Free tool · no sign-up</p>
+    <h1>Futures position size calculator<br><span class="sut-dim">and prop-firm risk planner.</span></h1>
+    <p class="sut-lead">Pick a contract, set what you're willing to lose on the trade, and enter your stop in points or as a multiple of ATR. The calculator tells you how many contracts keep the risk where you set it. It's the same sizing math Jack Gleason uses on every trade.</p>
+  </div>
+</section>
+
+<section class="sut-section sut-calc">
+  <div class="sut-wrap sut-calc-grid">
+
+    <form class="sut-calc-card" id="sut-size" autocomplete="off" onsubmit="return false">
+      <h2 class="sut-calc-h">Position size</h2>
+      <label>Contract
+        <select name="contract" id="sut-contract"></select>
+      </label>
+      <div class="sut-calc-row">
+        <label>Risk per trade ($)<input name="risk" type="number" inputmode="decimal" min="0" step="1" value="200"></label>
+        <label>Stop type
+          <select name="mode"><option value="points">Points</option><option value="atr">ATR × multiple</option></select>
+        </label>
+      </div>
+      <div class="sut-calc-row" data-mode="points">
+        <label>Stop distance (points)<input name="stop" type="number" inputmode="decimal" min="0" step="any" value="6"></label>
+      </div>
+      <div class="sut-calc-row" data-mode="atr" hidden>
+        <label>ATR (points)<input name="atr" type="number" inputmode="decimal" min="0" step="any" value="8"></label>
+        <label>Multiple<input name="mult" type="number" inputmode="decimal" min="0" step="any" value="1.5"></label>
+      </div>
+      <output class="sut-calc-out" id="sut-size-out" aria-live="polite"></output>
+    </form>
+
+    <form class="sut-calc-card" id="sut-prop" autocomplete="off" onsubmit="return false">
+      <h2 class="sut-calc-h">Prop-firm risk planner</h2>
+      <p class="sut-fine">Enter your own firm's numbers. Rules differ between firms and change often, so check yours.</p>
+      <div class="sut-calc-row">
+        <label>Max drawdown ($)<input name="dd" type="number" inputmode="decimal" min="0" step="1" value="2500"></label>
+        <label>Daily loss limit ($, optional)<input name="daily" type="number" inputmode="decimal" min="0" step="1" value=""></label>
+      </div>
+      <label>Losing trades in a row you want to survive<input name="streak" type="number" inputmode="numeric" min="1" step="1" value="10"></label>
+      <output class="sut-calc-out" id="sut-prop-out" aria-live="polite"></output>
+      <button type="button" class="sut-btn sut-btn-ghost sut-btn-sm" id="sut-use-risk">Use this risk in the calculator ↑</button>
+    </form>
+  </div>
+
+  <div class="sut-wrap">
+    <div class="sut-calc-cta">
+      <div>
+        <h3>Want this on your chart, automatically?</h3>
+        <p>Jack's free ATR indicator for NinjaTrader shows the ATR and the size for every trade, live. No card needed.</p>
+      </div>
+      <div class="sut-cta-row">
+        <a class="sut-btn" href="{{free_url_calc}}" data-free>Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-ghost" href="{{join_url}}">See the membership</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">How it works</p>
+      <h2>Size from risk, not from conviction.</h2>
+    </div>
+    <div class="sut-calc-how">
+      <p><b>Contracts = risk per trade ÷ (stop in points × point value)</b>, rounded down. Rounding down means the real risk is never more than you set.</p>
+      <p><b>ATR stops</b> move with the market. When volatility expands, the stop gets wider and the size gets smaller, so a quiet day and a news day risk the same dollars.</p>
+      <p><b>Prop-firm planner:</b> risk per trade = max drawdown ÷ the losing streak you want to survive. The suggested daily stop is three losing trades. If your firm has a daily loss limit, the daily stop never exceeds it, and risk per trade is capped at half of it.</p>
+    </div>
+
+    <h3 class="sut-calc-table-h">Contract specs used</h3>
+    <div class="sut-calc-table-wrap">
+      <table class="sut-calc-table" id="sut-specs">
+        <thead><tr><th>Contract</th><th>Name</th><th>$ per point</th><th>Tick size</th><th>$ per tick</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="sut-fine">CME Group contract specifications. Check your broker's specs and fees before trading.</p>
+  </div>
+</section>
+
+<!--include:_footer.html-->
+
+<script>
+/*calc-core*/
+var SUT_CONTRACTS = [
+  ['ES', 'E-mini S&P 500', 50, 0.25], ['MES', 'Micro E-mini S&P 500', 5, 0.25],
+  ['NQ', 'E-mini Nasdaq-100', 20, 0.25], ['MNQ', 'Micro E-mini Nasdaq-100', 2, 0.25],
+  ['YM', 'E-mini Dow', 5, 1], ['MYM', 'Micro E-mini Dow', 0.5, 1],
+  ['RTY', 'E-mini Russell 2000', 50, 0.1], ['M2K', 'Micro E-mini Russell 2000', 5, 0.1],
+  ['CL', 'Crude Oil', 1000, 0.01], ['MCL', 'Micro Crude Oil', 100, 0.01],
+  ['GC', 'Gold', 100, 0.1], ['MGC', 'Micro Gold', 10, 0.1],
+  ['6E', 'Euro FX', 125000, 0.00005], ['ZN', '10-Year T-Note', 1000, 0.015625]
+];
+var SUT_MICRO = { ES: 'MES', NQ: 'MNQ', YM: 'MYM', RTY: 'M2K', CL: 'MCL', GC: 'MGC' };
+function sutSpec(sym) {
+  for (var i = 0; i < SUT_CONTRACTS.length; i++) if (SUT_CONTRACTS[i][0] === sym) return SUT_CONTRACTS[i];
+  return null;
+}
+function sutSize(sym, risk, stopPoints) {
+  var s = sutSpec(sym);
+  if (!s || !(risk > 0) || !(stopPoints > 0)) return null;
+  var perContract = stopPoints * s[2];
+  var n = Math.floor(risk / perContract + 1e-9);
+  return { contracts: n, perContract: perContract, actualRisk: n * perContract,
+           ticks: stopPoints / s[3], micro: n === 0 ? (SUT_MICRO[sym] || null) : null };
+}
+function sutProp(drawdown, daily, streak) {
+  if (!(drawdown > 0) || !(streak >= 1)) return null;
+  var perTrade = Math.floor(drawdown / streak);
+  var dailyStop = perTrade * 3;
+  if (daily > 0) { dailyStop = Math.min(dailyStop, daily); perTrade = Math.min(perTrade, Math.floor(daily / 2)); }
+  return { perTrade: perTrade, dailyStop: dailyStop };
+}
+/*end-calc-core*/
+(function () {
+  var money = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+  var num = function (v) { var n = parseFloat(v); return isFinite(n) ? n : 0; };
+  var size = document.getElementById('sut-size');
+  var prop = document.getElementById('sut-prop');
+  if (!size || !prop) return;
+  var sel = document.getElementById('sut-contract');
+  var body = document.querySelector('#sut-specs tbody');
+  SUT_CONTRACTS.forEach(function (c) {
+    var o = document.createElement('option');
+    o.value = c[0]; o.textContent = c[0] + ' · ' + c[1];
+    sel.appendChild(o);
+    var tr = document.createElement('tr');
+    [c[0], c[1], '$' + c[2].toLocaleString('en-US'), String(c[3]), '$' + (c[2] * c[3]).toFixed(2)].forEach(function (t) {
+      var td = document.createElement('td'); td.textContent = t; tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  var q = new URLSearchParams(window.location.search);
+  if (q.get('c') && sutSpec(q.get('c').toUpperCase())) sel.value = q.get('c').toUpperCase();
+
+  function updateSize() {
+    var f = size.elements, atr = f.mode.value === 'atr';
+    size.querySelector('[data-mode="points"]').hidden = atr;
+    size.querySelector('[data-mode="atr"]').hidden = !atr;
+    var stop = atr ? num(f.atr.value) * num(f.mult.value) : num(f.stop.value);
+    var r = sutSize(sel.value, num(f.risk.value), stop);
+    var out = document.getElementById('sut-size-out');
+    if (!r) { out.textContent = 'Enter a risk amount and a stop above zero.'; return; }
+    if (r.contracts === 0) {
+      out.innerHTML = '<b>0 contracts.</b> One ' + sel.value + ' risks ' + money(r.perContract) +
+        ' on this stop, more than your limit.' + (r.micro ? ' Try ' + r.micro + ', the micro contract.' : '');
+      return;
+    }
+    out.innerHTML = '<b>' + r.contracts + ' contract' + (r.contracts > 1 ? 's' : '') + '</b> of ' + sel.value +
+      '<span>Stop ' + (Math.round(stop * 100) / 100) + ' points (' + Math.round(r.ticks) + ' ticks) · ' +
+      money(r.perContract) + ' per contract · total risk ' + money(r.actualRisk) + '</span>';
+  }
+  var lastProp = null;
+  function updateProp() {
+    var f = prop.elements;
+    lastProp = sutProp(num(f.dd.value), num(f.daily.value), num(f.streak.value));
+    var out = document.getElementById('sut-prop-out');
+    if (!lastProp) { out.textContent = 'Enter your max drawdown and a losing streak of at least 1.'; return; }
+    out.innerHTML = '<b>' + money(lastProp.perTrade) + ' risk per trade</b><span>Suggested daily stop ' +
+      money(lastProp.dailyStop) + '. At this size it takes at least ' + Math.round(num(f.streak.value)) +
+      ' losses in a row to use the full drawdown.</span>';
+  }
+  size.addEventListener('input', updateSize);
+  prop.addEventListener('input', updateProp);
+  document.getElementById('sut-use-risk').addEventListener('click', function () {
+    if (!lastProp) return;
+    size.elements.risk.value = lastProp.perTrade;
+    updateSize();
+    size.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  updateSize(); updateProp();
+})();
+</script>
+</div>

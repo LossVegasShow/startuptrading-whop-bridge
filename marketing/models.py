@@ -60,3 +60,51 @@ class KPIReport(BaseModel):
     wins: List[str]
     concerns: List[str]
     recommendations: List[str] = Field(description='Concrete changes for next week, most important first.')
+
+
+# ---- Outreach desk ---------------------------------------------------------
+
+ProspectKind = Literal['podcast', 'prop_firm', 'discord', 'newsletter', 'youtube', 'journalist', 'event']
+
+
+class Prospect(BaseModel):
+    name: str
+    kind: ProspectKind
+    url: str = Field(description='The page where you found them.')
+    audience: str = Field(description='Who they reach, as described on their own pages. No invented numbers.')
+    why_fit: str = Field(description='Why Jack is a good fit for them, specifically.')
+    contact_route: str = Field(
+        description='How to reach them, only as published on their site (guest form URL, contact page, '
+                    'listed email). Write "not published" if you did not find one. Never guess an email.')
+
+
+class ProspectList(BaseModel):
+    prospects: List[Prospect]
+
+
+class Pitch(BaseModel):
+    prospect_name: str
+    subject: str
+    body: str = Field(description='Under 150 words, personal, offers something specific.')
+    follow_up: str = Field(description='A two-sentence follow-up to send after 7 days with no reply.')
+
+
+class PitchList(BaseModel):
+    pitches: List[Pitch]
+
+
+# ---- Clip desk -------------------------------------------------------------
+
+class Clip(BaseModel):
+    source_file: str
+    start: str = Field(description='Timestamp where the clip starts, as written in the transcript.')
+    end: str
+    hook: str = Field(description='On-screen text for the first 2 seconds, under 60 characters.')
+    caption_en: str
+    caption_es: str = Field(description='The same caption in natural Latin American Spanish.')
+    pillar: Pillar
+    why: str = Field(description='Why this moment will hold attention.')
+
+
+class ClipList(BaseModel):
+    clips: List[Clip]

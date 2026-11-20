@@ -21,6 +21,16 @@ Researcher ──► Strategist ──► Copywriter ──► Compliance ──
 | Copywriter | Writes each brief as a YouTube title and description, a Shorts script, X posts and an email, in Jack's voice. | medium |
 | Compliance | An AI review against CFTC, NFA and FTC rules, plus fixed phrase rules in `compliance.py` that the AI can't overrule. It also adds the risk line to every piece. | high |
 
+Two more desks run in the same job:
+
+| Desk | Does | Output |
+|---|---|---|
+| Outreach | Searches for podcasts, prop firms, trading Discords, newsletters, YouTube channels, journalists and events that fit Jack, then drafts a personal pitch and a 7-day follow-up for each. Contact routes are copied only from what each prospect publishes, never guessed. | `outreach.md` |
+| Clips | Reads stream transcripts in `marketing/transcripts/` and picks the best 30–60 s moments, with timestamps, a hook, and captions in English and Spanish. Each caption carries the risk line. | `clips.md` |
+
+Pitches and captions go through the same phrase rules, including Spanish
+profit and guarantee words.
+
 All agents share one source of truth: **`brand_brief.md`**. When Jack changes
 a fact there, the next run uses it. Anything not in that file can't be stated
 as fact.
@@ -45,7 +55,13 @@ After that it runs every Sunday at 5:17 pm ET.
    - **ready_for_review**: read it, edit it if needed, then schedule it.
    - **needs_changes**: the flagged phrases are listed. Fix them or drop the piece.
    - **failed**: the agent couldn't write it. Ignore it this week.
-4. Optional: drop that week's numbers into `marketing/metrics/` as a CSV, for
+4. **Outreach:** send the ready pitches from your own email, or through the
+   contact route listed. Then add each name to `marketing/outreach/contacted.txt`
+   so it isn't pitched again.
+5. **Clips:** before Sunday, download the week's stream captions from YouTube
+   Studio (Subtitles → ⋮ → Download, `.srt` or `.vtt`) into `marketing/transcripts/`
+   and commit them. The clip desk picks the moments, and whoever edits video cuts them.
+6. Optional: drop that week's numbers into `marketing/metrics/` as a CSV, for
    example `metric,value` rows for leads, new members, churn and views. Use
    **totals only**. Never commit member names or emails: this repository is
    not the place for personal data.
@@ -64,7 +80,7 @@ The queue is written to `marketing/out/<date>/`, which git ignores.
 
 ## Cost
 
-One run makes about a dozen model calls, plus up to 8 web searches. It uses
+One run makes about 15–20 model calls (more when there are several transcripts), plus up to 16 web searches. It uses
 `claude-opus-5-5`, with the brand brief cached across calls. Check the real
 cost of the first run in the Anthropic console (Usage) and lower `--briefs`
 if it's more than you want.

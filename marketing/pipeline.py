@@ -8,7 +8,7 @@ import datetime as dt
 import json
 from pathlib import Path
 
-from . import agents, compliance
+from . import agents, compliance, desks
 
 READY = 'ready_for_review'
 NEEDS_CHANGES = 'needs_changes'
@@ -56,12 +56,14 @@ def read_metrics(metrics_dir):
         return ''
     parts = []
     for f in sorted(d.iterdir()):
-        if f.suffix.lower() in ('.csv', '.txt', '.md') and f.is_file():
+        if f.suffix.lower() in ('.csv', '.txt', '.md') and f.is_file() and not f.name.upper().startswith('README'):
             parts.append(f'--- {f.name} ---\n' + f.read_text(encoding='utf-8', errors='replace')[:20000])
     return '\n\n'.join(parts)
 
 
-def run(client, out_root, metrics_dir=None, today=None, max_briefs=5):
+def run(client, out_root, metrics_dir=None, today=None, max_briefs=5, outreach=0, contacted_path=None,
+        transcripts_dir=None):
+    """One weekly run. outreach = how many prospects to find (0 skips the outreach desk)."""
     today = today or dt.date.today()
     out = Path(out_root) / today.isoformat()
     out.mkdir(parents=True, exist_ok=True)
@@ -72,11 +74,28 @@ def run(client, out_root, metrics_dir=None, today=None, max_briefs=5):
     plan = agents.plan_week(client, report, kpis)
     items = [produce(client, b) for b in plan.briefs[:max_briefs]]
 
-    result = {'date': today.isoformat(), 'theme': plan.theme, 'rationale': plan.rationale,
-              'research': report.model_dump(), 'kpis': kpis.model_dump() if kpis else None, 'items': items}
+    outreach_items = _desk(lambda: desks.run_outreach(client, outreach, contacted_path)) if outreach else []
+    clip_items = _desk(lambda: desks.run_clips(client, transcripts_dir)) if transcripts_dir else []
+
+    date = today.isoformat()
+    result = {'date': date, 'theme': plan.theme, 'rationale': plan.rationale,
+              'research': report.model_dump(), 'kpis': kpis.model_dump() if kpis else None, 'items': items,
+              'outreach': outreach_items, 'clips': clip_items}
     (out / 'queue.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
     (out / 'queue.md').write_text(render_markdown(result), encoding='utf-8')
+    if outreach_items:
+        (out / 'outreach.md').write_text(desks.render_outreach(outreach_items, date), encoding='utf-8')
+    if clip_items:
+        (out / 'clips.md').write_text(desks.render_clips(clip_items, date), encoding='utf-8')
     return out, result
+
+
+def _desk(fn):
+    """A failing side desk shouldn't sink the content queue."""
+    try:
+        return fn()
+    except agents.AgentError as e:
+        return [{'status': FAILED, 'error': str(e)}]
 
 
 def render_markdown(r):
@@ -90,6 +109,13 @@ def render_markdown(r):
         lines += ['## Metrics', '', k['summary'], '']
         lines += [f'- Win: {w}' for w in k['wins']] + [f'- Concern: {c}' for c in k['concerns']]
         lines += [f'- Next week: {x}' for x in k['recommendations']] + ['']
+    extra = []
+    if r.get('outreach'):
+        extra.append(f"{sum(i.get('status') == READY for i in r['outreach'])} outreach pitches in `outreach.md`")
+    if r.get('clips'):
+        extra.append(f"{sum(i.get('status') == READY for i in r['clips'])} clips in `clips.md`")
+    if extra:
+        lines += ['Also this week: ' + '; '.join(extra) + '.', '']
     lines += ['## Record this week', '',
               'What Jack needs to capture on stream so the team can cut these pieces:', '']
     lines += [f"- [ ] **{i['brief']['title']}**: {i['brief']['record_this']}" for i in r['items']] + ['']

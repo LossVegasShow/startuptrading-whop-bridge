@@ -10,7 +10,8 @@ same `messages.parse` method). Nothing here publishes anything.
 import json
 from pathlib import Path
 
-from .models import ContentBrief, ContentPack, KPIReport, ResearchReport, ReviewResult, WeeklyPlan
+from .models import (ClipList, ContentBrief, ContentPack, KPIReport, PitchList, ProspectList, ResearchReport,
+                     ReviewResult, WeeklyPlan)
 
 MODEL = 'claude-opus-5-5'
 MAX_TOKENS = 16000
@@ -115,3 +116,45 @@ def review_pack(client, pack: ContentPack, rule_hits=None):
 
 def analyze(client, metrics_text):
     return _ask(client, ANALYST, 'Metrics exports:\n' + metrics_text, KPIReport, effort='medium')
+
+
+PROSPECTOR = """Role: Outreach Researcher.
+Use web search to find real outlets and communities where Jack would be a welcome guest or partner: futures and
+day-trading podcasts that take guests, prop-trading firms with education or affiliate programs, trading
+Discord communities with public contact routes, trading newsletters, YouTube channels that do interviews or
+collaborations, journalists who cover retail trading and volatility, and trading events. Prefer active ones
+(posted in the last 3 months). Only list what you actually found, with the page URL. Copy contact routes only
+as published; never guess an email address. Skip anyone on the already-contacted list."""
+
+PITCH_WRITER = """Role: Outreach Writer.
+Write a short, personal first pitch for each prospect, from the StartUpTrading team on Jack's behalf. Lead with
+what's in it for their audience: a guest segment ("Show your risk, not your profits"; how ATR sizing keeps a
+news day and a quiet day at the same dollar risk; surviving prop-firm drawdown rules), the free position-size
+calculator and prop-firm risk planner, the free ATR indicator, or a co-hosted live sizing clinic. Mention one
+specific thing about them from the research. Credentials only as listed in the brand brief. Never mention
+results, income or performance. No flattery padding, no pressure."""
+
+CLIPPER = """Role: Clip Editor.
+Read this live-stream transcript and pick the strongest 30 to 60 second moments for Shorts, Reels and TikTok:
+a clear teaching point, a tool doing something visible (a size or stop being set, the scanner ranking markets),
+a quotable line about risk or process, or a relatable story. Skip anything about profits, P&L, account size or
+calls to buy or sell. For each, give exact start and end timestamps from the transcript, a hook for the first
+2 seconds, an English caption and a natural Latin American Spanish caption."""
+
+
+def find_prospects(client, count=10, contacted=()):
+    prompt = f'Find {count} new outreach prospects this week, spread across the kinds.'
+    if contacted:
+        prompt += '\n\nAlready contacted (skip these):\n' + '\n'.join(f'- {c}' for c in contacted)
+    return _ask(client, PROSPECTOR, prompt, ProspectList, effort='medium', tools=[WEB_SEARCH])
+
+
+def write_pitches(client, prospects: ProspectList):
+    return _ask(client, PITCH_WRITER, 'Prospects:\n' + prospects.model_dump_json(indent=1), PitchList,
+                effort='medium')
+
+
+def find_clips(client, name, transcript, max_clips=6):
+    prompt = (f'Transcript file: {name}\nPick up to {max_clips} clips.\n\n'
+              '<transcript>\n' + transcript + '\n</transcript>')
+    return _ask(client, CLIPPER, prompt, ClipList, effort='medium')

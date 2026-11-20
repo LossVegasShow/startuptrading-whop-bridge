@@ -8,6 +8,7 @@
   "exit_offer": "true",
   "activation_url": "https://activate.startuptrading.com/",
   "thank_you_url": "https://startuptrading.com/welcome",
+  "join_url": "https://startuptrading.com/join",
   "support_email": "support@startuptrading.com",
   "whop_hub_url": "",
   "price_monthly": "99",

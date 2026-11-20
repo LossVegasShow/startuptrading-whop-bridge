@@ -10,6 +10,8 @@ RISK_LINE = ('Futures trading involves substantial risk of loss and is not suita
              'every investor. Education only, not financial advice.')
 # For X posts and Shorts captions, where space is tight.
 SHORT_RISK_LINE = 'Futures trading involves substantial risk of loss. Education only, not financial advice.'
+SPANISH_RISK_LINE = ('El trading de futuros implica un riesgo sustancial de pérdida. '
+                     'Solo educativo, no es asesoramiento financiero.')
 
 # (rule id, pattern, why). Patterns are case-insensitive.
 BANNED = [
@@ -35,29 +37,38 @@ BANNED = [
      'No pressure tactics.'),
     ('trade_call', r'\b(?:buy|sell|short|long) (?:now|here) at\b',
      'Trade calls cross into advice. Keep it educational.'),
+    # Spanish captions (clip desk)
+    ('es_profit', r'\b(?:ganancias?|rentables?|rentabilidad|ingresos|garantizad[oa]s?|sin riesgo|hazte rico)\b',
+     'Spanish: no profit, income or guarantee language.'),
 ]
 _COMPILED = [(rid, re.compile(p, re.IGNORECASE), why) for rid, p, why in BANNED]
+
+# Phrases that would trip a rule but say the opposite of a claim. Only these exact
+# shapes are allowed: the brand line "show your risk, not your profits".
+ALLOWED = re.compile(r'\brisk,?\s+not\s+(?:my\s+|your\s+|the\s+)?profits\b', re.IGNORECASE)
 
 
 def check_text(text):
     """Return a list of {rule, match, why} hits for one piece of text."""
     hits = []
+    text = ALLOWED.sub('risk', text or '')
     for rid, rx, why in _COMPILED:
-        for m in rx.finditer(text or ''):
+        for m in rx.finditer(text):
             hits.append({'rule': rid, 'match': m.group(0), 'why': why})
     return hits
 
 
 def has_risk_line(text):
     t = (text or '').lower()
-    return 'substantial risk' in t or 'risk of loss' in t
+    return 'substantial risk' in t or 'risk of loss' in t or 'riesgo sustancial' in t
 
 
-def with_risk_line(text, short=False):
+def with_risk_line(text, short=False, spanish=False):
     """Append the risk line if the text doesn't already carry one."""
     if has_risk_line(text):
         return text
-    return (text or '').rstrip() + '\n\n' + (SHORT_RISK_LINE if short else RISK_LINE)
+    line = SPANISH_RISK_LINE if spanish else (SHORT_RISK_LINE if short else RISK_LINE)
+    return (text or '').rstrip() + '\n\n' + line
 
 
 def check_pack(fields):
