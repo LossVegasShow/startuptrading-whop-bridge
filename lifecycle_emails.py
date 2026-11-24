@@ -109,6 +109,19 @@ def enabled(cfg):
     return bool(cfg.resend_api_key and cfg.resend_from)
 
 
+def licensing_open_for(cfg, c):
+    """Whether this member's licenses could actually be issued right now.
+
+    Activation reminders tell a paying member to go and activate. While license
+    writes are off, or limited to a test allowlist, a member outside it would
+    activate and receive nothing, so their reminders are held (left pending,
+    not cancelled) until licensing is open to their membership.
+    """
+    if not cfg.license_writes or not c:
+        return False
+    return c.get('membership_id') in {m for m, _ in cfg.write_allowlist()}
+
+
 async def send(cfg, cid, kind, post=None):
     """Send one lifecycle email if it's due and still applies. Returns a status word."""
     if not enabled(cfg):
@@ -120,6 +133,8 @@ async def send(cfg, cid, kind, post=None):
         if not row or row['status'] not in ('pending', 'retry') or row['next_attempt_at'] > now:
             return 'not_due'
         row = dict(row)
+        if kind in REMINDER_DELAYS and still_applies(kind, c) and not licensing_open_for(cfg, c):
+            return 'held'
         if not still_applies(kind, c):
             _cancel(db, cid, (kind,), now)
             return 'cancelled'
