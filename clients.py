@@ -44,7 +44,64 @@ def normalize_membership(record):
         result['plan_id']=membership_plan_id(result)
     return result
 
-def membership_entitlement(m):
+# Billing period each approved plan must report. A record whose
+# billing_period_days disagrees with its plan is never granted a rolling period.
+PLAN_PERIOD_DAYS = {'plan_qSXeS0xoDapGU': 30, 'plan_B84PWLvXemyFX': 365}
+# Keep at least this much runway on a rolling period so a license is never
+# issued that lapses before the next reconcile can extend it.
+ROLLING_MIN_RUNWAY = dt.timedelta(days=2)
+EPOCH = dt.datetime(1970, 1, 1, tzinfo=dt.timezone.utc)
+
+
+def rolling_period_end(m, now=None):
+    """End of the current billing period for an active membership that Whop
+    reports WITHOUT any period timestamps, else None.
+
+    Whop leaves current_period_start, current_period_end and expires_at null on
+    some active memberships, for example a $0 promotional checkout
+    (initial_price and renewal_price 0.00). Those members are genuinely active,
+    so a null period must not lock them out, but a null period is also not a
+    licence to grant open-ended access. Only this exact shape qualifies:
+
+    - status is exactly 'active' (not trialing, canceling, past_due, ...),
+    - no period or expiry timestamp at all (a present one always wins, and an
+      unparseable one fails closed),
+    - not cancelled and not set to cancel at period end,
+    - billing_period_days matches the approved plan (30 monthly, 365 annual).
+
+    The end is the next billing-period boundary counted from created_at (or
+    the Unix epoch if Whop omits it). It is stable within a period, so
+    reconciling repeatedly never rewrites licenses; it advances once per
+    period, like a normal renewal. Whop's status stays authoritative: when the
+    membership is cancelled or expires, status changes and access is revoked.
+    """
+    if not isinstance(m, dict) or m.get('status') != 'active':
+        return None
+    for key in ('current_period_start', 'current_period_end', 'expires_at'):
+        if m.get(key) not in (None, ''):
+            return None
+    if m.get('cancel_at_period_end') not in (None, False):
+        return None
+    if m.get('canceled_at') not in (None, ''):
+        return None
+    days = m.get('billing_period_days')
+    expected = PLAN_PERIOD_DAYS.get(membership_plan_id(m))
+    if isinstance(days, bool) or not isinstance(days, int) or expected is None or days != expected:
+        return None
+    now = now or dt.datetime.now(dt.timezone.utc)
+    period = dt.timedelta(days=days)
+    anchor = parse_utc(m.get('created_at'))
+    if m.get('created_at') not in (None, '') and anchor is None:
+        return None
+    if anchor is None or anchor > now:
+        anchor = EPOCH
+    end = anchor + period * ((now - anchor) // period + 1)
+    if end - now < ROLLING_MIN_RUNWAY:
+        end += period
+    return end
+
+
+def membership_entitlement(m, now=None):
     """Fail closed when authoritative state/period information is absent."""
     if not isinstance(m,dict): return None
     account = m.get('account') or {}
@@ -57,14 +114,19 @@ def membership_entitlement(m):
     # 'canceling' = cancelled at period end but still paid up; access is kept
     # until current_period_end, which is enforced below.
     if status not in ('active','trialing','canceling'): return None
+    now = now or dt.datetime.now(dt.timezone.utc)
     end = parse_utc(m.get('current_period_end'))
     expires = parse_utc(m.get('expires_at'))
     if expires and (not end or expires < end): end = expires
-    now = dt.datetime.now(dt.timezone.utc)
+    source = 'whop_period'
+    if not end:
+        # Never infer a period from plan duration EXCEPT for the narrow,
+        # fully-validated shape in rolling_period_end (active, no timestamps).
+        end = rolling_period_end(m, now)
+        source = 'rolling_active'
     if not end or end <= now: return None
-    # Never infer a future billing period from plan duration.
     return {'membership_id':m.get('id'), 'user_id':m.get('user_id'), 'plan_id':membership_plan_id(m),
-            'status':status, 'paid_through':end.isoformat().replace('+00:00','Z')}
+            'status':status, 'paid_through':end.isoformat().replace('+00:00','Z'), 'period_source':source}
 
 class WhopClient:
     def __init__(self,cfg:Config): self.cfg=cfg
