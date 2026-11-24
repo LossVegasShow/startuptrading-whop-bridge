@@ -46,7 +46,9 @@ def test_full_lifecycle(tmp_path):
 
 def test_do_not_touch_preexisting_license(tmp_path):
     e,cfg=setup(tmp_path)
-    e.nt.data[2067].append({'id':222,'email':'test@example.com','expirationDateUTC':datetime.now(timezone.utc).isoformat()})
+    # Still active but ending before the membership: never modified (an already-expired
+    # license is adopted instead; see tests/test_owned_separately.py).
+    e.nt.data[2067].append({'id':222,'email':'test@example.com','expirationDateUTC':(datetime.now(timezone.utc)+timedelta(days=1)).isoformat()})
     try:asyncio.run(e.reconcile(1));assert False,'expected incomplete sync'
     except IntegrationError:pass
     assert len(e.nt.created)==2
