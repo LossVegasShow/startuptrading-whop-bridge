@@ -22,6 +22,42 @@ def member_email(record):
     return ''
 
 
+async def member_api_email(whop, m):
+    '''The buyer's Whop email from the Members API, bound to a verified membership.
+
+    Returns '' when the membership has no member ID, the client can't look
+    members up, or Whop has no email for the member (callers then fall back or
+    retry). Raises IntegrationError on API errors and on ANY identity mismatch:
+    the member must be the membership's own member, in the StartUpTrading
+    business, for the membership's own Whop user. The member's own `status`
+    (e.g. 'joined') says nothing about the subscription and is ignored;
+    eligibility comes only from the membership. This is the Whop account email,
+    never the NinjaTrader email, which is verified separately.
+    '''
+    member_id=m.get('member_id') if isinstance(m,dict) else None
+    lookup=getattr(whop,'member',None)
+    if not isinstance(member_id,str) or not member_id.startswith('mber_') or lookup is None:
+        return ''
+    rec=await lookup(member_id)
+    if not isinstance(rec,dict):
+        raise IntegrationError('Unexpected Whop member response')
+    account=rec.get('account') if isinstance(rec.get('account'),dict) else {}
+    user=rec.get('user') if isinstance(rec.get('user'),dict) else {}
+    if rec.get('id')!=member_id:
+        raise IntegrationError('Whop member identity mismatch: member ID')
+    if (rec.get('account_id') or account.get('id'))!=BUSINESS_ID:
+        raise IntegrationError('Whop member identity mismatch: business')
+    if not user.get('id') or user.get('id')!=m.get('user_id'):
+        raise IntegrationError('Whop member identity mismatch: user')
+    value=rec.get('email')
+    if not isinstance(value,str):
+        return ''
+    value=value.strip().lower()
+    if '@' not in value or len(value)>200 or '.' not in value.rsplit('@',1)[-1]:
+        return ''
+    return value
+
+
 def is_target_membership(m):
     if not isinstance(m,dict):return False
     acct=m.get('account') or {}
@@ -64,8 +100,12 @@ async def import_membership(cfg,whop, membership_id, *, verified_membership=None
         return {'state':'ignored_ineligible'}
     email=member_email(m)
     if not email and not row:
-        # Some membership API versions omit user contact fields. The user
-        # endpoint is authoritative; do not guess from webhook payload.
+        # The membership record carries no contact fields; Whop exposes the
+        # customer's email on the Members API. Identity-bound, never guessed
+        # from the webhook payload.
+        email=await member_api_email(whop,m)
+    if not email and not row:
+        # Legacy fallback: some API versions return email on the user record.
         info=await whop.user(userid)
         email=member_email(info)
     if not email and not row:

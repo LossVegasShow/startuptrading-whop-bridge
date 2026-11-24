@@ -290,6 +290,25 @@ class WhopClient:
         val=r.json()
         return val.get('data',val) if isinstance(val,dict) else val
 
+    async def member(self, member_id):
+        """Whop Members API record (GET /api/v1/members/{mber_...}).
+
+        This is where Whop exposes the customer's email (top-level `email`, with
+        the key's member-email read permission). The caller must still bind the
+        record to a verified membership; see purchaser_intake.member_api_email.
+        """
+        if not self.cfg.whop_api_key: raise IntegrationError('WHOP_API_KEY is not configured')
+        if not isinstance(member_id,str) or not member_id.startswith('mber_') or len(member_id)>100:
+            raise IntegrationError('Invalid Whop member ID')
+        async with httpx.AsyncClient(timeout=18) as client:
+            r = await client.get(f'https://api.whop.com/api/v1/members/{member_id}',
+                headers={'Authorization':f'Bearer {self.cfg.whop_api_key}','Api-Version-Date':self.cfg.whop_api_version})
+        if r.status_code != 200: raise IntegrationError(f'Whop member lookup HTTP {r.status_code}')
+        data=r.json()
+        record=data.get('data',data) if isinstance(data,dict) else None
+        if not isinstance(record,dict): raise IntegrationError('Unexpected Whop member response')
+        return record
+
     async def membership(self, membership_id):
         if not self.cfg.whop_api_key: raise IntegrationError('WHOP_API_KEY is not configured')
         if not membership_id.startswith('mem_'): raise IntegrationError('Invalid membership ID')
