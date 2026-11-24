@@ -88,7 +88,17 @@ class Engine:
                         raise IntegrationError('Owned license missing or changed; manual review required')
                     selected=matched
                 else:
-                    if matched:
+                    expired_before=parse_utc(matched.get('expirationDateUTC')) if matched else None
+                    if matched and entitlement and expired_before is not None and expired_before<=dt.datetime.now(dt.timezone.utc):
+                        # A license the bridge didn't create that has ALREADY EXPIRED (an old
+                        # trial, a lapsed earlier test). It grants nothing today, so extending
+                        # it to the paid-through date takes no access away from anyone, and
+                        # reuses it instead of creating a duplicate. From here on the bridge
+                        # owns it, so it is expired again when the membership ends.
+                        with connect(self.cfg) as db:
+                            audit(db,cid,'ninjatrader_adopted_expired',f'{pid}/{matched.get("id")} expired {matched.get("expirationDateUTC")}')
+                        selected=matched
+                    elif matched:
                         # A license the bridge didn't create, e.g. a one-time purchase on
                         # startuptrading.com. Never modify or revoke it. If it's lifetime or
                         # lasts at least as long as the membership, the member already has
@@ -105,7 +115,8 @@ class Engine:
                             audit(db,cid,'ninjatrader_owned_separately',f'{pid}/{matched.get("id")}')
                         changes.append({'product_id':pid,'action':'owned_separately'})
                         continue
-                    selected=None
+                    else:
+                        selected=None
                 if entitlement:
                     desired=entitlement['paid_through']
                     if selected:
