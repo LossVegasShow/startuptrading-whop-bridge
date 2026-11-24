@@ -69,16 +69,36 @@ def membership_entitlement(m):
 class WhopClient:
     def __init__(self,cfg:Config): self.cfg=cfg
     async def memberships_for_user(self,user_id):
+        """Every StartUpTrading membership held by this Whop user.
+
+        Whop's `/memberships?user_id=...` filter silently returns no rows in
+        production (see V7_11_DEPLOY.md), which made every member sign-in fail
+        with "no membership". Page the business/product list instead and match
+        the user locally, exactly like find_subscription_for_user. A partial
+        scan never counts: incomplete pagination fails closed.
+        """
         if not self.cfg.whop_api_key: raise IntegrationError('WHOP_API_KEY is not configured')
-        if not user_id.startswith('user_'): raise IntegrationError('Invalid Whop user identity')
+        if not isinstance(user_id,str) or not user_id.startswith('user_'): raise IntegrationError('Invalid Whop user identity')
+        data=[]
+        after=None
         async with httpx.AsyncClient(timeout=18) as client:
-            r=await client.get('https://api.whop.com/api/v1/memberships',
-                params={'account_id':BUSINESS_ID,'user_id':user_id,'product_id':PRODUCT_ID,'first':100},
-                headers={'Authorization':f'Bearer {self.cfg.whop_api_key}','Api-Version-Date':self.cfg.whop_api_version})
-        if r.status_code!=200: raise IntegrationError(f'Whop membership listing HTTP {r.status_code}')
-        val=r.json()
-        data=val.get('data',[])
-        if not isinstance(data,list): raise IntegrationError('Unexpected Whop membership list response')
+            for _ in range(50):
+                params={'account_id':BUSINESS_ID,'product_id':PRODUCT_ID,'first':100}
+                if after: params['after']=after
+                r=await client.get('https://api.whop.com/api/v1/memberships',params=params,
+                    headers={'Authorization':f'Bearer {self.cfg.whop_api_key}','Api-Version-Date':self.cfg.whop_api_version})
+                if r.status_code!=200: raise IntegrationError(f'Whop membership listing HTTP {r.status_code}')
+                val=r.json()
+                page=val.get('data') if isinstance(val,dict) else None
+                if not isinstance(page,list): raise IntegrationError('Unexpected Whop membership list response')
+                data.extend(m for m in page if isinstance(m,dict) and m.get('user_id')==user_id)
+                info=val.get('page_info') or {}
+                if not info.get('has_next_page'): break
+                cursor=info.get('end_cursor')
+                if not cursor or cursor==after: raise IntegrationError('Whop membership list pagination incomplete')
+                after=cursor
+            else:
+                raise IntegrationError('Whop membership list exceeded safe pagination limit')
         resolved=[]
         for record in data:
             if isinstance(record,dict) and str(record.get('id','')).startswith('mem_') and not membership_plan_id(record):
