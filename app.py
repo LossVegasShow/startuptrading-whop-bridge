@@ -200,7 +200,7 @@ async def canonical_host(request,call_next):
 @app.middleware('http')
 async def secure_headers(request,call_next):
     resp=await call_next(request)
-    resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='no-referrer'
+    resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='same-origin'
     resp.headers['X-Content-Type-Options']='nosniff';resp.headers['X-Frame-Options']='DENY'
     resp.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     resp.headers['Permissions-Policy']='camera=(), microphone=(), geolocation=(), payment=()'
