@@ -161,7 +161,14 @@ def due_now(cfg, cid, kind):
         db.execute('UPDATE message_outbox SET next_attempt_at=0 WHERE customer_id=? AND kind=?', (cid, kind))
 
 
+def open_licensing(cfg, *mids):
+    # Reminders only go out when licensing is open to the member's membership.
+    cfg.license_writes = True
+    cfg.license_write_allowlist = ','.join(f'{m}:{m}@nt.example' for m in mids)
+
+
 def test_activation_reminders_at_24h_and_72h(cfg):
+    open_licensing(cfg, 'mem_new')
     with connect(cfg) as db:
         cid = add_customer(db, 'mem_new')
         add_customer(db, 'mem_done', verified=1, nt='d@nt.example')
@@ -256,6 +263,7 @@ def test_not_configured_without_resend(cfg):
 
 
 def test_failed_send_retries_with_backoff(cfg):
+    open_licensing(cfg, 'mem_retry')
     with connect(cfg) as db:
         cid = add_customer(db, 'mem_retry')
         lifecycle_emails.schedule_reminders(db, now=NOW)
@@ -266,3 +274,61 @@ def test_failed_send_retries_with_backoff(cfg):
     assert asyncio.run(lifecycle_emails.send(cfg, cid, 'activation_reminder_1', post=broken)) == 'retry'
     row = outbox(cfg, cid)['activation_reminder_1']
     assert row['status'] == 'retry' and row['attempts'] == 1 and row['next_attempt_at'] > int(time.time())
+
+
+# --- Reminders are held while licensing is test-only -------------------------------
+# Live case: once purchase intake worked, real paying members were recorded while
+# license writes were limited to the test pair. Reminding them to activate would
+# send them to a flow that cannot license them yet.
+
+@pytest.mark.parametrize('writes,allow', [(False, ''), (True, ''), (True, 'mem_other:x@nt.example')],
+                         ids=['writes-off', 'empty-allowlist', 'other-membership-only'])
+def test_reminders_are_held_until_licensing_is_open_for_the_member(cfg, writes, allow):
+    cfg.license_writes, cfg.license_write_allowlist = writes, allow
+    with connect(cfg) as db:
+        cid = add_customer(db, 'mem_real_customer')
+        lifecycle_emails.schedule_reminders(db, now=NOW)
+    due_now(cfg, cid, 'activation_reminder_1')
+    post = Outbox()
+    assert asyncio.run(lifecycle_emails.send(cfg, cid, 'activation_reminder_1', post=post)) == 'held'
+    assert post.sent == []
+    row = outbox(cfg, cid)['activation_reminder_1']
+    assert row['status'] == 'pending' and row['attempts'] == 0          # held, not cancelled or failed
+
+
+def test_held_reminder_sends_once_licensing_opens(cfg):
+    with connect(cfg) as db:
+        cid = add_customer(db, 'mem_later')
+        lifecycle_emails.schedule_reminders(db, now=NOW)
+    due_now(cfg, cid, 'activation_reminder_1')
+    post = Outbox()
+    assert asyncio.run(lifecycle_emails.send(cfg, cid, 'activation_reminder_1', post=post)) == 'held'
+    open_licensing(cfg, 'mem_later')
+    assert asyncio.run(lifecycle_emails.send(cfg, cid, 'activation_reminder_1', post=post)) == 'sent'
+    assert len(post.sent) == 1
+
+
+def test_held_reminder_is_still_dropped_when_the_member_activates(cfg):
+    with connect(cfg) as db:
+        cid = add_customer(db, 'mem_activates')
+        lifecycle_emails.schedule_reminders(db, now=NOW)
+        db.execute("UPDATE customers SET verified=1, nt_email='n@nt.example' WHERE id=?", (cid,))
+    due_now(cfg, cid, 'activation_reminder_1')
+    assert asyncio.run(lifecycle_emails.send(cfg, cid, 'activation_reminder_1', post=Outbox())) == 'cancelled'
+
+
+def test_admin_plan_column_names_monthly_and_annual(cfg, monkeypatch):
+    # The live dashboard labelled a monthly membership "Annual" (case-sensitive 'qSxe' check).
+    import base64
+    from fastapi.testclient import TestClient
+    import app as web
+    monkeypatch.setattr(web, 'cfg', cfg)
+    cfg.admin_password = 'a-long-admin-password-for-tests'
+    with connect(cfg) as db:
+        for mid, plan in (('mem_month', 'plan_qSXeS0xoDapGU'), ('mem_year', 'plan_B84PWLvXemyFX'), ('mem_none', None)):
+            cid = add_customer(db, mid)
+            db.execute('UPDATE customers SET plan_id=? WHERE id=?', (plan, cid))
+    html = TestClient(web.app, base_url='https://activate.example.com').get(
+        '/admin', auth=('admin', cfg.admin_password)).text
+    row = lambda mid: html.split(mid, 1)[1].split('</tr>', 1)[0]
+    assert '>Monthly<' in row('mem_month') and '>Annual<' in row('mem_year') and '>—<' in row('mem_none')
