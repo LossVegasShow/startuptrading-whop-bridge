@@ -22,7 +22,7 @@ RISK MODES
 - Fixed: an amount per trade.
 - Percent of account: account size x risk %.
 - Prop firm: the remaining drawdown allowance, less a safety buffer, divided by the losing streak you want to survive. The panel shows the remaining allowance against the original, and how much is used.
-- Optional remaining daily loss allowance: caps risk per trade at half of what is left today, and shows how many full stops still fit.
+- Optional daily loss constraint (switch it on to use it): daily cap per trade = remaining daily allowance x (1 - safety buffer, in Prop firm mode) / planned daily losses (default 2). The risk budget is the smaller of this cap and the mode's budget, and the panel shows how many full stops still fit today. With the constraint on, a remaining allowance of 0 means the day's limit is used up: the budget is 0 and the panel reads "Risk budget exhausted - no trade."
 
 Prop firms define drawdown differently. A trailing limit moves up with your peak balance; a static one does not. Enter the current remaining allowance from your firm's dashboard. This is a planning aid. It does not check your account against any firm's rules; staying within them remains your responsibility.
 
@@ -48,7 +48,7 @@ LIMITATIONS
 - Contract specifications come from the chart symbol and a built-in table of the pairs above. Check them against your broker's.
 - Amounts are in the chart symbol's currency; the panel notes when that is not USD.
 - Slippage, gaps and fast markets can fill a stop beyond its level. Costs are included only if you enter them.
-- Very small budgets can round down to 0 contracts.
+- Very small budgets can round down to 0 contracts. A budget of 0 shows "Risk budget exhausted - no trade."
 
 Educational tool. Futures trading involves substantial risk of loss.
 
