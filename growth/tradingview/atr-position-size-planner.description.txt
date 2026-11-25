@@ -3,44 +3,52 @@ ATR Position Size & Stop Planner
 
 DESCRIPTION (paste as-is. TradingView forbids links, websites, social handles, contact details and company names here. Keep it that way.)
 
-Most traders pick a size first and squeeze the stop to fit it. This planner works the other way round:
+Most traders pick a size first and squeeze the stop to fit it. This planner works the other way round. Risk first, stop second, size last:
 
-1. Choose your risk for the trade.
-2. Let volatility set the stop. The stop sits a multiple of ATR from your entry (default 1.5 × ATR 14), rounded up to a whole tick so it is never tighter than planned.
-3. Let the stop set the size. Contracts = risk ÷ (stop in points × dollars per point + costs per contract), always rounded DOWN, so the actual risk never exceeds your risk budget.
+1. Set your risk budget for the trade.
+2. Let volatility set the stop. The stop sits a multiple of ATR from your planned entry (default 1.5 x ATR 14), rounded UP to a whole tick so it is never tighter than planned.
+3. Let the stop set the size. Maximum contracts = risk budget / (stop in points x value per point + costs per contract), rounded DOWN, so the estimated stop risk never exceeds the budget.
 
-WHAT YOU SEE
-• A dashboard with your risk budget, ATR, volatility versus its normal level, the stop in points and ticks, dollars per point, risk per contract, the number of contracts and the actual risk.
-• The micro-contract alternative on ES, NQ, YM, RTY, CL and GC (MES, MNQ, MYM, M2K, MCL, MGC at one-tenth the point value). When one full contract already risks too much, the panel shows 0 and the micro line shows what still fits.
-• Optional entry, stop and target levels on the chart, with the stop distance in ticks and the target as an R multiple.
+THE DASHBOARD
+- The maximum position size is the headline number, with the symbol, timeframe and risk mode above it.
+- Risk budget, estimated stop risk, budget remaining and budget used (%).
+- ATR, volatility versus its normal level, the stop in points and ticks, and the cost per contract.
+- Adjustable text size, compact or full layout, and four panel positions.
+
+STANDARD VERSUS MICRO
+On ES/MES, NQ/MNQ, YM/MYM, RTY/M2K, CL/MCL, GC/MGC, SI/SIL, 6E/M6E and BTC/MBT, an optional block compares both contracts for the same stop distance. Each contract uses its own tick size and value per point, and its own round-turn cost. You see the maximum contracts, estimated stop risk and remaining budget for each side by side. It works from either chart, the standard or the micro.
 
 RISK MODES
-• Fixed $: a dollar amount per trade.
-• % of account: account size × risk %.
-• Prop firm: maximum drawdown ÷ the losing streak you want to survive (default 10).
-• Optional daily loss limit: caps risk per trade at half the limit and shows how many full losses fit in the day.
+- Fixed: an amount per trade.
+- Percent of account: account size x risk %.
+- Prop firm: the remaining drawdown allowance, less a safety buffer, divided by the losing streak you want to survive. The panel shows the remaining allowance against the original, and how much is used.
+- Optional remaining daily loss allowance: caps risk per trade at half of what is left today, and shows how many full stops still fit.
+
+Prop firms define drawdown differently. A trailing limit moves up with your peak balance; a static one does not. Enter the current remaining allowance from your firm's dashboard. This is a planning aid. It does not check your account against any firm's rules; staying within them remains your responsibility.
+
+PLANNING LEVELS ON THE CHART
+Entry, stop and an optional target (as an R multiple) are drawn as planning levels, with labels prefixed PLAN. Choose Clean (lines only), Prices, or Prices + risk (estimated stop risk at the stop, and the hypothetical reward at the target). Planning for Long or Short shades the risk and target zones. These levels are drawings only: no orders are placed and nothing is executed. A target reward is hypothetical. It is only realised if price reaches the target and the fill matches the plan.
 
 OTHER SETTINGS
-• ATR length, stop multiple, and ATR timeframe (the same or a higher timeframe than the chart, for example a 5-minute ATR on a 1-minute chart).
-• "Use the last closed bar's ATR" keeps the numbers fixed while the current bar forms. Off, they update live.
-• Dollars per point: leave at 0 to use the chart symbol's value, or type one in (ES 50, MES 5, NQ 20, MNQ 2, CL 1000, GC 100).
-• Round-turn costs per contract: added to the risk per contract.
-• Planned entry: 0 uses the last price. Set a price to plan a specific level.
-• Compact or full panel, and panel position.
+- ATR length, stop multiple, and ATR timeframe (the same or a higher timeframe than the chart; the panel warns if it is lower).
+- "Use the last closed bar's ATR" keeps the numbers fixed while the current bar forms. It reads the previous completed bar, so it does not look ahead.
+- Value per point: leave at 0 to use the chart symbol's value, or type one in.
+- Planned entry: 0 uses the last price.
 
 VOLATILITY VERSUS NORMAL
-ATR is compared with its own average over the last 100 bars (adjustable). Above 1.25× is shown as elevated, below 0.8× as quiet. When volatility expands, the stop widens and the size shrinks, so the dollars at risk stay the same.
+ATR is compared with its own average over the last 100 bars (adjustable): above 1.25x is elevated, below 0.8x is quiet. When volatility expands, the stop widens and the size shrinks, so the money at risk stays inside the budget.
 
 ALERTS
-• Position size changed.
-• Volatility expanded (ATR crossed above 1.25× its normal).
+- Position size changed.
+- Volatility expanded (ATR crossed above 1.25x its normal).
 
 LIMITATIONS
-• This is a planning aid, not a signal. It does not tell you when, where or which way to trade.
-• With "closed bar" off, ATR and the size can change until the current bar closes.
-• Point values come from the chart symbol. Check them against your broker's contract specifications, especially on non-futures symbols.
-• Slippage, gaps and fast markets can fill a stop beyond its level. Costs are only included if you enter them.
-• Very small risk budgets can round down to 0 contracts.
+- A planning aid, not a signal. It does not tell you when, where or which way to trade.
+- With "closed bar" off, ATR and the size can change until the current bar closes.
+- Contract specifications come from the chart symbol and a built-in table of the pairs above. Check them against your broker's.
+- Amounts are in the chart symbol's currency; the panel notes when that is not USD.
+- Slippage, gaps and fast markets can fill a stop beyond its level. Costs are included only if you enter them.
+- Very small budgets can round down to 0 contracts.
 
 Educational tool. Futures trading involves substantial risk of loss.
 
