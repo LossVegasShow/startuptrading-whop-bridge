@@ -1,23 +1,25 @@
-// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © {TradingView username}
+// This Pine Script code is subject to the terms of the Mozilla Public License 2.0
+// at https://mozilla.org/MPL/2.0/
+// (c) {TradingView username}
 // Risk first. Stop second. Size last.
 //
-// TEMPLATE for every tool in the series. Copy this file, rename the tool, and keep the
-// DESIGN SYSTEM block and the dashboard helpers unchanged so all releases look alike:
-//   • Header bar: orange, dark text, "TOOL NAME  vX.Y" in monospace capitals
-//   • Rows: grey label left, light value right, monospace, small
-//   • Status colours: green = fits / healthy, amber = caution, red = too much / blocked
-//   • Footer: the method line, muted
-//   • Panel: dark, thin border, user-selectable position, Full / Compact
-// Never put links, websites, social handles, company names, logos or scannable codes in the
-// title, code, chart output or description: TradingView's publishing rules forbid them.
+// TEMPLATE for every tool in the series. Copy this file, rename the tool, and keep
+// the DESIGN SYSTEM block and the dashboard helpers unchanged so releases look alike:
+//   - Header bar: orange, dark text, "TOOL NAME  vX.Y" in monospace capitals
+//   - Rows: grey label left, light value right, monospace, small
+//   - Status colours: green = fits / healthy, amber = caution, red = too much
+//   - Footer: the method line, muted
+//   - Panel: dark, thin border, user-selectable position, Full / Compact
+// Keep the file plain ASCII with lines under 90 characters (safe to copy and paste).
+// Never put links, websites, social handles, company names, logos or scannable codes
+// in the title, code, chart output or description: TradingView's rules forbid them.
 //@version=6
 indicator("Tool Name", shorttitle = "Tool", overlay = true)
 
-// ═════════════════════════════ DESIGN SYSTEM (do not change) ═════════════════
+// ===== DESIGN SYSTEM (do not change) =====
 TOOL_NAME    = "TOOL NAME"
 TOOL_VERSION = "v1.0"
-MOTTO        = "Risk first · stop second · size last"
+MOTTO        = "Risk first | stop second | size last"
 C_PANEL      = color.new(#0b0e13, 4)
 C_HEADER     = color.new(#fa7b39, 0)
 C_HEADER_TXT = color.new(#170b03, 0)
@@ -31,7 +33,8 @@ C_MUTED      = color.new(#6b7689, 0)
 
 G_VIEW    = "Display"
 panelSize = input.string("Full", "Panel", options = ["Full", "Compact"], group = G_VIEW)
-tablePos  = input.string("Top right", "Panel position", options = ["Top right", "Bottom right", "Top left", "Bottom left"], group = G_VIEW)
+tablePos  = input.string("Top right", "Panel position",
+     options = ["Top right", "Bottom right", "Top left", "Bottom left"], group = G_VIEW)
 
 pos = switch tablePos
     "Bottom right" => position.bottom_right
@@ -39,20 +42,26 @@ pos = switch tablePos
     "Bottom left"  => position.bottom_left
     => position.top_right
 
-var table panel = table.new(pos, 2, 12, bgcolor = C_PANEL, border_color = C_LINE, border_width = 1, frame_color = C_LINE, frame_width = 1)
+var table panel = table.new(pos, 2, 12, bgcolor = C_PANEL, border_color = C_LINE,
+     border_width = 1, frame_color = C_LINE, frame_width = 1)
 
 header() =>
-    table.cell(panel, 0, 0, TOOL_NAME + "  " + TOOL_VERSION, bgcolor = C_HEADER, text_color = C_HEADER_TXT, text_size = size.small, text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 0, 0, TOOL_NAME + "  " + TOOL_VERSION, bgcolor = C_HEADER,
+         text_color = C_HEADER_TXT, text_size = size.small, text_halign = text.align_left,
+         text_font_family = font.family_monospace)
     table.merge_cells(panel, 0, 0, 1, 0)
 
 row(int r, string label, string value, color valueColor) =>
-    table.cell(panel, 0, r, label, text_color = C_LABEL, text_size = size.small, text_halign = text.align_left, text_font_family = font.family_monospace)
-    table.cell(panel, 1, r, value, text_color = valueColor, text_size = size.small, text_halign = text.align_right, text_font_family = font.family_monospace)
+    table.cell(panel, 0, r, label, text_color = C_LABEL, text_size = size.small,
+         text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 1, r, value, text_color = valueColor, text_size = size.small,
+         text_halign = text.align_right, text_font_family = font.family_monospace)
 
 footer(int r) =>
-    table.cell(panel, 0, r, MOTTO, text_color = C_MUTED, text_size = size.tiny, text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 0, r, MOTTO, text_color = C_MUTED, text_size = size.tiny,
+         text_halign = text.align_left, text_font_family = font.family_monospace)
     table.merge_cells(panel, 0, r, 1, r)
-// ═════════════════════════════ END DESIGN SYSTEM ═════════════════════════════
+// ===== END DESIGN SYSTEM =====
 
 // Tool logic goes here.
 value = ta.atr(14)

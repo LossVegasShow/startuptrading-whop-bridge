@@ -1,16 +1,15 @@
-// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © {TradingView username}
+// This Pine Script code is subject to the terms of the Mozilla Public License 2.0
+// at https://mozilla.org/MPL/2.0/
+// (c) {TradingView username}
 // Risk first. Stop second. Size last.
 //@version=6
-indicator("ATR Position Size & Stop Planner", shorttitle = "ATR Size", overlay = true, max_lines_count = 10, max_labels_count = 10)
+indicator("ATR Position Size & Stop Planner", shorttitle = "ATR Size", overlay = true,
+     max_lines_count = 10, max_labels_count = 10)
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Design system: shared by every tool in this series. Keep these identical
-// across releases so traders recognise the dashboard at a glance.
-// ═════════════════════════════════════════════════════════════════════════════
+// ===== Design system: identical in every tool of this series =====
 TOOL_NAME    = "ATR POSITION SIZE"
 TOOL_VERSION = "v1.1"
-MOTTO        = "Risk first · stop second · size last"
+MOTTO        = "Risk first | stop second | size last"
 C_PANEL      = color.new(#0b0e13, 4)
 C_HEADER     = color.new(#fa7b39, 0)
 C_HEADER_TXT = color.new(#170b03, 0)
@@ -22,52 +21,54 @@ C_WARN       = color.new(#ffb454, 0)
 C_BAD        = color.new(#ff6b5b, 0)
 C_MUTED      = color.new(#6b7689, 0)
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Inputs
-// ═════════════════════════════════════════════════════════════════════════════
+// ===== Inputs =====
 G_RISK = "Risk budget"
-riskMode  = input.string("Fixed $", "Risk mode", options = ["Fixed $", "% of account", "Prop firm"], group = G_RISK)
-riskUsd   = input.float(250.0, "Risk per trade ($)", minval = 1, group = G_RISK, tooltip = "Used in Fixed $ mode.")
-acctSize  = input.float(50000.0, "Account size ($)", minval = 1, group = G_RISK, tooltip = "Used in % of account mode.")
+riskMode  = input.string("Fixed $", "Risk mode",
+     options = ["Fixed $", "% of account", "Prop firm"], group = G_RISK)
+riskUsd   = input.float(250.0, "Risk per trade ($)", minval = 1, group = G_RISK,
+     tooltip = "Used in Fixed $ mode.")
+acctSize  = input.float(50000.0, "Account size ($)", minval = 1, group = G_RISK,
+     tooltip = "Used in % of account mode.")
 riskPct   = input.float(0.5, "Risk per trade (%)", minval = 0.01, step = 0.05, group = G_RISK)
 maxDD     = input.float(2500.0, "Prop firm: max drawdown ($)", minval = 1, group = G_RISK)
 streak    = input.int(10, "Prop firm: losing streak to survive", minval = 1, group = G_RISK,
-     tooltip = "Risk per trade = max drawdown ÷ this number.")
+     tooltip = "Risk per trade = max drawdown / this number.")
 dailyLimit = input.float(0.0, "Daily loss limit ($, 0 = none)", minval = 0, group = G_RISK,
-     tooltip = "When set, risk per trade is capped at half of it, and the panel shows how many full losses fit in the day.")
+     tooltip = "Caps risk per trade at half the limit and shows how many full losses fit.")
 
 G_STOP = "Stop"
 atrLen    = input.int(14, "ATR length", minval = 1, group = G_STOP)
-stopMult  = input.float(1.5, "Stop distance (× ATR)", minval = 0.1, step = 0.1, group = G_STOP)
+stopMult  = input.float(1.5, "Stop distance (x ATR)", minval = 0.1, step = 0.1, group = G_STOP)
 atrTf     = input.timeframe("", "ATR timeframe (blank = chart)", group = G_STOP,
-     tooltip = "Use the same or a higher timeframe than the chart, e.g. 5-minute ATR on a 1-minute chart.")
+     tooltip = "Same or higher than the chart, e.g. 5-minute ATR on a 1-minute chart.")
 closedBar = input.bool(false, "Use the last closed bar's ATR", group = G_STOP,
-     tooltip = "On: numbers stay fixed while the current bar forms. Off: ATR updates live.")
+     tooltip = "On: numbers stay fixed while the bar forms. Off: ATR updates live.")
 
 G_CONTRACT = "Contract"
-pvInput   = input.float(0.0, "Dollars per point (0 = use the symbol's)", minval = 0, group = G_CONTRACT,
-     tooltip = "ES 50 · MES 5 · NQ 20 · MNQ 2 · YM 5 · RTY 50 · CL 1000 · GC 100")
-commRt    = input.float(0.0, "Round-turn costs per contract ($)", minval = 0, step = 0.1, group = G_CONTRACT,
-     tooltip = "Commissions and fees. Added to the risk per contract so the size accounts for them.")
+pvInput   = input.float(0.0, "Dollars per point (0 = use the symbol's)", minval = 0,
+     group = G_CONTRACT, tooltip = "ES 50, MES 5, NQ 20, MNQ 2, YM 5, RTY 50, CL 1000, GC 100")
+commRt    = input.float(0.0, "Round-turn costs per contract ($)", minval = 0, step = 0.1,
+     group = G_CONTRACT, tooltip = "Commissions and fees, added to the risk per contract.")
 
 G_PLAN = "Trade plan"
-side      = input.string("Both", "Show stops for", options = ["Both", "Long", "Short"], group = G_PLAN)
+side      = input.string("Both", "Show stops for",
+     options = ["Both", "Long", "Short"], group = G_PLAN)
 entryIn   = input.price(0.0, "Planned entry (0 = last price)", group = G_PLAN)
-targetR   = input.float(2.0, "Target (R multiple, 0 = off)", minval = 0, step = 0.5, group = G_PLAN)
+targetR   = input.float(2.0, "Target (R multiple, 0 = off)", minval = 0, step = 0.5,
+     group = G_PLAN)
 
 G_VIEW = "Display"
 panelSize = input.string("Full", "Panel", options = ["Full", "Compact"], group = G_VIEW)
-tablePos  = input.string("Top right", "Panel position", options = ["Top right", "Bottom right", "Top left", "Bottom left"], group = G_VIEW)
+tablePos  = input.string("Top right", "Panel position",
+     options = ["Top right", "Bottom right", "Top left", "Bottom left"], group = G_VIEW)
 showLines = input.bool(true, "Draw entry, stop and target levels", group = G_VIEW)
 regimeLen = input.int(100, "Normal-volatility lookback (bars)", minval = 10, group = G_VIEW,
      tooltip = "ATR is compared with its own average over this many bars.")
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Math. The core rule is unchanged from v1.0:
-//   stop (points)  = ATR × multiple, rounded UP to a whole tick
-//   contracts      = risk ÷ (stop × $ per point + costs), rounded DOWN
+// ===== Math (core rule unchanged from v1.0) =====
+//   stop (points) = ATR x multiple, rounded UP to a whole tick
+//   contracts     = risk / (stop x $ per point + costs), rounded DOWN
 // so the actual risk never exceeds the risk budget.
-// ═════════════════════════════════════════════════════════════════════════════
 atrPair(int off) =>
     a = ta.atr(atrLen)
     [a[off], ta.sma(a, regimeLen)[off]]
@@ -91,7 +92,7 @@ perContract = stopPts * pointValue + commRt
 contracts   = perContract > 0 ? math.floor(riskBudget / perContract) : 0
 actualRisk  = contracts * perContract
 
-// Micro-contract alternative for the major CME E-minis (one-tenth the point value).
+// Micro alternative for the major CME E-minis (one tenth of the point value).
 microName = switch syminfo.root
     "ES"  => "MES"
     "NQ"  => "MNQ"
@@ -103,10 +104,12 @@ microName = switch syminfo.root
 microPer       = stopPts * pointValue / 10 + commRt
 microContracts = microName != "" and microPer > 0 ? math.floor(riskBudget / microPer) : 0
 
-// Volatility regime: today's ATR against its own normal.
+// Volatility regime: ATR against its own normal.
 regime      = atrNormal > 0 ? atr / atrNormal : na
-regimeText  = na(regime) ? "warming up" : regime >= 1.25 ? "elevated" : regime <= 0.8 ? "quiet" : "normal"
-regimeColor = na(regime) ? C_MUTED : regime >= 1.25 ? C_WARN : regime <= 0.8 ? C_MUTED : C_GOOD
+regimeText  = na(regime) ? "warming up" :
+     regime >= 1.25 ? "elevated" : regime <= 0.8 ? "quiet" : "normal"
+regimeColor = na(regime) ? C_MUTED :
+     regime >= 1.25 ? C_WARN : regime <= 0.8 ? C_MUTED : C_GOOD
 
 entry       = entryIn > 0 ? entryIn : close
 longStop    = entry - stopPts
@@ -114,15 +117,15 @@ shortStop   = entry + stopPts
 longTarget  = targetR > 0 ? entry + stopPts * targetR : na
 shortTarget = targetR > 0 ? entry - stopPts * targetR : na
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Chart levels
-// ═════════════════════════════════════════════════════════════════════════════
-var line[] drawn  = array.new_line()
-var label[] tags  = array.new_label()
+// ===== Chart levels =====
+var line[] drawn = array.new_line()
+var label[] tags = array.new_label()
 
 level(float price, color col, string txt) =>
-    array.push(drawn, line.new(bar_index, price, bar_index + 1, price, extend = extend.right, color = col, style = line.style_dashed, width = 1))
-    array.push(tags, label.new(bar_index + 3, price, txt, style = label.style_label_left, color = color.new(col, 80), textcolor = col, size = size.small))
+    array.push(drawn, line.new(bar_index, price, bar_index + 1, price,
+         extend = extend.right, color = col, style = line.style_dashed, width = 1))
+    array.push(tags, label.new(bar_index + 3, price, txt, style = label.style_label_left,
+         color = color.new(col, 80), textcolor = col, size = size.small))
 
 if barstate.islast and showLines
     for l in drawn
@@ -133,7 +136,7 @@ if barstate.islast and showLines
     array.clear(tags)
     level(entry, C_VALUE, "Entry")
     if side != "Short"
-        level(longStop, C_BAD, "Long stop  −" + str.tostring(stopTicks) + "t")
+        level(longStop, C_BAD, "Long stop  -" + str.tostring(stopTicks) + "t")
         if targetR > 0
             level(longTarget, C_GOOD, "Long " + str.tostring(targetR) + "R")
     if side != "Long"
@@ -141,61 +144,76 @@ if barstate.islast and showLines
         if targetR > 0
             level(shortTarget, C_GOOD, "Short " + str.tostring(targetR) + "R")
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Dashboard (shared layout: header bar, label/value rows, method footer)
-// ═════════════════════════════════════════════════════════════════════════════
+// ===== Dashboard: header bar, label/value rows, method footer =====
 pos = switch tablePos
     "Bottom right" => position.bottom_right
     "Top left"     => position.top_left
     "Bottom left"  => position.bottom_left
     => position.top_right
 
-var table panel = table.new(pos, 2, 14, bgcolor = C_PANEL, border_color = C_LINE, border_width = 1, frame_color = C_LINE, frame_width = 1)
+var table panel = table.new(pos, 2, 14, bgcolor = C_PANEL, border_color = C_LINE,
+     border_width = 1, frame_color = C_LINE, frame_width = 1)
 
-money(float v) => "$" + str.tostring(v, "#,##0.00")
+money(float v) =>
+    "$" + str.tostring(v, "#,##0.00")
 
 row(int r, string label, string value, color valueColor) =>
-    table.cell(panel, 0, r, label, text_color = C_LABEL, text_size = size.small, text_halign = text.align_left, text_font_family = font.family_monospace)
-    table.cell(panel, 1, r, value, text_color = valueColor, text_size = size.small, text_halign = text.align_right, text_font_family = font.family_monospace)
+    table.cell(panel, 0, r, label, text_color = C_LABEL, text_size = size.small,
+         text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 1, r, value, text_color = valueColor, text_size = size.small,
+         text_halign = text.align_right, text_font_family = font.family_monospace)
 
 if barstate.islast
     table.clear(panel, 0, 0, 1, 13)
-    table.cell(panel, 0, 0, TOOL_NAME + "  " + TOOL_VERSION, bgcolor = C_HEADER, text_color = C_HEADER_TXT, text_size = size.small, text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 0, 0, TOOL_NAME + "  " + TOOL_VERSION, bgcolor = C_HEADER,
+         text_color = C_HEADER_TXT, text_size = size.small, text_halign = text.align_left,
+         text_font_family = font.family_monospace)
     table.merge_cells(panel, 0, 0, 1, 0)
-    sizeText  = contracts > 0 ? str.tostring(contracts) + " " + syminfo.root : "0 · skip or size down"
+    sizeText  = contracts > 0 ? str.tostring(contracts) + " " + syminfo.root :
+         "0 - skip or size down"
     sizeColor = contracts > 0 ? C_GOOD : C_BAD
+    atrLabel  = "ATR(" + str.tostring(atrLen) + (atrTf == "" ? "" : ", " + atrTf) +
+         (closedBar ? ", closed" : "") + ")"
     r = 1
     if panelSize == "Full"
         row(r, "Risk budget (" + riskMode + ")", money(riskBudget), C_VALUE)
         r += 1
-        row(r, "ATR(" + str.tostring(atrLen) + (atrTf == "" ? "" : " · " + atrTf) + (closedBar ? " · closed" : "") + ")", str.tostring(atr, format.mintick), C_VALUE)
+        row(r, atrLabel, str.tostring(atr, format.mintick), C_VALUE)
         r += 1
-        row(r, "Volatility vs normal", na(regime) ? regimeText : str.tostring(regime, "0.00") + "× · " + regimeText, regimeColor)
+        row(r, "Volatility vs normal", na(regime) ? regimeText :
+             str.tostring(regime, "0.00") + "x " + regimeText, regimeColor)
         r += 1
-        row(r, "Stop (" + str.tostring(stopMult) + "× ATR)", str.tostring(stopPts, format.mintick) + " pts · " + str.tostring(stopTicks) + " ticks", C_VALUE)
+        row(r, "Stop (" + str.tostring(stopMult) + "x ATR)",
+             str.tostring(stopPts, format.mintick) + " pts / " + str.tostring(stopTicks) +
+             " ticks", C_VALUE)
         r += 1
         row(r, "$ per point", "$" + str.tostring(pointValue, "#,##0.##"), C_VALUE)
         r += 1
-        row(r, "Risk per contract" + (commRt > 0 ? " (incl. costs)" : ""), money(perContract), C_VALUE)
+        row(r, "Risk per contract" + (commRt > 0 ? " (incl. costs)" : ""),
+             money(perContract), C_VALUE)
         r += 1
     row(r, "Contracts (rounded down)", sizeText, sizeColor)
     r += 1
     row(r, "Actual risk", money(actualRisk), C_VALUE)
     r += 1
     if microName != ""
-        row(r, "Or in " + microName, str.tostring(microContracts) + " · " + money(microContracts * microPer), microContracts > 0 ? C_VALUE : C_BAD)
+        row(r, "Or in " + microName, str.tostring(microContracts) + " / " +
+             money(microContracts * microPer), microContracts > 0 ? C_VALUE : C_BAD)
         r += 1
     if dailyLimit > 0 and actualRisk > 0
-        row(r, "Full losses to daily limit", str.tostring(math.floor(dailyLimit / actualRisk)), C_VALUE)
+        row(r, "Full losses to daily limit", str.tostring(math.floor(dailyLimit / actualRisk)),
+             C_VALUE)
         r += 1
     if panelSize == "Full" and targetR > 0 and contracts > 0
-        row(r, "Reward at " + str.tostring(targetR) + "R", money(contracts * stopPts * pointValue * targetR), C_VALUE)
+        row(r, "Reward at " + str.tostring(targetR) + "R",
+             money(contracts * stopPts * pointValue * targetR), C_VALUE)
         r += 1
-    table.cell(panel, 0, r, MOTTO, text_color = C_MUTED, text_size = size.tiny, text_halign = text.align_left, text_font_family = font.family_monospace)
+    table.cell(panel, 0, r, MOTTO, text_color = C_MUTED, text_size = size.tiny,
+         text_halign = text.align_left, text_font_family = font.family_monospace)
     table.merge_cells(panel, 0, r, 1, r)
 
-// ═════════════════════════════════════════════════════════════════════════════
-// Alerts
-// ═════════════════════════════════════════════════════════════════════════════
-alertcondition(contracts != contracts[1], "Position size changed", "ATR position size changed: {{ticker}}")
-alertcondition(regime >= 1.25 and regime[1] < 1.25, "Volatility expanded", "ATR moved above 1.25× its normal on {{ticker}}: sizes are smaller now")
+// ===== Alerts =====
+alertcondition(contracts != contracts[1], "Position size changed",
+     "ATR position size changed: {{ticker}}")
+alertcondition(regime >= 1.25 and regime[1] < 1.25, "Volatility expanded",
+     "ATR moved above 1.25x its normal on {{ticker}}: sizes are smaller now")

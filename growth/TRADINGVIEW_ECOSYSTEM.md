@@ -32,7 +32,7 @@ yourself before publishing**, and change this table if anything differs.
 | **Inherent / safe** | The automatic author byline ("by *username*") and the author's profile page | Platform feature |
 | **Inherent / safe** | A consistent **visual design** (colours, layout, typography) with no brand name, logo or link | Design, not promotion |
 | **Needs a moderator's answer** | A **series name** in titles (e.g. "… · Risk-First Series"). The Vendor Requirements excerpt allows limited brand mentions ("one or two mentions throughout the publication"), but that's written for vendors. For open-source scripts, ask first | Ambiguous |
-| **Needs a moderator's answer** | The **method line** in the dashboard footer ("Risk first · stop second · size last"). It's descriptive, not a brand, but confirm it isn't treated as a watermark | Ambiguous |
+| **Needs a moderator's answer** | The **method line** in the dashboard footer ("Risk first | stop second | size last"). It's descriptive, not a brand, but confirm it isn't treated as a watermark | Ambiguous |
 | **Needs a moderator's answer** | Naming the author's **other scripts** in a description ("pairs with the ATR Expansion Bars by the same author"), with no link | Ambiguous |
 | **Needs a moderator's answer** | What the **profile bio** and profile social-link fields may contain on Jack's plan | Ambiguous |
 | **We won't do** | Links, QR codes, logos, watermarks, company names, "follow me" or "join" text in titles, code, panels, labels, chart output or screenshots | Prohibited or circumvention |
@@ -98,7 +98,7 @@ method, and the Signature.** It never lives in a link or a logo.
 | **Short titles** | Two words, consistent: "ATR Size", "ATR Expansion", "DD Guard", "Vol Map" |
 | **Dashboard** | `growth/tradingview/_tool-template.pine`:<br>• orange header bar with "TOOL NAME vX.Y" in monospace capitals<br>• grey labels on the left, light values on the right<br>• green / amber / red status colours<br>• muted method line in the footer<br>• dark panel, thin border<br>• Full or Compact view, four positions |
 | **Colours** | Panel #0b0e13 · header #fa7b39 · labels #9aa4b2 · values #e8edf3 · good #3ddc97 · caution #ffb454 · bad #ff6b5b · muted #6b7689. These are the same palette as startuptrading.com, so the website feels like the tools' home |
-| **Method line** | "Risk first · stop second · size last" (pending moderator confirmation, see section 1) |
+| **Method line** | "Risk first | stop second | size last" (pending moderator confirmation, see section 1) |
 | **Versioning** | vMAJOR.MINOR in the header. Every update gets **release notes**: what changed, and why it's useful |
 | **Publication chart** | Dark theme, ES or NQ 5-minute, panel top right, levels drawn, nothing else on the chart |
 | **Descriptions** | The same section order every time: the problem · how it works (with the formula) · what you see · settings · alerts · limitations · risk line |
