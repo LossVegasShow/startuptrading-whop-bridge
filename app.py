@@ -172,6 +172,7 @@ async def lifespan(app):
 app=FastAPI(title='StartUpTrading Licensing Bridge',docs_url=None,redoc_url=None,lifespan=lifespan)
 app.mount('/static',StaticFiles(directory=str(ROOT/'static')),name='static')
 templates=Jinja2Templates(directory=str(ROOT/'templates'))
+templates.env.filters['utc']=lambda ts:time.strftime('%Y-%m-%d %H:%M',time.gmtime(int(ts))) if ts else '—'
 customer_errors.install(app,lambda request,key,status:render_error(request,key,status))
 
 # Paths that must keep answering on every hostname: Whop webhooks and the OAuth
@@ -732,7 +733,8 @@ def admin(request:Request):
         licenses=[dict(r) for r in db.execute('SELECT * FROM licenses ORDER BY updated_at DESC LIMIT 60')]
         issues=attention.find_issues(db,cfg)
         control=controls.status(cfg,db)
-    return page(request,'admin.html',customers=customers,events=events,audits=audits,licenses=licenses,control=control,
+        changes=controls.recent_changes(db)
+    return page(request,'admin.html',customers=customers,events=events,audits=audits,licenses=licenses,control=control,changes=changes,
                 attention_count=len(issues),attention_high=any(i['severity']=='high' for i in issues),
                 writes=cfg.license_writes,allow_email=cfg.allowed_test_email,allow_mem=cfg.allowed_test_membership,
                 whop=bool(cfg.whop_api_key),nt=bool(cfg.nt_sec and cfg.nt_cid),base=cfg.public_base_url)

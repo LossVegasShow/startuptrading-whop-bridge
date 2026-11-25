@@ -1,5 +1,5 @@
 """Whop-authoritative, ownership-safe, retryable NinjaTrader license reconciliation.
-Writes are restricted to ONE test membership and ONE verified email (never production-wide).
+Writes only for members in scope (controls.in_scope): the allowlist, or every verified member with LICENSE_ALL_MEMBERS.
 """
 import datetime as dt
 import secrets

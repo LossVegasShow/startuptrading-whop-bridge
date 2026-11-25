@@ -228,3 +228,36 @@ def test_health_reports_mode_and_breaker(web):
     assert c.get('/health').json()['mode'] == 'all_members'
     cfg.license_writes = False
     assert c.get('/health').json()['mode'] == 'observe_only'
+
+
+def test_recent_changes_lists_every_member_a_mode_touched(tmp_path):
+    cfg, eng = make(tmp_path, n=2, license_all_members=True)
+    reconcile(eng, 1); reconcile(eng, 2)
+    with connect(cfg) as db:
+        rows = controls.recent_changes(db)
+        assert {r['membership_id'] for r in rows} == {'mem_1', 'mem_2'}
+        assert {r['action'] for r in rows} == {'ninjatrader_created'}
+        assert len(rows) == 2 * len(INDICATORS)
+        # Older than the window: not shown.
+        assert controls.recent_changes(db, now=int(time.time()) + 8 * 86400) == []
+
+
+def test_restricted_test_touches_only_the_allowlisted_member(tmp_path):
+    cfg, eng = make(tmp_path, n=3, license_write_allowlist='mem_2:NT2@example.com')
+    for cid in (1, 2, 3):
+        reconcile(eng, cid)
+    with connect(cfg) as db:
+        rows = controls.recent_changes(db)
+    assert {r['membership_id'] for r in rows} == {'mem_2'}
+    # Only the allowlisted member's indicators were written; the others got nothing, granted or revoked.
+    assert len(eng.nt.writes) == len(INDICATORS)
+
+
+def test_dashboard_lists_license_changes(web):
+    client, cfg = web
+    with connect(cfg) as db:
+        db.execute("INSERT INTO customers(membership_id,whop_user_id,buyer_email,buyer_email_verified,nt_email,verified,status,updated_at) "
+                   "VALUES('mem_x','u','b@example.com',1,'nt@example.com',1,'eligible',1)")
+        db.execute("INSERT INTO audit(at,customer_id,action,details) VALUES(?,1,'ninjatrader_created','2067/555')", (int(time.time()),))
+    html = client.get('/admin', auth=('admin', PW)).text
+    assert 'License changes (last 7 days)' in html and 'mem_x' in html and '2067/555' in html and 'created' in html
