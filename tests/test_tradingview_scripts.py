@@ -23,6 +23,15 @@ def code_without_license(text):
 
 
 @pytest.mark.parametrize('path', SCRIPTS, ids=lambda p: p.name)
+def test_scripts_are_plain_ascii_with_short_lines(path):
+    # Non-ASCII characters and very long lines get mangled when copied out of
+    # previews into TradingView's editor (a truncated line broke the first paste).
+    text = path.read_text()
+    bad = [(n, l) for n, l in enumerate(text.splitlines(), 1) if not l.isascii() or len(l) > 95]
+    assert bad == []
+
+
+@pytest.mark.parametrize('path', SCRIPTS, ids=lambda p: p.name)
 def test_scripts_contain_no_promotion(path):
     hits = FORBIDDEN.findall(code_without_license(path.read_text()))
     assert hits == [], hits
@@ -31,10 +40,10 @@ def test_scripts_contain_no_promotion(path):
 @pytest.mark.parametrize('path', SCRIPTS, ids=lambda p: p.name)
 def test_scripts_use_the_shared_design_system(path):
     src = path.read_text()
-    assert src.startswith('// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0')
+    assert src.startswith('// This Pine Script code is subject to the terms of the Mozilla Public License 2.0')
     assert '//@version=6' in src
     for token in ('C_HEADER     = color.new(#fa7b39, 0)', 'C_PANEL      = color.new(#0b0e13, 4)',
-                  'MOTTO        = "Risk first · stop second · size last"', 'text_font_family = font.family_monospace'):
+                  'MOTTO        = "Risk first | stop second | size last"', 'text_font_family = font.family_monospace'):
         assert token in src, (path.name, token)
 
 
