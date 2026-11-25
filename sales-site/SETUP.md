@@ -58,9 +58,9 @@ buttons that open Whop's hosted checkout. Nothing else changes.
    Use **Preview** to see the real page.
 6. **Page settings:**
    - Background colour `#07090d`.
-   - **SEO:** title *StartUpTrading: NinjaTrader indicators and private trade room*.
-     Description *Jack's three NinjaTrader indicators and the private
-     StartUpTrading Discord. $99/month, cancel anytime.* Add a 1200×630 social
+   - **SEO:** title *StartUpTrading: NinjaTrader indicators, trade room and masterclass*.
+     Description *Jack's two NinjaTrader indicators, the private StartUpTrading
+     Discord and his masterclass. $99/month, cancel anytime.* Add a 1200×630 social
      image (chart plus logo) once you have one.
    - **Tracking code:** paste the Google Analytics or Meta Pixel snippets into
      *Header tracking code* when you're ready. The page needs nothing else.

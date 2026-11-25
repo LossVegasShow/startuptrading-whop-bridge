@@ -129,6 +129,8 @@
 /* Indicators */
 .sut-ind { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
 .sut-ind + .sut-ind { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow h3 { margin: 14px 0 14px; }
 .sut-ind-flip .sut-ind-copy { order: 2; }
 .sut-ind-copy h3 { margin: 14px 0 14px; }
 .sut-ind-copy > p:not(.sut-tag) { color: var(--text-2); font-size: 16.5px; }
@@ -308,6 +310,7 @@
   .sut-section { padding: 76px 0; }
   .sut-head { margin-bottom: 40px; }
   .sut-ind + .sut-ind { margin-top: 64px; padding-top: 64px; }
+  .sut-grow { margin-top: 64px; padding-top: 64px; }
   .sut-strip-in { grid-template-columns: 1fr 1fr; }
   .sut-strip-in > div:nth-child(3) { border-left: 0; }
   .sut-strip-in > div:nth-child(n+3) { border-top: 1px solid var(--line); }
