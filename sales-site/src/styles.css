@@ -404,11 +404,14 @@
    growth/FREE_TOOLS_LIBRARY.md section 4). This only reserves its space while it
    loads; form_embed.js then sets the exact height. */
 .sut-sub-frame { position: relative; }
-.sut-sub-form { display: block; width: 100%; height: 540px; min-height: 519px; border: 0; background: transparent; }
+.sut-sub-form { display: block; width: 100%; height: 540px; border: 0; background: transparent; }
+/* Space reserved only until the form reports its size (see fitForms in tracking.js). */
+.sut-sub-form:not([data-sut-sized]) { min-height: 519px; }
 @media (max-width: 980px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 640px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr; }
-  .sut-sub-form { height: 660px; min-height: 600px; }
+  .sut-sub-form { height: 680px; }
+  .sut-sub-form:not([data-sut-sized]) { min-height: 600px; }
 }

@@ -154,6 +154,18 @@ function sutFormSubmitted(data, iframeId) {
   return Object.prototype.toString.call(data) === '[object Array]' && data[0] === 'set-sticky-contacts' &&
     !!iframeId && data[1] === 'embedded_iframe_' + iframeId;
 }
+
+// GoHighLevel resizes its form iframe with iframe-resizer: the form posts
+// "[iFrameSizer]<iframe id>:<height>:<width>:<event>" whenever its content changes
+// (load, validation messages, the thank-you message). Returns that height, or null.
+var SUT_FORM_PAD = 24;   // GHL measures the form's body without its top margin (10px on desktop)
+function sutSizerHeight(data, iframeId) {
+  if (typeof data !== 'string' || !iframeId) return null;
+  var prefix = '[iFrameSizer]' + iframeId + ':';
+  if (data.indexOf(prefix) !== 0) return null;
+  var h = parseFloat(data.slice(prefix.length).split(':')[0]);
+  return h > 0 && h < 20000 ? h : null;
+}
 /*end-track-core*/
 
 (function () {
@@ -236,6 +248,47 @@ function sutFormSubmitted(data, iframeId) {
     });
   };
 
+  // Fit each form to its content using GoHighLevel's own height reports, plus a
+  // margin for what its measurement leaves out, so the form never scrolls inside.
+  // Guarded on its own, so it runs even when an older copy of this file wired the form.
+  var fitForms = function () {
+    var frames = d.querySelectorAll('iframe[data-ghl-form]');
+    for (var f = 0; f < frames.length; f++) {
+      var fr = frames[f];
+      if (fr.getAttribute('data-sut-fit')) continue;
+      fr.setAttribute('data-sut-fit', '1');
+      // GoHighLevel's resizer rewrites style.height on every report; re-apply ours after it.
+      if (w.MutationObserver) {
+        new MutationObserver((function (el) {
+          return function () { applyFit(el); };
+        })(fr)).observe(fr, { attributes: true, attributeFilter: ['style'] });
+      }
+    }
+    if (frames.length && first('ghl_form_fit')) {
+      w.addEventListener('message', function (ev) {
+        var frs = d.querySelectorAll('iframe[data-ghl-form]');
+        for (var i = 0; i < frs.length; i++) {
+          if (ev.source !== frs[i].contentWindow) continue;
+          var h = sutSizerHeight(ev.data, frs[i].id);
+          if (h === null) return;
+          frs[i].setAttribute('data-sut-height', String(h));
+          // Sized: drop the space reserved while loading, so a short thank-you message fits too.
+          frs[i].setAttribute('data-sut-sized', '1');
+          var el = frs[i];
+          applyFit(el);
+          setTimeout(function () { applyFit(el); }, 0);
+          return;
+        }
+      });
+    }
+  };
+  var applyFit = function (fr) {
+    var h = parseFloat(fr.getAttribute('data-sut-height'));
+    if (!(h > 0)) return;
+    var want = Math.ceil(h + SUT_FORM_PAD) + 'px';
+    if (fr.style.height !== want) fr.style.height = want;
+  };
+
   var ready = function () {
     // Free tool page views and first use.
     var root = d.querySelector('.sut[data-tool-id]');
@@ -275,6 +328,7 @@ function sutFormSubmitted(data, iframeId) {
       }, { threshold: 0.4 }).observe(checkout);
     }
     wireForms();
+    fitForms();
   };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', ready); else ready();
 })();

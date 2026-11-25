@@ -173,9 +173,19 @@ Trigger: *Form submitted = Free tools updates*.
   hidden fields work either way. If you add a banner later, nothing here changes.
 - `tracking.js` itself sets no cookies; it keeps attribution in the visitor's browser
   storage.
-- The form is full width on phones (checked at 390 px and 1280 px, no sideways
-  scrolling). Its height is reserved while it loads, so the page doesn't jump, and
-  GHL's script then sets the exact height.
+- **Sizing (no scrollbars inside the form).**
+  - GoHighLevel's own resizer (iframe-resizer, in `form_embed.js`) reports the
+    form's height whenever its content changes: on load, when validation messages
+    appear, and when the thank-you message replaces the fields.
+  - Its measurement leaves out the form's own top margin (10 px on desktop), so on
+    its own it set the iframe about 5 px short and the form scrolled inside.
+  - `tracking.js` reads the same reports and sets the iframe to that height plus
+    24 px. Nothing is hidden or clipped: if the content ever grew without a
+    report, the form would scroll rather than cut off.
+  - The space reserved while the form loads (519 px; 600 px on phones) is dropped
+    after the first report, so the short thank-you message isn't left in a tall box.
+  - Checked against the real form at 360, 390, 768, 1024 and 1440 px.
+- The form is full width on phones with no sideways scrolling.
 - The form starts loading only when the reader scrolls within about 800 px of
   it, so it never slows the tools above it. With JavaScript off, a link to
   the form appears instead.
