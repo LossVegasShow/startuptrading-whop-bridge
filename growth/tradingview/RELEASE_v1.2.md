@@ -4,6 +4,7 @@
 - Daily loss constraint now has its own **on/off switch** (default off). When on, 0 remaining means **exhausted**: budget 0, no trade. Before, 0 silently turned the constraint off.
 - **Planned daily losses** setting (default 2) replaces the fixed 2. Formula, as in the tooltip: cap = remaining daily allowance × (1 − buffer, Prop firm mode only) ÷ planned daily losses; budget = min(mode budget, cap).
 - A zero budget shows **"Risk budget exhausted - no trade."** (a plain hyphen, because the script stays plain ASCII for safe pasting).
+- **Reward consistency fix:** the target reward was gross while the stop risk included costs. It's now shown **net** of the same costs, with **gross / costs** beside it, on both the dashboard and the chart label. The final QA results, checklist and publishing steps are in `PUBLISHING.md`.
 
 ## What changed from v1.1
 | Area | v1.2 |

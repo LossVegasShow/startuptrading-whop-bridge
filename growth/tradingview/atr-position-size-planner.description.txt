@@ -13,6 +13,7 @@ THE DASHBOARD
 - The maximum position size is the headline number, with the symbol, timeframe and risk mode above it.
 - Risk budget, estimated stop risk, budget remaining and budget used (%).
 - ATR, volatility versus its normal level, the stop in points and ticks, and the cost per contract.
+- At the target (optional): the hypothetical reward NET of the same round-turn costs used in the estimated stop risk, with the gross amount and the costs shown beside it.
 - Adjustable text size, compact or full layout, and four panel positions.
 
 STANDARD VERSUS MICRO
@@ -27,11 +28,12 @@ RISK MODES
 Prop firms define drawdown differently. A trailing limit moves up with your peak balance; a static one does not. Enter the current remaining allowance from your firm's dashboard. This is a planning aid. It does not check your account against any firm's rules; staying within them remains your responsibility.
 
 PLANNING LEVELS ON THE CHART
-Entry, stop and an optional target (as an R multiple) are drawn as planning levels, with labels prefixed PLAN. Choose Clean (lines only), Prices, or Prices + risk (estimated stop risk at the stop, and the hypothetical reward at the target). Planning for Long or Short shades the risk and target zones. These levels are drawings only: no orders are placed and nothing is executed. A target reward is hypothetical. It is only realised if price reaches the target and the fill matches the plan.
+Entry, stop and an optional target (as an R multiple) are drawn as planning levels, with labels prefixed PLAN. Choose Clean (lines only), Prices, or Prices + risk (estimated stop risk at the stop, and the hypothetical net reward at the target). Planning for Long or Short shades the risk and target zones. These levels are drawings only: no orders are placed and nothing is executed. A target reward is hypothetical. It is only realised if price reaches the target and the fill matches the plan.
 
 OTHER SETTINGS
 - ATR length, stop multiple, and ATR timeframe (the same or a higher timeframe than the chart; the panel warns if it is lower).
-- "Use the last closed bar's ATR" keeps the numbers fixed while the current bar forms. It reads the previous completed bar, so it does not look ahead.
+- ATR is TradingView's standard ATR (Wilder's smoothing), the same as the built-in Average True Range with RMA smoothing.
+- "Use the last closed bar's ATR" reads the previous completed bar of the ATR timeframe, so it does not look ahead and does not repaint. With it off, ATR (and any alert based on it) updates while the bar forms.
 - Value per point: leave at 0 to use the chart symbol's value, or type one in.
 - Planned entry: 0 uses the last price.
 
