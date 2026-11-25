@@ -1,5 +1,10 @@
 # ATR Position Size & Stop Planner v1.2: release notes, QA and assessment
 
+## Final pre-publication changes
+- Daily loss constraint now has its own **on/off switch** (default off). When on, 0 remaining means **exhausted**: budget 0, no trade. Before, 0 silently turned the constraint off.
+- **Planned daily losses** setting (default 2) replaces the fixed 2. Formula, as in the tooltip: cap = remaining daily allowance × (1 − buffer, Prop firm mode only) ÷ planned daily losses; budget = min(mode budget, cap).
+- A zero budget shows **"Risk budget exhausted - no trade."** (a plain hyphen, because the script stays plain ASCII for safe pasting).
+
 ## What changed from v1.1
 | Area | v1.2 |
 |---|---|
@@ -63,7 +68,10 @@ expressions and the same contract table.
 | R7 | YM1!, RTY1!, CL1!, GC1! | Ticks of 1.0, 0.1, 0.01, 0.1 respectively | |
 | R8 | % mode: 50,000 × 0.5% | Budget 250 | |
 | R9 | Prop: original 2,500, remaining 2,000, buffer 10%, streak 10 | Budget 180. DD left "2,000 of 2,500", used 20% | |
-| R10 | Add remaining daily 300 (prop) | Budget 135; "Full stops left today" shown | |
+| R10 | Daily constraint ON, remaining daily 300, planned losses 2 (prop, remaining DD 2,000) | Budget 135; "Full stops left today" shown | |
+| R10a | Prop, remaining DD 2,500, streak 10, buffer 10%: daily OFF / ON with 100 / 200 / 500 | 225 / 45 / 90 / 225 (verified in TradingView) | |
+| R10b | Daily constraint ON with remaining daily 0 | Budget 0, 0 contracts, headline "Risk budget exhausted - no trade." | |
+| R10c | Planned daily losses 3, remaining daily 300 (prop) | Budget 90 | |
 | R11 | ATR timeframe 15 on a 5m chart; toggle closed bar | Closed: the value doesn't change while the bar forms. Live: it updates | |
 | R12 | ATR timeframe 1 on a 5m chart | Warning "ATR timeframe is below the chart's" | |
 | R13 | Chart levels: Off / Clean / Prices / Prices + risk | Labels prefixed PLAN. Risk and "hypothetical" text only in Prices + risk | |

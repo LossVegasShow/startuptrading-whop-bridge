@@ -85,11 +85,11 @@ def size_for(budget, per):
 
 
 def budget_for(mode='Fixed $', risk=250.0, acct=50000.0, pct=0.5, dd_left=2500.0, streak=10,
-               buffer_pct=10.0, daily_left=0.0):
+               buffer_pct=10.0, use_daily=False, daily_left=0.0, daily_losses=2):
     buffer = 1 - buffer_pct / 100
     base = {'% of account': acct * pct / 100, 'Prop firm': dd_left * buffer / streak}.get(mode, risk)
-    if daily_left > 0:
-        cap = daily_left * (buffer if mode == 'Prop firm' else 1) / 2
+    if use_daily:
+        cap = daily_left * (buffer if mode == 'Prop firm' else 1) / daily_losses
         return min(base, cap)
     return base
 
@@ -147,7 +147,8 @@ def test_core_rules_and_defaults_are_unchanged():
                   'atrLen    = input.int(14', 'stopMult  = input.float(1.5',
                   'closedBar = input.bool(false', 'pvInput   = input.float(0.0',
                   'costStd   = input.float(0.0', 'costMicro = input.float(0.0',
-                  'dailyLeft = input.float(0.0'):
+                  'dailyLeft = input.float(0.0', 'useDaily  = input.bool(false',
+                  'dailyLosses = input.int(2'):
         assert token in src, token
 
 
@@ -226,11 +227,48 @@ def test_contract_floor_is_not_pulled_down_by_float_noise():
 def test_percent_and_prop_firm_budgets():
     assert budget_for('% of account', acct=50000, pct=0.5) == 250.0
     assert math.isclose(budget_for('Prop firm', dd_left=2000, streak=10, buffer_pct=10), 180.0)
-    assert math.isclose(budget_for('Prop firm', dd_left=2000, buffer_pct=10, daily_left=300), 135.0)
-    assert budget_for('Fixed $', risk=250, daily_left=300) == 150.0     # cap = half of daily left
-    assert budget_for('Fixed $', risk=100, daily_left=300) == 100.0     # cap only lowers
+    assert math.isclose(budget_for('Prop firm', dd_left=2000, use_daily=True, daily_left=300), 135.0)
+    assert budget_for('Fixed $', risk=250, use_daily=True, daily_left=300) == 150.0  # no buffer outside prop
+    assert budget_for('Fixed $', risk=100, use_daily=True, daily_left=300) == 100.0  # cap only lowers
     assert budget_for('Prop firm', dd_left=0) == 0.0                    # nothing left: size 0
     assert plan(budget_for('Prop firm', dd_left=0), 4.0, 1.5, 'ES')['n'] == 0
+
+
+@pytest.mark.parametrize('kwargs,expected', [
+    (dict(dd_left=2500), 225.0),                                         # 2500 x 0.9 / 10
+    (dict(dd_left=800), 72.0),
+    (dict(dd_left=0), 0.0),
+    (dict(dd_left=2500, use_daily=True, daily_left=100), 45.0),          # 100 x 0.9 / 2
+    (dict(dd_left=2500, use_daily=True, daily_left=200), 90.0),
+    (dict(dd_left=2500, use_daily=True, daily_left=500), 225.0),         # cap 225 = drawdown budget
+    (dict(dd_left=2500, use_daily=False, daily_left=100), 225.0),        # constraint off
+], ids=['dd2500', 'dd800', 'dd0', 'daily100', 'daily200', 'daily500', 'daily-off'])
+def test_prop_firm_results_verified_in_tradingview(kwargs, expected):
+    assert math.isclose(budget_for('Prop firm', streak=10, buffer_pct=10, **kwargs), expected, abs_tol=1e-9)
+
+
+def test_daily_constraint_zero_means_exhausted_not_disabled():
+    budget = budget_for('Prop firm', dd_left=2500, use_daily=True, daily_left=0)
+    assert budget == 0.0 and plan(budget, 4.0, 1.5, 'ES')['n'] == 0
+    assert budget_for('Fixed $', risk=250, use_daily=True, daily_left=0) == 0.0
+    assert budget_for('Prop firm', dd_left=2500, use_daily=False, daily_left=0) == 225.0
+
+
+def test_planned_daily_losses_is_configurable():
+    assert math.isclose(budget_for('Prop firm', dd_left=2500, use_daily=True, daily_left=300, daily_losses=3), 90.0)
+    assert math.isclose(budget_for('Prop firm', dd_left=2500, use_daily=True, daily_left=300, daily_losses=1), 225.0)
+    assert budget_for('Fixed $', risk=250, use_daily=True, daily_left=300, daily_losses=4) == 75.0
+    src = PLANNER.read_text()
+    assert ('dailyCap   = useDaily ? dailyLeft * (riskMode == "Prop firm" ? buffer : 1) / dailyLosses'
+            ' : na') in src
+    assert 'planned daily losses' in src and 'allowance x (1 - safety buffer' in src
+
+
+def test_exhausted_budget_message():
+    src = PLANNER.read_text()
+    assert 'exhausted = riskBudget <= 0' in src
+    assert '"Risk budget exhausted - no trade."' in src
+    assert 'if useDaily and estRisk > 0' in src
 
 
 # ---- Costs and invalid data ----

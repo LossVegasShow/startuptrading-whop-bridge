@@ -32,8 +32,14 @@ riskUsd   = input.float(250.0, "Risk per trade", minval = 1, group = G_RISK,
 acctSize  = input.float(50000.0, "Account size", minval = 1, group = G_RISK,
      tooltip = "% of account mode.")
 riskPct   = input.float(0.5, "Risk per trade (%)", minval = 0.01, step = 0.05, group = G_RISK)
-dailyLeft = input.float(0.0, "Remaining daily loss allowance (0 = none)", minval = 0,
-     group = G_RISK, tooltip = "Caps risk per trade at half of what is left today.")
+useDaily  = input.bool(false, "Apply a daily loss constraint", group = G_RISK,
+     tooltip = "On: an allowance of 0 means the day's limit is used up, so the budget is 0.")
+dailyLeft = input.float(0.0, "Remaining daily loss allowance", minval = 0, group = G_RISK,
+     tooltip = "What is left of today's loss limit. Daily cap per trade = remaining " +
+     "allowance x (1 - safety buffer, Prop firm mode only) / planned daily losses. " +
+     "The risk budget is the smaller of this cap and the mode's budget.")
+dailyLosses = input.int(2, "Planned daily losses", minval = 1, group = G_RISK,
+     tooltip = "How many full losing trades today's remaining allowance must cover.")
 
 G_PROP = "Prop firm planning"
 ddType    = input.string("Trailing", "Drawdown rule", options = ["Trailing", "Static"],
@@ -120,7 +126,9 @@ baseBudget = switch riskMode
     "% of account" => pctBudget
     "Prop firm"    => propBudget
     => riskUsd
-dailyCap   = dailyLeft > 0 ? dailyLeft * (riskMode == "Prop firm" ? buffer : 1) / 2 : na
+// Daily cap: remaining allowance, less the buffer in Prop firm mode, spread over the
+// planned daily losses. When the constraint is on, 0 left means a 0 budget (no trade).
+dailyCap   = useDaily ? dailyLeft * (riskMode == "Prop firm" ? buffer : 1) / dailyLosses : na
 riskBudget = na(dailyCap) ? baseBudget : math.min(baseBudget, dailyCap)
 
 rawStop    = atr * stopMult
@@ -276,9 +284,11 @@ if barstate.islast
         // The maximum position size is the dominant element.
         wide(r, "MAX POSITION", C_MUTED, C_PANEL, TSs)
         r += 1
-        heroTxt = contracts > 0 ? str.tostring(contracts) + " " + syminfo.root :
+        exhausted = riskBudget <= 0
+        heroTxt = exhausted ? "Risk budget exhausted - no trade." :
+             contracts > 0 ? str.tostring(contracts) + " " + syminfo.root :
              "0 " + syminfo.root + "  skip or size down"
-        wide(r, heroTxt, contracts > 0 ? C_GOOD : C_BAD, C_PANEL, TSh)
+        wide(r, heroTxt, contracts > 0 ? C_GOOD : C_BAD, C_PANEL, exhausted ? TS : TSh)
         r += 1
         row(r, "Risk budget", money(riskBudget), C_VALUE)
         r += 1
@@ -327,7 +337,7 @@ if barstate.islast
             row(r, "DD used / buffer", str.tostring(used, "0") + "% / " +
                  str.tostring(bufferPct, "0") + "%", used >= 75 ? C_WARN : C_VALUE)
             r += 1
-        if dailyLeft > 0 and estRisk > 0
+        if useDaily and estRisk > 0
             row(r, "Full stops left today", str.tostring(sizeFor(dailyLeft, estRisk)), C_VALUE)
             r += 1
         if tfTooLow
