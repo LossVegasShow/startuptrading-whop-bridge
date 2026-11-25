@@ -8,12 +8,18 @@ PLANS = {
     'plan_qSXeS0xoDapGU': 'Monthly · $99',
     'plan_B84PWLvXemyFX': 'Annual · $495'
 }
-# The NinjaTrader indicators the membership licenses. The membership also
+# What the membership delivers comes from products.json (the single source of
+# truth, also used by the /setup page). The membership also
 # includes the Discord and the masterclass, which Whop grants directly.
-INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner & Market Selector'}
+import json as _json
+_REGISTRY = _json.loads((Path(__file__).resolve().parent / 'products.json').read_text())
+# Product id -> its entry: name, NinjaTrader name and location, file, sha256.
+PRODUCTS = {int(p['id']): p for p in _REGISTRY['products']}
+# The NinjaTrader products the membership licenses: id -> customer-facing name.
+INDICATORS = {pid: p['name'] for pid, p in PRODUCTS.items()}
 # No longer part of the membership. Licenses the bridge itself issued for these
 # are switched off on the next sync; licenses it didn't issue are never touched.
-RETIRED_INDICATORS = {2205:'TSMS & Fibs'}
+RETIRED_INDICATORS = {int(p['id']): p['name'] for p in _REGISTRY['retired']}
 EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_period_end_changed','membership.updated','payment.succeeded','payment.failed'}
 
 @dataclass

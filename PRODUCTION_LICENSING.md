@@ -242,9 +242,10 @@ so new buyers get reminders without a manual release.
 - [ ] Remove TSMS & Fibs from any other page that lists what the membership
       includes (Home, Tools section). Separate one-time products can stay.
 - [ ] Publish the `/setup` install guide (`sales-site/dist/setup-embed.html`,
-      `sales-site/SETUP.md` step 2e). Before launch, add Jack's download link
-      (`setup_download_url`) and screenshots, rebuild and paste again.
-      `INDICATOR_SETUP_URL` already points to it.
+      `sales-site/SETUP.md` step 2e). The download buttons come from
+      `products.json` (each product's `download_url`; files hosted on GoHighLevel Media, never in GitHub).
+      Add the screenshots, rebuild and paste again. `INDICATOR_SETUP_URL` already
+      points to it.
 
 ### Affiliate attribution (before announcing the affiliate program)
 Setup:

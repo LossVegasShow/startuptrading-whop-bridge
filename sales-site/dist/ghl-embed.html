@@ -418,6 +418,20 @@
   .sut-sub-form:not([data-sut-sized]) { min-height: 600px; }
 }
 
+/* /setup: product downloads (from products.json) */
+.sut-downloads { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.sut-downloads li { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.sut-downloads b { color: var(--text); font-weight: 600; }
+.sut-downloads span { grid-column: 1; color: var(--muted); font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 2; grid-row: 1 / span 2; }
+.sut-list-plain { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); }
+.sut-list-plain li { margin: 6px 0; }
+@media (max-width: 640px) {
+  .sut-downloads li { grid-template-columns: 1fr; }
+  .sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 1; grid-row: auto; justify-self: stretch; margin-top: 8px; }
+  .sut .sut-downloads .sut-btn { white-space: normal; max-width: 100%; text-align: center; justify-content: center; }
+}
+
 </style>
 <div class="sut" id="top">
 <!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.

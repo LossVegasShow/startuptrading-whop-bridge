@@ -368,7 +368,7 @@ embedded-form behaviour.
 
 | # | Where | Action |
 |---|---|---|
-| 1 | GitHub | Make the repository private (still pending from the product release) |
+| 1 | GoHighLevel Media | Upload the two product zips; send me the links for `products.json` (the repository stays public; product files are never committed) |
 | 2 | GoHighLevel → Settings → Tracking code | Re-paste the new `site-tracking.html`, then the GTM snippets (section 6) |
 | 3 | GoHighLevel pages | Re-paste the embeds: `/free-tools`, calculator, TradingView page, `/welcome`, `/setup` (and `/join` + Home if they use `ghl-embed.html`) |
 | 4 | GA4 + GTM | Section 6 |
@@ -382,7 +382,7 @@ embedded-form behaviour.
 
 - **GA4/GTM not installed**: no anonymous visitor data exists until you do section 6.
   Nothing can be backfilled.
-- **Repository still public**: holds back the product-release push (and these files).
+- **Product files** are hosted outside GitHub (the repository is public): the /setup buttons stay placeholders until both `download_url`s are set.
 - **Attribution coverage**: buyers who purchase on Whop's store page, or activate on
   another device, show as Unknown until phase 2 (checkout metadata).
 - **Whop permissions**: payment webhooks need `webhook_receive:payments`; the refund

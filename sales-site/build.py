@@ -129,6 +129,7 @@ def render(cfg, name='sales'):
     values['subscribe'] = subscribe_html(cfg, name)
     values['membership_note'] = membership_note_html(cfg)
     values['tv_cta'] = tv_cta_html(cfg)
+    values['product_downloads'], values['product_locations'] = product_downloads_html(cfg)
     values['cta_attr'] = '' if embed_on else ' data-checkout'
     cfg['exit_offer'] = 'true' if str(cfg.get('exit_offer', '')).lower() == 'true' and cfg.get('free_indicator_url') else ''
     for place in FREE_PLACEMENTS:
@@ -415,6 +416,31 @@ def membership_note_html(cfg):
     else:
         link = '<p class="sut-fine">Opening soon.</p>'
     return f'<aside class="sut-free sut-member-note"><div class="sut-free-copy">{head}{link}</div></aside>'
+
+
+def load_products():
+    """The membership's products: ../products.json, shared with the licensing app."""
+    return json.loads((HERE.parent / 'products.json').read_text())['products']
+
+
+def product_downloads_html(cfg):
+    """/setup: one download button per product (its download_url in products.json,
+    hosted outside GitHub), and where each appears in NinjaTrader."""
+    e = lambda v: html.escape(str(v), quote=True)
+    items, where = [], []
+    for p in load_products():
+        url = p.get('download_url', '')
+        if url:
+            action = (f'<a class="sut-btn" href="{e(url)}" download '
+                      f'data-download="{e(p["file"])}">Download {e(p["name"])} <span class="sut-arrow" aria-hidden="true">↓</span></a>')
+        else:
+            action = (f'<div class="sut-ph sut-ph-text"><strong>Download link goes here</strong>'
+                      f'<small>Set download_url for this product in products.json.</small></div>')
+        items.append(f'<li><b>{e(p["name"])}</b><span>{e(p["file"])}</span>{action}</li>')
+        menu, _, folder = p['ninjatrader_location'].partition(', ')
+        where.append(f'<li><b>{e(p["name"])}</b>: right-click the chart, choose <b>{e(menu)}…</b>, open the '
+                     f'<b>{e(folder.replace(" folder", ""))}</b> folder and add <b>{e(p["ninjatrader_name"])}</b>.</li>')
+    return (f'<ul class="sut-downloads">{"".join(items)}</ul>', f'<ul class="sut-list-plain">{"".join(where)}</ul>')
 
 
 def tv_cta_html(cfg):

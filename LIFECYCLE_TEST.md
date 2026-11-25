@@ -1,39 +1,45 @@
-# Live restricted test: the complete customer experience
+# Release acceptance test: the complete customer experience
 
-Goal: prove, with **one test membership and one test NinjaTrader account**,
-that a customer can buy, activate, **receive and install the indicators**, use
-them in NinjaTrader, and lose and regain them as the membership changes, while
-**no other member's licenses change**.
+Goal: prove, with **one test purchase and one test NinjaTrader account**, that a
+customer can buy, activate, **download and install both products**, use them in
+NinjaTrader, and lose and regain them as the membership changes. Licensing runs
+for **all members** (the release configuration); no membership-ID allowlist is
+used.
 
 A successful license API call is not a pass. A step passes only when the
 customer-facing result (email, download, NinjaTrader behaviour) is confirmed.
 
-Audited against the deployed code on 25 Nov 2026 (`main` after PR #49) and the
-live `/health`.
+Audited against the deployed code on 25 Nov 2026 and the live `/health`.
+Products, files and NinjaTrader names: `products.json` (the single source).
 
 ---
 
-## 0. Stop: the current live state is NOT restricted
+## 0. Release configuration (live now)
 
-`https://activate.startuptrading.com/health` returned on 25 Nov:
+`/health` returns `"mode":"all_members"`: `LICENSE_WRITES_ENABLED=true` and
+`LICENSE_ALL_MEMBERS=true`. Every ~15 minutes the reconciler syncs up to 100
+stored members, and every member who has completed activation is granted,
+renewed or expired according to Whop. Members who never activated are not
+touched. The circuit breaker (60 grants or 20 revocations an hour, 10 failures in
+15 minutes) pauses everything if something runs away.
 
-```
-"mode":"all_members", "circuit_breaker":"ok", "reconciler_enabled":true
-```
+Clean up the test-only settings in Render → Environment (they no longer do
+anything useful in this mode, and must not linger):
 
-That means `LICENSE_WRITES_ENABLED=true` and `LICENSE_ALL_MEMBERS=true` are set
-in Render **now**. Every ~15 minutes the reconciler syncs up to 100 stored
-members, and **every member who has completed activation** (verified NinjaTrader
-email) is granted, renewed or expired according to Whop. Members who never
-activated are not touched.
+| Variable | Set to |
+|---|---|
+| `LICENSE_WRITES_ENABLED` | `true` |
+| `LICENSE_ALL_MEMBERS` | `true` |
+| `ALLOWED_TEST_MEMBERSHIP`, `ALLOWED_TEST_EMAIL`, `LICENSE_WRITE_ALLOWLIST` | **delete** |
+| `ADMIN_TEST_ENABLED`, `ADMIN_TEST_WHOP_USER_ID`, `ADMIN_TEST_WHOP_EMAIL`, `LOCAL_DEMO_OTP` | **delete** (or `false`) |
+| `ACTIVATION_REMINDERS_AUTO` | `false` (release reminders by hand at `/admin/reminders`) |
+| `INDICATOR_SETUP_URL` | `https://startuptrading.com/setup` (one row only) |
+| `RUN_RECONCILER` | `true` |
+| `ALERT_WEBHOOK_URL` | a Discord webhook (recommended) |
 
-**Do section 3 (restrict) before anything else.**
-
-Also live now: `membership_open` is on (the free pages link to `/join`). The
-homepage is still the old site. Whop's own store page sells the membership
-regardless of either.
-
----
+The allowlist mechanism stays in the code as a fallback: if you ever need to
+narrow licensing again, set `LICENSE_ALL_MEMBERS=false` and list
+`mem_…:email` pairs in `LICENSE_WRITE_ALLOWLIST`.
 
 ## 1. Audit findings
 
@@ -104,18 +110,27 @@ check them against the product list in the NinjaTrader vendor portal (P5).
 3. When **both** indicators are licensed to the paid-through date, one
    **"Your tools are ready"** email is queued (`store.queue_activation_email`).
    It goes to the NinjaTrader email and links to `INDICATOR_SETUP_URL`.
-4. `/setup` tells them to **download the tools file**, import it
-   (*Tools → Import → NinjaScript Add-On*) and add the indicators to a chart.
+4. `/setup` has a download button for each product, then: import each .zip
+   (*Tools → Import → NinjaScript Add-On*), restart, and add them to a chart.
 
-**Blocker: there is no download.** The live `/setup` still shows the placeholder
-"Download link goes here" (`setup_download_url` is blank), and no indicator
-files exist anywhere in this project. A customer can be licensed today but
-**cannot get the indicators**. See B1.
+**Downloads:** the product files are proprietary and never committed (the GitHub
+repository is public). They're hosted outside GitHub (GoHighLevel Media) and each
+link is set as `download_url` in `products.json`; `/setup` has one button per
+product (a placeholder until the link is set):
 
-**Permissions:** the download itself will be a plain link, so anyone who has it
-can download the file. The protection is NinjaTrader vendor licensing compiled
-into the indicators. That only holds if Jack exported them as protected
-assemblies with vendor licensing enabled. Test L7 checks this.
+| ID | Product | File | Appears in NinjaTrader as |
+|---|---|---|---|
+| 2067 | ATR Order Automation | `SUT_ATR_Orders_2026.zip` | **SUT ATR Orders** (Strategies → StartupTrading) |
+| 2071 | Trend Scanner & Market Selector | `StartupTrading_Tools_Scanner_2026.zip` | **StartupTrading Scanner** (Indicators → StartupTrading) |
+
+Checked from the files themselves: both are protected NinjaTrader exports
+(Agile.NET-protected `.dll` plus a generated stub; no source), exported with
+NinjaTrader 8.1.8.1 and 8.1.8.4, and both call NinjaTrader `VendorLicense`
+("No active license was found for SUT ATR-Orders" / "…for StartupTrading
+Tools"). Test L7 confirms the protection in NinjaTrader.
+
+**Permissions:** the download links are public. Anyone can download the files,
+but they only run for a NinjaTrader account with an active vendor license.
 
 Discord and the masterclasses are delivered by Whop (attached to the plans), not
 by this app.
@@ -133,61 +148,34 @@ by this app.
 
 ---
 
-## 2. Blockers: resolve before the test
+## 2. Before the test
 
-| # | Blocker | Owner | How to clear it |
+| # | Item | Owner | How to clear it |
 |---|---|---|---|
-| **B1** | **No indicator download.** `/setup` has a placeholder; no files exist | Jack | Export both indicators from NinjaTrader as a **protected** NinjaScript add-on .zip with vendor licensing. Host it (a Whop file, Google Drive or GHL media link). Send me the link and I'll set `setup_download_url` and rebuild `/setup`. Also send 3–4 screenshots of import and adding to a chart |
-| **B2** | **Which membership is the test?** `mem_T1AdJRcFkJNNSk` is the **first** 24 Nov test membership. It was ended, and its NinjaTrader link moved to `mem_XN7y9ppQsdx2np` (see section 11). A new 100%-off redemption normally creates a **new** `mem_…` | You | In Whop → Members, open the test account's membership created by the new redemption and copy its ID. Use that ID in the allowlist. If Whop really shows `mem_T1AdJRcFkJNNSk` active again, tell me before testing: its record here is `transferred` |
-| **B3** | **NinjaTrader email already linked.** `bitbanditbrand@gmail.com` is linked to the `mem_XN7y9ppQsdx2np` record (Whop user `phonysolvent77`). If the new test Whop account is a **different** Whop user, activation stops with "That NinjaTrader email is linked to another account" | You | **Recommended:** use a **new NinjaTrader account with a fresh email** for C1–C9, so it's a true new-customer test (new licenses, nothing adopted). Keep `bitbanditbrand@gmail.com` for L6 (rejoin), which needs the same Whop user |
-| **B4** | Licensing is in `all_members` mode | You | Section 3 |
-| **B5** | Earlier test cleanup unconfirmed. `mem_XN7y9ppQsdx2np` was ended on 25 Nov, and the `all_members` reconciler should since have expired its licenses (82908, 82912) | You | P3 below |
-| **B6** | NinjaTrader Desktop revocation never confirmed (24 Nov step 6 "pending") | You / Jack | Test L4 |
-| **B7** | `INDICATOR_SETUP_URL` must be exactly one row, `https://startuptrading.com/setup` | You | Render → Environment (P1) |
-| **B8** | Optional but recommended: `ALERT_WEBHOOK_URL` (Discord webhook) so a tripped breaker or HIGH issue alerts you | You | Render → Environment |
+| **R1** | **Host the two product files** outside GitHub | You | GoHighLevel → Media → upload both zips → copy each file's public link and send them to me (they go in `download_url` in `products.json`). Never upload them to GitHub |
+| **R2** | **Confirm the NinjaTrader locations** (`ninjatrader_location` in `products.json`): ATR Order Automation under **Strategies**, the scanner under **Indicators**, both in a **StartupTrading** folder | Jack | Import both files and look. If either is wrong, tell me and I'll update `products.json` (the setup page follows) |
+| **R3** | **Scanner build contents.** The scanner file also contains a "StartupTrading Tools (Tester)" item | Jack | Confirm it's meant to ship to customers, or re-export without it |
+| **R4** | **Support email.** The license messages inside both products say `contact@startuptrading.com`; the site and emails use `support@startuptrading.com` | You | Make sure both inboxes reach you (or forward one to the other) |
+| **R5** | **Test membership and NinjaTrader account.** A new 100%-off redemption creates a **new** `mem_…` (not `mem_T1AdJRcFkJNNSk`, which is the first, ended test). `bitbanditbrand@gmail.com` is still linked to the earlier test record | You | Use the new `mem_…`, and a **new NinjaTrader account with a fresh email** for C1–C9. Keep `bitbanditbrand@gmail.com` for L6 (rejoin, same Whop user) |
+| **R6** | Earlier test cleanup: `mem_XN7y9ppQsdx2np` ended on 25 Nov; its licenses should be expired by now | You | Pre-flight P3 |
+| **R7** | NinjaTrader Desktop revocation never confirmed | You / Jack | Test L4 |
 
----
-
-## 3. Restrict licensing to the test account (do this first)
-
-Render → `startuptrading-whop-bridge` → **Environment**:
-
-| Variable | Set to |
-|---|---|
-| `LICENSE_WRITES_ENABLED` | `true` |
-| `LICENSE_ALL_MEMBERS` | `false` (or delete the row) |
-| `LICENSE_WRITE_ALLOWLIST` | `<test mem_ ID from B2>:<test NinjaTrader email>`, for example `mem_ABC123:newtest@example.com` |
-| `ALLOWED_TEST_MEMBERSHIP`, `ALLOWED_TEST_EMAIL` | **Delete both** (old pairs must not stay allowlisted) |
-| `ACTIVATION_REMINDERS_AUTO` | `false` (or delete) |
-| `RUN_RECONCILER` | `true` |
-| `INDICATOR_SETUP_URL` | `https://startuptrading.com/setup` (one row only) |
-
-Save, wait for the deploy to finish, then check:
-
-1. `https://activate.startuptrading.com/health` → `"mode":"allowlist"`, `"circuit_breaker":"ok"`.
-2. `/admin` → the badge reads **ALLOWLIST ONLY**; Licensing controls: Mode **Allowlist only**.
-
-The NinjaTrader email in the allowlist must be the **NinjaTrader** account's email
-(the one entered at activation), not necessarily the Whop email.
-
----
-
-## 4. Pre-flight (before the purchase)
+## 3. Pre-flight (before the purchase)
 
 | # | Check | Expect | Pass |
 |---|---|---|---|
-| P1 | Render environment as in section 3 | One `INDICATOR_SETUP_URL`; no `ALLOWED_TEST_*`; `LICENSE_ALL_MEMBERS` false | |
-| P2 | `/admin` → **License changes (last 7 days)** | Note every membership listed. Any real member's grants here happened under `all_members` mode: tell me before testing, so we decide whether to keep or expire them | |
+| P1 | Render environment as in section 0; `/health` | `"mode":"all_members"`, `"circuit_breaker":"ok"`; no test-only variables left | |
+| P2 | `/admin` → **License changes (last 7 days)** | Every membership listed is a real, paying member or a test. Note them; anything unexpected, tell me | |
 | P3 | `/admin` → `mem_XN7y9ppQsdx2np` → **Snapshot** | `whop.entitled: false`; 2067/2071 `no active license (expired …)`; `overall: consistent` | |
 | P4 | `/admin/attention` | No HIGH items | |
 | P5 | NinjaTrader vendor portal → Products | 2067 = ATR Order Automation, 2071 = Trend Scanner & Market Selector | |
-| P6 | `startuptrading.com/setup` in a private window | Real **Download the tools** button (after B1); the file downloads and is a .zip | |
+| P6 | `startuptrading.com/setup` in a private window (after re-pasting `setup-embed.html`) | Two download buttons; each file downloads as the .zip named on the page | |
 | P7 | Whop → product → both plans | Discord and masterclasses attached; post-purchase redirect `https://startuptrading.com/welcome` | |
-| P8 | Test NinjaTrader account (B3) | You can sign into NinjaTrader 8 with it on a Windows PC, and open its email inbox | |
+| P8 | Test NinjaTrader account (R5) | You can sign into NinjaTrader 8 with it on a Windows PC, and open its email inbox | |
 
 ---
 
-## 5. How to check each step
+## 4. How to check each step
 
 - **Snapshot:** `/admin` → the member → **Snapshot** (`/admin/lifecycle/<id>`).
   Read-only. Shows `whop` (status, `entitled`, paid-through), `write_gate`
@@ -197,11 +185,11 @@ The NinjaTrader email in the allowlist must be the **NinjaTrader** account's ema
 - **Reconcile:** applies Whop's current state now instead of waiting up to 15 minutes.
 - **License changes (last 7 days):** the cross-member check. After every step,
   only the test membership may appear.
-- **NinjaTrader Desktop:** section 6.
+- **NinjaTrader Desktop:** section 5.
 
 ---
 
-## 6. Verifying inside NinjaTrader
+## 5. Verifying inside NinjaTrader
 
 Do this on a Windows PC with NinjaTrader 8, signed in with the **test**
 NinjaTrader account.
@@ -222,9 +210,9 @@ NinjaTrader account.
 
 ---
 
-## 7. The customer journey (new customer)
+## 6. The customer journey (new customer)
 
-Use the fresh NinjaTrader account from B3 and the test Whop account. Private
+Use the fresh NinjaTrader account from R5 and the test Whop account. Private
 browser window throughout.
 
 | # | Action | Expected | Pass |
@@ -233,17 +221,17 @@ browser window throughout.
 | C2 | Check the Whop email inbox | Whop receipt. Whop shows Discord and masterclass access | |
 | C3 | `/welcome` → **Activate my trading tools** → **Sign in with Whop** | Sign-in succeeds and the activation page shows the membership. `/admin` lists the new `mem_…` | |
 | C4 | Enter the code sent to the Whop email | Verified | |
-| C5 | Choose "I have a NinjaTrader account", enter the test NinjaTrader email, enter that inbox's code | "Linked". Snapshot: `write_gate.allowed: true` (reason: on the write allowlist); after seconds or **Reconcile**: 2067 and 2071 `active until <paid-through>`, `overall: consistent` | |
+| C5 | Choose "I have a NinjaTrader account", enter the test NinjaTrader email, enter that inbox's code | "Linked". Snapshot: `write_gate.allowed: true` (reason: LICENSE_ALL_MEMBERS is on); after seconds or **Reconcile**: 2067 and 2071 `active until <paid-through>`, `overall: consistent` | |
 | C6 | **License changes** | Exactly 2 `created` rows, both for the test membership; nothing else new | |
 | C7 | NinjaTrader inbox | **One** "Your tools are ready" email, **after** C5 (compare times with the audit). Its button opens `/setup` | |
-| C8 | `/setup` → download → import → restart (section 6) | Both indicators load on a chart | |
+| C8 | `/setup` → download **both** files → import each → restart (section 5) | **SUT ATR Orders** (Strategies) and **StartupTrading Scanner** (Indicators) both load on a chart | |
 | C9 | Whop email inbox and NinjaTrader inbox over the next hour | No reminder emails (the member is activated) | |
 
 **Pass** only if C7 and C8 are confirmed by a person, not just C5.
 
 ---
 
-## 8. Lifecycle tests
+## 7. Lifecycle tests
 
 Run in order. After each one: Snapshot, License changes, and (where marked) NinjaTrader.
 
@@ -252,11 +240,11 @@ Run in order. After each one: Snapshot, License changes, and (where marked) Ninj
 | L1 | **Duplicate activation** | Press **Reconcile** twice, refresh the activation page, press the page's refresh button | Still `consistent`; audit `ninjatrader_unchanged`; no new `created`; no second email | Still works | |
 | L2 | **No silent relink** | Sign in again on the activation page | It shows the linked NinjaTrader account with no way to change it (the server also refuses a change: "NinjaTrader account already linked; contact support"). Licenses unchanged | — | |
 | L3 | **Cancel at period end** | Whop → member → cancel *at the end of the billing period* | `whop.status: canceling`, still `entitled: true`, `consistent`, **no writes**. One "access ending" email to the Whop email. (A $0 promo may have no billing period: if Whop offers no "at period end", record that and skip) | Still works | |
-| L4 | **Expiration / revocation** | Whop → end the membership **now** (cancel immediately / terminate), then **Reconcile** | Before: `mismatch: NOT entitled, but the NinjaTrader license is still active`. After: `writes: 2`, both `expired`, `consistent`. License changes: 2 `expired` rows for the test membership only. One "access ended" email | **Key check:** restart NinjaTrader → neither indicator loads (section 6). Record the time taken | |
+| L4 | **Expiration / revocation** | Whop → end the membership **now** (cancel immediately / terminate), then **Reconcile** | Before: `mismatch: NOT entitled, but the NinjaTrader license is still active`. After: `writes: 2`, both `expired`, `consistent`. License changes: 2 `expired` rows for the test membership only. One "access ended" email | **Key check:** restart NinjaTrader → neither indicator loads (section 5). Record the time taken | |
 | L5 | **Webhook path** | Repeat L4's effect via webhook only: don't press Reconcile; wait up to 15 minutes after a Whop membership change | `/admin` → Webhook deliveries shows the event `processed`; the snapshot updates without a manual Reconcile | — | |
-| L6 | **Reactivation (rejoin)** | Same Whop user buys again (new `mem_…`). Add the new pair to `LICENSE_WRITE_ALLOWLIST` (comma-separated), deploy, activate with the **same** NinjaTrader email | Old record `transferred`; new record `consistent`; the **same** license IDs `renewed` (no new `created`). Audit `ninjatrader_link_transferred_in` | Works again after restart | |
+| L6 | **Reactivation (rejoin)** | Same Whop user buys again (new `mem_…`) and activates with the **same** NinjaTrader email | Old record `transferred`; new record `consistent`; the **same** license IDs `renewed` (no new `created`). Audit `ninjatrader_link_transferred_in` | Works again after restart | |
 | L7 | **Unlicensed account (protection)** | Sign NinjaTrader into an account with **no** license (or the test account after L4), import the same .zip, add the indicators | — | **Must not load.** If they load, the file isn't protected: stop and tell Jack before launch | |
-| L8 | **Other members untouched** | After all tests: **License changes (last 7 days)** | Only the test membership(s) since the test started | — | |
+| L8 | **No surprises for other members** | After all tests: **License changes (last 7 days)** | Besides the test memberships, only real members who activated, each with `created`/`renewed` for 2067 and 2071 (and `expired` only for members whose Whop membership ended) | — | |
 
 Same-membership restore (Whop "uncancel" before the period ends) isn't
 possible for an ended membership in Whop. L3's cancel can be undone in Whop
@@ -265,23 +253,24 @@ cancelled.
 
 ---
 
-## 9. Rollback
+## 8. Rollback
 
 | Situation | Do this | Effect |
 |---|---|---|
-| **Anything unexpected** (wrong member in License changes, duplicate licenses, errors) | Render: `LICENSE_WRITES_ENABLED=false` → deploy | Stops every write, including revocations, within one deploy. Licenses already issued keep their expiry dates, so NinjaTrader still switches them off when the paid period ends |
+| **Anything unexpected** (unexpected member changes, duplicate licenses, errors) | Render: `LICENSE_WRITES_ENABLED=false` → deploy | Stops every write, including revocations, within one deploy. Licenses already issued keep their expiry dates, so NinjaTrader still switches them off when the paid period ends |
 | Circuit breaker trips | Investigate `/admin/attention`; resume only by typing `RESUME` at `/admin` | Writes stay paused until then, even across restarts |
-| A non-test member was granted licenses under `all_members` | Tell me with the membership ID. Don't edit licenses by hand in the vendor portal | We decide whether they keep them (paying member) or they're expired by a reviewed reconcile |
-| The test is done | Remove the test pair from `LICENSE_WRITE_ALLOWLIST`, end and refund the test membership, Reconcile its record | Its licenses expire; nothing else changes |
+| Narrow licensing again | `LICENSE_ALL_MEMBERS=false` and `LICENSE_WRITE_ALLOWLIST=mem_…:email,…` | Only those pairs are written; nobody else gains or loses anything |
+| A bad product file | Upload the new file to GoHighLevel Media, update its `download_url` and `sha256` in `products.json`, rebuild and re-paste `/setup` | Customers download the new file; licenses are unaffected |
+| The test is done | End and refund the test membership in Whop, then Reconcile its record | Its licenses expire; nothing else changes |
 | Revert the free pages' membership links | Tell me to set `membership_open` back to off; re-paste the three free pages | The "Become a Member" nav and links disappear |
-| Back to unrestricted (after a pass, at launch) | `LICENSE_ALL_MEMBERS=true` | Only when you decide to launch (Gate 1 in `growth/LAUNCH_AND_GROWTH.md`) |
 
 ---
 
-## 10. Results (this run)
+## 9. Results (this run)
 
 | # | Date / time (UTC) | Snapshot / admin | NinjaTrader / inbox | Notes |
 |---|---|---|---|---|
+| R1–R7 | | | | |
 | P1–P8 | | | | |
 | C1–C9 | | | | |
 | L1 | | | | |
@@ -294,11 +283,11 @@ cancelled.
 | L8 | | | | |
 
 **Pass** = C1–C9, L1, L2, L4, L7 and L8 as expected, confirmed in NinjaTrader and
-the inboxes. L3, L5 and L6 are strongly recommended.
+the inboxes. Then promote (Gate 2–4 in `growth/LAUNCH_AND_GROWTH.md`). L3, L5 and L6 are strongly recommended.
 
 ---
 
-## 11. Previous run (24–25 Nov 2026, allowlist test)
+## 10. Previous run (24–25 Nov 2026, allowlist test)
 
 Run on 24–25 Nov 2026 against the live app, test NinjaTrader account
 `bitbanditbrand@gmail.com`, Whop account `phonysolvent77`. At the time the
@@ -325,7 +314,7 @@ test-only (#29).
 **Pass** = steps 1–7 and 9 behave as expected, *and* step 6 shows the
 indicators actually stop working in NinjaTrader.
 
-## 12. Questions for the NinjaTrader vendor contact
+## 11. Questions for the NinjaTrader vendor contact
 
 1. Vendor API tokens: should production licensing authenticate against
    `demo.tradovateapi.com` or `live.tradovateapi.com`? (Set `NT_AUTH_URL`.)
@@ -341,7 +330,7 @@ indicators actually stop working in NinjaTrader.
 6. If a customer changes the email on their NinjaTrader account, what happens to
    licenses issued to the old email?
 
-## 13. Rejoining with a new membership (how L6 works)
+## 12. Rejoining with a new membership (how L6 works)
 
 When a membership fully ends and the person buys again, Whop issues a **new
 `mem_…` ID**, so the bridge creates a new customer record. The bridge now lets

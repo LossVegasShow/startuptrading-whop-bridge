@@ -5,3 +5,7 @@ __pycache__/
 .pytest_cache/
 *.db
 marketing/out/
+
+# Proprietary indicator files: never commit (the repository is public).
+downloads/
+*.zip

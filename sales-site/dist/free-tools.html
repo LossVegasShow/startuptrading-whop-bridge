@@ -430,6 +430,20 @@
   .sut-sub-form:not([data-sut-sized]) { min-height: 600px; }
 }
 
+/* /setup: product downloads (from products.json) */
+.sut-downloads { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.sut-downloads li { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.sut-downloads b { color: var(--text); font-weight: 600; }
+.sut-downloads span { grid-column: 1; color: var(--muted); font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 2; grid-row: 1 / span 2; }
+.sut-list-plain { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); }
+.sut-list-plain li { margin: 6px 0; }
+@media (max-width: 640px) {
+  .sut-downloads li { grid-template-columns: 1fr; }
+  .sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 1; grid-row: auto; justify-self: stretch; margin-top: 8px; }
+  .sut .sut-downloads .sut-btn { white-space: normal; max-width: 100%; text-align: center; justify-content: center; }
+}
+
 </style>
 <div class="sut" id="top" data-page="free_tools" data-tool-id="free-tools-directory">
 <!-- Free tools directory (GHL path /free-tools). Cards come from sales-site/tools.json;
@@ -438,8 +452,8 @@
 <header class="sut-nav">
   <div class="sut-wrap sut-nav-in">
     <a class="sut-logo" href="https://startuptrading.com/" aria-label="StartUpTrading home"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>STARTUPTRADING</a>
-    <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/join#indicators">Technology</a><a href="https://startuptrading.com/free-tools">Free Tools</a><a href="https://startuptrading.com/join#room">Education</a><a href="https://startuptrading.com/join#room">Community</a><a href="https://startuptrading.com/join#jack">About Jack</a></nav>
-    <a class="sut-btn sut-btn-sm" href="https://startuptrading.com/join#pricing" data-member-cta="nav">Become a Member</a>
+    <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/free-tools">Free Tools</a></nav>
+    <a class="sut-btn sut-btn-sm" href="#subscribe">Get updates</a>
   </div>
 </header>
 
@@ -474,7 +488,7 @@
 
 <section class="sut-section">
   <div class="sut-wrap">
-    <aside class="sut-free sut-member-note"><div class="sut-free-copy"><p class="sut-eyebrow muted">Trade on NinjaTrader?</p><h3>The membership does this for you.</h3><p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, alongside the Trend Scanner &amp; Market Selector, Jack's trade room and masterclasses. Every new tool is included.</p><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/join" data-member-cta="free_page">See the membership <span class="sut-arrow" aria-hidden="true">→</span></a></div></aside>
+    <aside class="sut-free sut-member-note"><div class="sut-free-copy"><p class="sut-eyebrow muted">Trade on NinjaTrader?</p><h3>The membership does this for you.</h3><p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, alongside the Trend Scanner &amp; Market Selector, Jack's trade room and masterclasses. Every new tool is included.</p><a class="sut-btn sut-btn-ghost" href="#subscribe">Get notified when it opens</a></div></aside>
   </div>
 </section>
 

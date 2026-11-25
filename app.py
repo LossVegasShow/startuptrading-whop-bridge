@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from fastapi import FastAPI, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
+from fastapi.responses import FileResponse,HTMLResponse,RedirectResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from config import Config,INDICATORS,EVENTS,PLANS
