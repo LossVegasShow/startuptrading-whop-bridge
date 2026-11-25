@@ -42,6 +42,8 @@ link reads that one setting.
 | `tv_atr_script_url` | `""` | After the script is published on TradingView. The "Open on TradingView" buttons appear; until then the page says "Coming soon to TradingView" |
 | `ghl_subscribe_form_url` | `""` | After the GHL form exists (section 4). The optional sign-up section appears on the free pages |
 | `learn_url` | `""` | When `/learn` exists. The nav's Education link moves to it |
+| `tv_profile_url` | `""` | Jack's TradingView profile URL. Shows "Follow Jack on TradingView" on the companion page |
+| `tv_atr_video_url` | `""` | The YouTube demo of the planner. Shows a "Watch it in action" section |
 
 Rebuild and re-paste after each change.
 
