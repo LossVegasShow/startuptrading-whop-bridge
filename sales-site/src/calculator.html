@@ -160,6 +160,13 @@ function sutProp(drawdown, daily, streak) {
   var q = new URLSearchParams(window.location.search);
   if (q.get('c') && sutSpec(q.get('c').toUpperCase())) sel.value = q.get('c').toUpperCase();
 
+  // Tell the analytics script a calculation completed (it counts one per calculator).
+  var touched = {};
+  function calculated(which) {
+    if (!touched[which]) return;   // only results the visitor asked for, not the page's first render
+    try { document.dispatchEvent(new CustomEvent('sut:calculated', { detail: { calculator: which } })); } catch (e) { /* old browser */ }
+  }
+
   function updateSize() {
     var f = size.elements, atr = f.mode.value === 'atr';
     size.querySelector('[data-mode="points"]').hidden = atr;
@@ -168,6 +175,7 @@ function sutProp(drawdown, daily, streak) {
     var r = sutSize(sel.value, num(f.risk.value), stop);
     var out = document.getElementById('sut-size-out');
     if (!r) { out.textContent = 'Enter a risk amount and a stop above zero.'; return; }
+    calculated('position_size');
     if (r.contracts === 0) {
       out.innerHTML = '<b>0 contracts.</b> One ' + sel.value + ' risks ' + money(r.perContract) +
         ' on this stop, more than your limit.' + (r.micro ? ' Try ' + r.micro + ', the micro contract.' : '');
@@ -183,15 +191,17 @@ function sutProp(drawdown, daily, streak) {
     lastProp = sutProp(num(f.dd.value), num(f.daily.value), num(f.streak.value));
     var out = document.getElementById('sut-prop-out');
     if (!lastProp) { out.textContent = 'Enter your max drawdown and a losing streak of at least 1.'; return; }
+    calculated('prop_firm');
     out.innerHTML = '<b>' + money(lastProp.perTrade) + ' risk per trade</b><span>Suggested daily stop ' +
       money(lastProp.dailyStop) + '. At this size it takes at least ' + Math.round(num(f.streak.value)) +
       ' losses in a row to use the full drawdown.</span>';
   }
-  size.addEventListener('input', updateSize);
-  prop.addEventListener('input', updateProp);
+  size.addEventListener('input', function () { touched.position_size = true; updateSize(); });
+  prop.addEventListener('input', function () { touched.prop_firm = true; updateProp(); });
   document.getElementById('sut-use-risk').addEventListener('click', function () {
     if (!lastProp) return;
     size.elements.risk.value = lastProp.perTrade;
+    touched.position_size = true;
     updateSize();
     size.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });

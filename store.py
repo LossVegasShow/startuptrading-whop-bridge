@@ -65,6 +65,17 @@ CREATE INDEX IF NOT EXISTS idx_write_log ON license_write_log(kind, at);
 CREATE TABLE IF NOT EXISTS reminder_approvals (
   customer_id INTEGER NOT NULL, kind TEXT NOT NULL, approved_at INTEGER NOT NULL,
   batch TEXT NOT NULL, PRIMARY KEY(customer_id, kind));
+CREATE TABLE IF NOT EXISTS customer_attribution (
+  membership_id TEXT PRIMARY KEY, customer_id INTEGER, visitor_id TEXT,
+  first_source TEXT, first_medium TEXT, first_campaign TEXT, first_content TEXT, first_channel TEXT,
+  first_landing TEXT, first_at INTEGER, last_source TEXT, last_medium TEXT, last_campaign TEXT,
+  last_content TEXT, last_channel TEXT, affiliate TEXT, method TEXT NOT NULL, captured_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS payments (
+  id TEXT PRIMARY KEY, membership_id TEXT, product_id TEXT, plan_id TEXT, status TEXT, substatus TEXT,
+  billing_reason TEXT, currency TEXT, total REAL, usd_total REAL, refunded_amount REAL, promo_code_id TEXT,
+  checkout_origin TEXT, checkout_surface TEXT, checkout_configuration_id TEXT, paid_at TEXT, refunded_at TEXT,
+  created_at TEXT, updated_at TEXT, last_source TEXT, received_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_payments_membership ON payments(membership_id);
 '''
 
 # Persistent PostgreSQL is required for hosted customer storage. SQLite remains

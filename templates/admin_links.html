@@ -1,0 +1,58 @@
+{% extends "_base.html" %}
+{% block title %}Campaign links{% endblock %}
+{% block brand_sub %}Operations{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span class="eyebrow">Marketing · private</span>
+  <h1>Campaign link generator</h1>
+  <p class="lead">Build a correctly attributed link for any post, video, email or ad. Pick where it's going and where it will
+    be posted; the source, medium and channel follow the StartUpTrading conventions automatically.</p>
+  <p class="mk-nav"><a href="/admin">Operations</a> · <a href="/admin/marketing">Marketing</a> · <b>Campaign links</b></p>
+</div>
+<form class="card mk-links" id="mk-links" autocomplete="off" onsubmit="return false">
+  <label>Destination
+    <select name="dest">
+      <option value="https://startuptrading.com/free-tools">Free tools (/free-tools)</option>
+      <option value="https://startuptrading.com/futures-position-size-calculator">Futures Position Size Calculator</option>
+      <option value="https://startuptrading.com/tradingview/atr-position-size-planner">TradingView indicator page</option>
+      <option value="https://startuptrading.com/">Homepage</option>
+      <option value="https://startuptrading.com/join">Membership (/join)</option>
+      <option value="custom">Other startuptrading.com page…</option>
+    </select></label>
+  <label class="mk-custom" hidden>Page URL <input name="custom" placeholder="https://startuptrading.com/…"></label>
+  <label>Where it will be posted
+    <select name="placement">
+      <option value="youtube|social">YouTube (description, pinned comment, community post)</option>
+      <option value="instagram|social">Instagram (bio, story, post)</option>
+      <option value="tiktok|social">TikTok (bio, video)</option>
+      <option value="facebook|social">Facebook (page, group)</option>
+      <option value="x|social">X / Twitter</option>
+      <option value="tradingview|social">TradingView (profile signature)</option>
+      <option value="discord|social">Discord</option>
+      <option value="reddit|social">Reddit</option>
+      <option value="newsletter|email">Email campaign</option>
+      <option value="podcast|referral">Podcast or collaboration (read on air)</option>
+      <option value="google|cpc">Google Ads</option>
+      <option value="facebook|paid_social">Meta ads (Facebook / Instagram)</option>
+      <option value="tiktok|paid_social">TikTok ads</option>
+      <option value="affiliate|affiliate">Affiliate link</option>
+    </select></label>
+  <label>Campaign <small>series or initiative, e.g. risk_lab, jack_reacts, launch_2026, tradingnut</small>
+    <input name="campaign" required placeholder="risk_lab"></label>
+  <label>Content <small>optional: the specific asset or placement, e.g. short25, bio, pinned_comment, signature</small>
+    <input name="content" placeholder="short25"></label>
+  <label class="mk-aff" hidden>Affiliate code (their Whop username) <input name="aff" placeholder="theirwhopname"></label>
+  <p class="mk-out"><b>Channel:</b> <span id="mk-channel">—</span></p>
+  <label>Your link <textarea id="mk-url" rows="3" readonly></textarea></label>
+  <p><button type="button" id="mk-copy">Copy link</button> <span class="muted" id="mk-msg"></span></p>
+</form>
+<section class="card">
+  <h2>Conventions</h2>
+  <p>Lowercase, words joined with underscores, no spaces or personal data. <b>Source</b> = the platform, <b>medium</b> = the
+    kind of traffic (social, email, referral, cpc, paid_social, affiliate), <b>campaign</b> = the series or initiative,
+    <b>content</b> = the individual asset. The <b>channel</b> is worked out from source and medium on the site; you never type
+    it. Affiliate links keep the affiliate's <code>?a=</code> code so Whop credits them. Full rules:
+    growth/MARKETING_ANALYTICS.md, section 3.</p>
+</section>
+<script src="/static/campaign-links.js"></script>
+{% endblock %}

@@ -36,7 +36,10 @@ def build_contact(c,cfg):
         'ninjatrader_email':c.get('nt_email') if c.get('verified') else '',
         'activation_status':('active' if c.get('status')=='eligible' and c.get('activated') else
                               'linked' if c.get('verified') else 'awaiting_link'),
-        'paid_through':c.get('paid_through') or ''}
+        'paid_through':c.get('paid_through') or '',
+        # How the subscriber found us (acquisition.py; empty when not captured).
+        'acquisition_first_channel':c.get('acquisition_first_channel') or '',
+        'acquisition_last_channel':c.get('acquisition_last_channel') or ''}
     try: mapping=json.loads(cfg.ghl_custom_fields_json or '{}')
     except (TypeError,ValueError):mapping={}
     if isinstance(mapping,dict):
@@ -55,6 +58,8 @@ async def sync_crm(cfg,cid):
         licenses=db.execute('SELECT product_id,license_id,expiration FROM licenses WHERE customer_id=?',(cid,)).fetchall()
         active={int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through']} & set(INDICATORS)
         c['activated']=active==set(INDICATORS) and bool(c['verified']) and c['status']=='eligible'
+        a=db.execute('SELECT first_channel,last_channel FROM customer_attribution WHERE membership_id=?',(c['membership_id'],)).fetchone()
+        if a:c['acquisition_first_channel'],c['acquisition_last_channel']=a['first_channel'],a['last_channel'] or a['first_channel']
     data=build_contact(c,cfg)
     headers={'Authorization':'Bearer '+cfg.ghl_api_key,'Version':'2021-07-28','Content-Type':'application/json'}
     url=f'{API}/contacts/{row["contact_id"]}' if row['contact_id'] else f'{API}/contacts/upsert'

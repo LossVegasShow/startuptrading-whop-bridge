@@ -1,0 +1,89 @@
+{% extends "_base.html" %}
+{% block title %}Marketing performance{% endblock %}
+{% block brand_sub %}Operations{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span class="eyebrow">Marketing · private</span>
+  <h1>Marketing performance</h1>
+  <p class="lead">Which acquisition channels bring paying, activated subscribers. Subscriptions and revenue come from Whop's
+    signed payment events; activation from licensing. Website traffic and leads live in GA4 and GoHighLevel and are not
+    copied here. Nothing on this page is estimated unless it says so.</p>
+  <p class="mk-nav"><a href="/admin">Operations</a> · <b>Marketing</b> · <a href="/admin/campaign-links">Campaign links</a>{% if ga4 %} · <a href="{{ ga4 }}" rel="noopener" target="_blank">GA4 ↗</a>{% endif %}</p>
+</div>
+
+<form class="card mk-filters" method="get" action="/admin/marketing">
+  <label>From <input type="date" name="start" value="{{ f.start }}"></label>
+  <label>To <input type="date" name="end" value="{{ f.end }}"></label>
+  <label>Attribute to
+    <select name="basis"><option value="first" {% if f.basis == 'first' %}selected{% endif %}>First touch</option>
+      <option value="last" {% if f.basis == 'last' %}selected{% endif %}>Latest touch</option></select></label>
+  <label>Channel
+    <select name="channel"><option value="">All</option>{% for k, v in channels.items() %}<option value="{{ k }}" {% if f.channel == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+  <label>Campaign
+    <select name="campaign"><option value="">All</option>{% for c in data.campaigns %}<option {% if f.campaign == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Landing page
+    <select name="landing"><option value="">All</option>{% for c in data.landings %}<option {% if f.landing == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Affiliate
+    <select name="affiliate"><option value="">All</option>{% for c in data.affiliates %}<option {% if f.affiliate == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Traffic
+    <select name="traffic"><option value="">All</option><option value="organic" {% if f.traffic == 'organic' %}selected{% endif %}>Organic</option><option value="paid" {% if f.traffic == 'paid' %}selected{% endif %}>Paid</option></select></label>
+  <button>Apply</button> <a class="btn secondary" href="/admin/marketing">Reset</a>
+</form>
+
+{% set t = data.totals %}
+<section class="card">
+  <h2>Executive overview</h2>
+  <div class="mk-grid">
+    <div><span class="mk-tag na">GA4</span><b>—</b><span>Website visitors</span></div>
+    <div><span class="mk-tag na">GoHighLevel</span><b>—</b><span>New leads (Form 7)</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ t.subscribers }}</b><span>Subscribers (memberships seen)</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ t.paying }}</b><span>Paying subscribers</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>${{ '%.2f'|format(t.net_revenue) }}</b><span>Net revenue (paid − refunds)</span></div>
+    <div><span class="mk-tag est">Estimate</span><b>${{ '%.2f'|format(t.mrr) }}</b><span>MRR from each active member's latest payment</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ '$%.2f'|format(t.ltv) if t.ltv is not none else '—' }}</b><span>Realised LTV per paying subscriber</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ '%s%%'|format(t.activation_rate) if t.activation_rate is not none else '—' }}</b><span>Activation completion</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ '%s%%'|format(t.churn_rate) if t.churn_rate is not none else '—' }}</b><span>Churned (membership ended)</span></div>
+    <div><span class="mk-tag na">No spend data</span><b>—</b><span>CAC and ROAS</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ '%s%%'|format(t.attribution_rate) if t.attribution_rate is not none else '—' }}</b><span>Subscribers with captured acquisition data</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ t.excluded }}</b><span>QA memberships excluded</span></div>
+  </div>
+  <p class="muted">Revenue: initial ${{ '%.2f'|format(t.initial_revenue) }} · renewals ${{ '%.2f'|format(t.renewal_revenue) }} · refunds ${{ '%.2f'|format(t.refunds) }} ({{ t.refunded_payments }} payments) · failed payment attempts {{ t.failed_payments }} · free or promo-only members {{ t.promo_only }} (never counted as revenue).
+    Lead-to-subscriber and visitor-to-subscriber rates need GA4 and GoHighLevel counts: see growth/MARKETING_ANALYTICS.md, phase 2.</p>
+</section>
+
+<section class="card">
+  <h2>Acquisition channels ({{ 'first' if f.basis == 'first' else 'latest' }} touch)</h2>
+  {% if data.channels %}
+  <div class="scroll"><table>
+    <tr><th>Channel</th><th>Subscribers</th><th>Paying</th><th>Activated</th><th>Activation</th><th>Net revenue</th><th>LTV</th><th>Churned</th><th>Visitors · Leads · Spend</th></tr>
+    {% for r in data.channels %}<tr><td>{{ r.label }}</td><td>{{ r.subscribers }}</td><td>{{ r.paying }}</td><td>{{ r.activated }}</td>
+      <td>{{ '%s%%'|format(r.activation_rate) if r.activation_rate is not none else '—' }}</td><td>${{ '%.2f'|format(r.net_revenue) }}</td>
+      <td>{{ '$%.2f'|format(r.ltv) if r.ltv is not none else '—' }}</td><td>{{ r.churned }}</td><td class="muted">GA4 · GHL · —</td></tr>{% endfor %}
+  </table></div>
+  {% else %}<p>No subscribers match these filters yet.</p>{% endif %}
+  <p class="muted">"Unknown" = no acquisition data reached the activation app (bought on Whop directly, another browser, or storage blocked). It is never guessed.</p>
+</section>
+
+<section class="card">
+  <h2>Landing pages (first page seen)</h2>
+  {% if data.landing_rows %}
+  <div class="scroll"><table><tr><th>Landing page</th><th>Subscribers</th><th>Paying</th><th>Activated</th><th>Net revenue</th></tr>
+    {% for r in data.landing_rows %}<tr><td>{{ r.landing }}</td><td>{{ r.subscribers }}</td><td>{{ r.paying }}</td><td>{{ r.activated }}</td><td>${{ '%.2f'|format(r.net_revenue) }}</td></tr>{% endfor %}
+  </table></div>{% else %}<p>No data yet.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>Customer funnel</h2>
+  <div class="scroll"><table><tr><th>Stage</th><th>Count</th><th>Source</th></tr>
+    <tr><td>Website visitor</td><td>—</td><td>GA4: Reports → Acquisition</td></tr>
+    <tr><td>Free tool engagement</td><td>—</td><td>GA4 events <code>tool_use</code>, <code>calculation_complete</code></td></tr>
+    <tr><td>Email signup</td><td>—</td><td>GA4 <code>generate_lead</code> / GoHighLevel Form 7</td></tr>
+    <tr><td>Membership offer click</td><td>—</td><td>GA4 <code>select_promotion</code></td></tr>
+    <tr><td>Checkout initiated</td><td>—</td><td>GA4 <code>begin_checkout</code></td></tr>
+    <tr><td>Subscription created</td><td>{{ t.subscribers }}</td><td>Verified (Whop)</td></tr>
+    <tr><td>NinjaTrader linked</td><td>{{ t.linked }}</td><td>Verified (activation)</td></tr>
+    <tr><td>Indicators licensed / customer activated</td><td>{{ t.activated }}</td><td>Verified (NinjaTrader licensing)</td></tr>
+    <tr><td>Product downloaded</td><td>—</td><td>GA4 <code>file_download</code></td></tr>
+  </table></div>
+</section>
+{% endblock %}

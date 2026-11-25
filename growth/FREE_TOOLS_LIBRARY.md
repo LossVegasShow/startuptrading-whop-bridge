@@ -132,9 +132,15 @@ Hidden; create each as a contact custom field, single-line text, and set its
 | Latest UTM medium | `last_utm_medium` | `social` |
 | Latest UTM campaign | `last_utm_campaign` | `risk_planner` |
 | Latest UTM content | `last_utm_content` | |
+| First acquisition channel | `first_channel` | `youtube`, `ai_referral`, `direct`… (taxonomy: `MARKETING_ANALYTICS.md` §3) |
+| Latest acquisition channel | `last_channel` | `tradingview` |
 
-A visit with no UTMs but an outside referrer is recorded as source = the referring
-site (for example `youtube.com`) with medium `referral`. Direct visits leave them blank.
+A visit with no UTMs but an outside referrer is recorded with a canonical source (for
+example `youtube`) and medium `referral` (`organic` for search engines). Our own
+journey (GoHighLevel, Whop, payment pages, our domains) is never a source. A
+genuinely direct first visit is `(direct)`; an undeterminable one is `(unknown)`.
+Latest touch falls back to the first touch when there has been no later external
+source. Details: `MARKETING_ANALYTICS.md` §2–3.
 
 ### 4.2 Form settings to change in GoHighLevel
 

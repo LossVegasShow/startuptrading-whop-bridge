@@ -352,3 +352,22 @@ th { color: var(--muted); font: 600 11.5px var(--mono); text-transform: uppercas
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* Marketing dashboard and campaign links */
+.mk-nav { margin-top: 10px; color: var(--muted); }
+.mk-filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.mk-filters label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.mk-filters select, .mk-filters input { min-width: 140px; }
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+.mk-grid > div { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--line, #232a36); border-radius: 10px; }
+.mk-grid b { font-size: 22px; }
+.mk-grid span:last-child { color: var(--muted); font-size: 13px; }
+.mk-tag { justify-self: start; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+.mk-tag.ok { color: var(--ok, #3fb950); }
+.mk-tag.est { color: var(--accent, #fa7b39); }
+.mk-tag.na { color: var(--muted); }
+.mk-links { display: grid; gap: 14px; }
+.mk-links label { display: grid; gap: 6px; }
+.mk-links small { color: var(--muted); font-weight: 400; }
+.mk-links label[hidden] { display: none; }
+.mk-links textarea { width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2, #161c26); color: var(--text, #ecf0f5); border: 1px solid var(--line, #232a36); border-radius: 8px; padding: 10px; }

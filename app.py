@@ -2,6 +2,7 @@
 Works with a Whop link and verified buyer email; embedded Whop SSO adapter is NOT claimed.
 """
 import asyncio,hashlib,hmac,json,os,secrets, smtplib,ssl,time,base64
+import datetime as dt
 from urllib.parse import urlencode
 import httpx
 from email.message import EmailMessage
@@ -29,6 +30,7 @@ from security import verify_webhook,hash_token,require_admin
 import customer_errors
 import email_templates
 import controls
+import acquisition
 
 cfg=Config(); engine=Engine(cfg)
 ROOT=Path(__file__).parent
@@ -158,6 +160,8 @@ async def event_worker():
                 purge_expired(db)
                 lifecycle_emails.schedule_reminders(db)
             await process_pending(cfg)
+            try:await acquisition.refresh_payments(cfg,connect)
+            except Exception:pass
             with connect(cfg) as db:issues=attention.find_issues(db,cfg)
             await alerts.notify(cfg,lambda:connect(cfg),issues)
         except Exception: pass
@@ -222,7 +226,14 @@ def health():
 
 @app.get('/',response_class=HTMLResponse)
 def index(request:Request):
-    return page(request,'index.html',indicators=INDICATORS,affiliate=cfg.affiliate_url,admin_preview_enabled=cfg.admin_test_enabled and preview_allowlist_configured())
+    resp=page(request,'index.html',indicators=INDICATORS,affiliate=cfg.affiliate_url,admin_preview_enabled=cfg.admin_test_enabled and preview_allowlist_configured())
+    # Anonymous acquisition data handed over by links from startuptrading.com
+    # (tracking.js sutHandoff). Kept through Whop sign-in, stored once per membership.
+    handoff=acquisition.parse_handoff(request.query_params)
+    if handoff:
+        resp.set_cookie(acquisition.ATTR_COOKIE,acquisition.cookie_value(handoff),max_age=2*86400,httponly=True,
+                        secure=cfg.public_base_url.startswith('https://'),samesite='lax')
+    return resp
 
 
 def preview_allowlist_configured():
@@ -475,7 +486,7 @@ def oauth_login():
     return RedirectResponse(url,302)
 
 @app.get('/oauth/callback')
-async def oauth_callback(code:str='',state:str='',error:str=''):
+async def oauth_callback(request:Request,code:str='',state:str='',error:str=''):
     if error or not code or not state:raise HTTPException(400,'Whop sign-in declined or incomplete')
     with connect(cfg) as db:
         row=db.execute('SELECT verifier,nonce FROM oauth_states WHERE state_hash=? AND expires_at>?',(hash_token(state),int(time.time()))).fetchone()
@@ -539,6 +550,9 @@ async def oauth_callback(code:str='',state:str='',error:str=''):
                             'buyer_verified' if person.get('email_verified') is True else 'invited',int(time.time())))
             cid=cur.lastrowid
         request_crm_sync(db,cid)
+        # How this buyer found us, if the activation link carried it. Never overwrites.
+        if acquisition.record_attribution(db,membership_id,cid,acquisition.read_cookie(request.cookies.get(acquisition.ATTR_COOKIE))):
+            audit(db,cid,'attribution_captured','activation link')
         # Whop states the email is verified; otherwise the existing buyer-email code remains required.
         if person.get('email_verified') is True and not row:
             audit(db,cid,'whop_verified_identity','OAuth userinfo and eligible membership')
@@ -546,6 +560,7 @@ async def oauth_callback(code:str='',state:str='',error:str=''):
         db.execute('INSERT INTO sessions(token_hash,customer_id,expires_at) VALUES(?,?,?)',
                    (hash_token(session),cid,int(time.time())+86400*14))
     response=RedirectResponse('/onboarding',303)
+    response.delete_cookie(acquisition.ATTR_COOKIE)
     response.set_cookie('sut_session',session,httponly=True,
         secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=1209600)
     return response
@@ -799,6 +814,29 @@ async def admin_reminders_release(request:Request):
         'when':'Each approved reminder sends at its scheduled time (already-due ones within RECONCILE_INTERVAL_SECONDS), '
                'and only while licensing is open for that member.'})
 
+def _day(v,default=None):
+    try:return int(dt.datetime.strptime(v,'%Y-%m-%d').replace(tzinfo=dt.timezone.utc).timestamp()) if v else default
+    except ValueError:return default
+
+@app.get('/admin/marketing',response_class=HTMLResponse)
+def admin_marketing(request:Request,start:str='',end:str='',basis:str='first',channel:str='',campaign:str='',
+                    landing:str='',affiliate:str='',traffic:str=''):
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    basis='last' if basis=='last' else 'first'
+    s0=_day(start);e0=_day(end)
+    with connect(cfg) as db:
+        data=acquisition.report(cfg,db,start=s0,end=(e0+86400 if e0 else None),basis=basis,
+                              channel=channel if channel in acquisition.CHANNELS else '',campaign=campaign[:120],
+                              landing=landing[:120],affiliate=affiliate[:64],traffic=traffic if traffic in ('paid','organic') else '')
+    return page(request,'admin_marketing.html',data=data,channels=acquisition.CHANNELS,
+                f={'start':start,'end':end,'basis':basis,'channel':channel,'campaign':campaign,'landing':landing,
+                   'affiliate':affiliate,'traffic':traffic},ga4=cfg.ga4_property_url)
+
+@app.get('/admin/campaign-links',response_class=HTMLResponse)
+def admin_campaign_links(request:Request):
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    return page(request,'admin_links.html',channels=acquisition.CHANNELS)
+
 @app.get('/admin/attention',response_class=HTMLResponse)
 def admin_attention(request:Request):
     require_admin(request,cfg.admin_password,cfg.public_base_url)
@@ -838,6 +876,9 @@ async def webhook(request:Request):
         cur=db.execute('INSERT OR IGNORE INTO webhook_events(webhook_id,event_type,object_id,received_at,state) VALUES(?,?,?,?,?)',
                        (mid,event_type[:120],str(objid)[:130],int(time.time()),'queued' if event_type in EVENTS else 'ignored'))
         duplicate=cur.rowcount==0
+        # Revenue: the signed payment event itself is the source of truth (non-personal fields only).
+        if event_type.startswith('payment.') and isinstance(obj,dict):
+            acquisition.record_payment(db,obj,'webhook:'+event_type)
     # Durable event storage is immediate; reconciliation uses up-to-date Whop membership, not payload assumptions.
     return {'received':True,'duplicate':duplicate}
 
