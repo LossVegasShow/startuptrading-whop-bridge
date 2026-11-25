@@ -1,0 +1,50 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// Decide the dollar risk first, let ATR set the stop, let the stop set the size.
+//@version=6
+indicator("ATR Position Size & Stop Planner", shorttitle = "ATR Size", overlay = true)
+
+// ── Inputs ────────────────────────────────────────────────────────────────
+riskUsd   = input.float(250.0, "Risk per trade ($)", minval = 1, group = "Risk")
+atrLen    = input.int(14, "ATR length", minval = 1, group = "Stop")
+stopMult  = input.float(1.5, "Stop distance (× ATR)", minval = 0.1, step = 0.1, group = "Stop")
+pvInput   = input.float(0.0, "Dollars per point (0 = use the symbol's)", minval = 0, group = "Contract",
+     tooltip = "Leave at 0 to use the chart symbol's point value, e.g. ES = 50, MES = 5, NQ = 20, MNQ = 2.")
+showStops = input.bool(true, "Show long and short stop levels", group = "Display")
+tablePos  = input.string("Top right", "Panel position", options = ["Top right", "Bottom right", "Top left", "Bottom left"], group = "Display")
+
+// ── Math ──────────────────────────────────────────────────────────────────
+atr        = ta.atr(atrLen)
+pointValue = pvInput > 0 ? pvInput : syminfo.pointvalue
+tick       = syminfo.mintick
+// Stop distance in points, rounded UP to a whole tick so the real stop is never tighter than planned.
+stopPts    = math.ceil(atr * stopMult / tick) * tick
+perContract = stopPts * pointValue
+contracts  = perContract > 0 ? math.floor(riskUsd / perContract) : 0
+actualRisk = contracts * perContract
+stopTicks  = tick > 0 ? math.round(stopPts / tick) : 0
+
+plot(showStops ? close - stopPts : na, "Long stop", color = color.new(color.red, 20), style = plot.style_stepline)
+plot(showStops ? close + stopPts : na, "Short stop", color = color.new(color.orange, 20), style = plot.style_stepline)
+
+// ── Panel ─────────────────────────────────────────────────────────────────
+pos = switch tablePos
+    "Bottom right" => position.bottom_right
+    "Top left"     => position.top_left
+    "Bottom left"  => position.bottom_left
+    => position.top_right
+
+var table panel = table.new(pos, 2, 7, bgcolor = color.new(#0b0e13, 5), border_color = color.new(#2a3240, 0), border_width = 1)
+
+row(r, label, value, valueColor) =>
+    table.cell(panel, 0, r, label, text_color = color.new(#9aa4b2, 0), text_size = size.small, text_halign = text.align_left)
+    table.cell(panel, 1, r, value, text_color = valueColor, text_size = size.small, text_halign = text.align_right)
+
+if barstate.islast
+    white = color.new(#e8edf3, 0)
+    row(0, "ATR(" + str.tostring(atrLen) + ")", str.tostring(atr, format.mintick), white)
+    row(1, "Stop (" + str.tostring(stopMult) + "× ATR)", str.tostring(stopPts, format.mintick) + " pts · " + str.tostring(stopTicks) + " ticks", white)
+    row(2, "$ per point", "$" + str.tostring(pointValue, "#,##0.##"), white)
+    row(3, "Risk per contract", "$" + str.tostring(perContract, "#,##0.00"), white)
+    row(4, "Your risk", "$" + str.tostring(riskUsd, "#,##0.00"), white)
+    row(5, "Contracts (rounded down)", contracts > 0 ? str.tostring(contracts) : "0: skip, or use the micro", contracts > 0 ? color.new(#3ddc97, 0) : color.new(#ff6b5b, 0))
+    row(6, "Actual risk", "$" + str.tostring(actualRisk, "#,##0.00"), white)

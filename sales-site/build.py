@@ -39,9 +39,9 @@ WHOP_LOADER = 'https://js.whop.com/static/checkout/loader.js'
 # name -> (source template, standalone file, embed file, <title>, description)
 PAGES = {
     'sales': ('page.html', 'index.html', 'ghl-embed.html',
-              'StartUpTrading: proprietary NinjaTrader tools, trade room and masterclasses',
-              "Jack's proprietary NinjaTrader 8 tools, licensed to your account automatically, plus the StartUpTrading Discord and masterclasses. "
-              '${price_monthly}/month, cancel anytime.'),
+              'Futures Indicators for NinjaTrader 8 | StartUpTrading',
+              "ATR position sizing and trend scanning indicators for NinjaTrader 8, licensed automatically. "
+              "Every new tool, Jack's trade room and masterclasses. ${price_monthly}/mo."),
     'welcome': ('welcome.html', 'welcome.html', 'welcome-embed.html',
                 'Welcome to StartUpTrading',
                 'Your StartUpTrading membership: next steps to activate your indicators.'),
@@ -139,6 +139,9 @@ def render(cfg, name='sales'):
         body = pattern.sub(lambda m: m.group(1) if on else '', body)
         pattern = re.compile(rf'<!--ifnot:{key}-->(.*?)<!--endifnot:{key}-->', re.S)
         body = pattern.sub(lambda m: '' if on else m.group(1), body)
+    ld = structured_data(name, cfg, body)
+    if ld:
+        body += '\n<script type="application/ld+json">' + ld + '</script>'
     has_checkout = '<div data-whop-checkout-plan-id=' in body
     loader = f'<script async defer src="{WHOP_LOADER}"></script>\n' if has_checkout else ''
     embed = f'{FONTS}\n<style>\n{css}\n</style>\n{body}\n<script>\n{js}\n</script>\n{loader}'
@@ -151,6 +154,48 @@ def render(cfg, name='sales'):
             '<style>html,body{margin:0;background:#07090d}</style>\n'
             f'</head>\n<body>\n{embed}</body>\n</html>\n')
     return embed, full
+
+
+def _text(fragment):
+    return ' '.join(html.unescape(re.sub(r'<[^>]+>', ' ', fragment)).split())
+
+
+def structured_data(name, cfg, body):
+    """schema.org JSON-LD that search engines read: the business, the membership
+    with its two prices, the FAQ, and the free calculator. Built from the same
+    config and copy as the page, so it can't drift from what visitors see."""
+    site = cfg['join_url'].split('/join')[0]
+    org = {'@type': 'Organization', '@id': site + '/#org', 'name': 'StartUpTrading', 'url': site + '/'}
+    if cfg.get('youtube_url'):
+        org['sameAs'] = [cfg['youtube_url']]
+    if name == 'sales':
+        offers = [{'@type': 'Offer', 'name': label, 'price': price, 'priceCurrency': 'USD', 'url': cfg['join_url'],
+                   'availability': 'https://schema.org/InStock',
+                   'priceSpecification': {'@type': 'UnitPriceSpecification', 'price': price, 'priceCurrency': 'USD',
+                                          'billingDuration': 1, 'unitCode': unit}}
+                  for label, price, unit in (('Monthly membership', cfg['price_monthly'], 'MON'),
+                                             ('Annual membership', cfg['price_annual'], 'ANN'))]
+        app = {'@type': 'SoftwareApplication', 'name': 'StartUpTrading membership',
+               'applicationCategory': 'FinanceApplication', 'operatingSystem': 'Windows (NinjaTrader 8)',
+               'description': 'Proprietary NinjaTrader 8 tools (ATR Order Automation and Trend Scanner & Market '
+                              'Selector) licensed automatically to the member\'s NinjaTrader account, every new tool as '
+                              'it is released, a private Discord trade room and masterclasses.',
+               'url': cfg['join_url'], 'publisher': {'@id': site + '/#org'}, 'offers': offers}
+        faq = [{'@type': 'Question', 'name': _text(q), 'acceptedAnswer': {'@type': 'Answer', 'text': _text(a)}}
+               for q, a in re.findall(r'<details><summary>(.*?)</summary><p>(.*?)</p></details>', body, re.S)]
+        graph = [org, {'@type': 'WebSite', '@id': site + '/#site', 'name': 'StartUpTrading', 'url': site + '/',
+                       'publisher': {'@id': site + '/#org'}}, app]
+        if faq:
+            graph.append({'@type': 'FAQPage', 'mainEntity': faq})
+    elif name == 'calculator':
+        graph = [org, {'@type': 'WebApplication', 'name': 'Futures Position Size Calculator & Prop-Firm Risk Planner',
+                       'applicationCategory': 'FinanceApplication', 'operatingSystem': 'Any (web browser)',
+                       'url': site + '/futures-position-size-calculator', 'publisher': {'@id': site + '/#org'},
+                       'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'}}]
+    else:
+        return ''
+    # </ can't appear inside a <script> block.
+    return json.dumps({'@context': 'https://schema.org', '@graph': graph}, separators=(',', ':')).replace('</', '<\\/')
 
 
 def main():
