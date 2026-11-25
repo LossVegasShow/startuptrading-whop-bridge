@@ -273,3 +273,23 @@ def test_setup_copy_passes_marketing_compliance():
 def test_welcome_links_to_the_install_guide():
     cfg, embed, _ = welcome()
     assert f'href="{cfg["setup_url"]}"' in embed
+
+
+def test_structured_data_matches_the_page():
+    cfg, embed, _ = rendered()
+    ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', embed, re.S).group(1))
+    types = {g['@type']: g for g in ld['@graph']}
+    assert set(types) == {'Organization', 'WebSite', 'SoftwareApplication', 'FAQPage'}
+    prices = sorted(o['price'] for o in types['SoftwareApplication']['offers'])
+    assert prices == sorted([cfg['price_monthly'], cfg['price_annual']])
+    questions = re.findall(r'<details><summary>(.*?)</summary>', embed)
+    assert len(types['FAQPage']['mainEntity']) == len(questions) > 5
+    assert 'TSMS' not in json.dumps(ld)
+    # No reviews or ratings: none exist yet, and inventing them is not allowed.
+    assert 'aggregateRating' not in json.dumps(ld) and 'review' not in json.dumps(ld).lower()
+
+
+def test_titles_and_descriptions_fit_search_results():
+    for name, (_, _, _, title, description) in load_build().PAGES.items():
+        assert len(title) <= 65, name
+        assert len(description.replace('{price_monthly}', '99')) <= 160, name

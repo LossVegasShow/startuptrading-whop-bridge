@@ -1,0 +1,29 @@
+TITLE
+ATR Position Size & Stop Planner
+
+DESCRIPTION (paste as-is; TradingView forbids links, websites and company names here)
+
+Most traders pick their size first and squeeze the stop to fit it. This script does it the other way round, in three steps:
+
+1. Decide your dollar risk per trade (the "Risk per trade" input).
+2. Let volatility set the stop: the stop sits a multiple of ATR away from price (default 1.5 × ATR(14)), rounded up to a whole tick so the real stop is never tighter than planned.
+3. Let the stop set the size: contracts = risk ÷ (stop in points × dollars per point), always rounded DOWN, so the actual risk never exceeds the risk you chose.
+
+What you see
+• A panel with ATR, the stop in points and ticks, dollars per point, risk per contract, your risk, the number of contracts and the actual risk.
+• Optional long-stop and short-stop levels drawn from the current price.
+• When one contract already risks more than your limit, the panel says 0. The honest choices are to skip the trade or use the micro contract (for example MES instead of ES, MNQ instead of NQ).
+
+Inputs
+• Risk per trade ($)
+• ATR length and stop multiple
+• Dollars per point: leave at 0 to use the chart symbol's own point value, or type one in (ES 50, MES 5, NQ 20, MNQ 2, CL 1000, GC 100)
+• Panel position and stop-level display
+
+Notes
+• Works on any futures symbol; on non-futures symbols, enter the point value yourself.
+• The calculation uses the last closed bar's ATR. It's a planning aid, not a signal: it doesn't tell you when or which way to trade.
+• Educational tool. Futures trading involves substantial risk of loss.
+
+SIGNATURE (Premium plan: Profile settings → Signature; the ONLY place a link is allowed)
+Free futures position size calculator and Jack's NinjaTrader 8 tools: startuptrading.com
