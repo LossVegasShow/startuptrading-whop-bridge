@@ -48,6 +48,14 @@ PAGES = {
     'setup': ('setup.html', 'setup.html', 'setup-embed.html',
               'Install your StartUpTrading tools',
               'How to download, import and add your StartUpTrading tools to NinjaTrader 8.'),
+    'free_tools': ('free-tools.html', 'free-tools.html', 'free-tools-embed.html',
+                   'Free Futures Trading Tools for TradingView & NinjaTrader',
+                   'Free tools from futures trader Jack Gleason: an ATR position size planner for TradingView, '
+                   'a position size calculator and an ATR indicator for NinjaTrader 8.'),
+    'tv_atr': ('tradingview-atr-planner.html', 'tradingview-atr-planner.html', 'tradingview-atr-planner-embed.html',
+               'ATR Position Size & Stop Planner for TradingView (Free)',
+               'Free TradingView indicator: set your dollar risk, place the stop by ATR and see how many futures '
+               'contracts fit. Method, examples and limitations.'),
     'calculator': ('calculator.html', 'calculator.html', 'calculator-embed.html',
                    'Futures Position Size Calculator & Prop-Firm Risk Planner (Free)',
                    'Free futures position size calculator for ES, NQ, MES, MNQ, CL, GC and more. Size from ATR '
@@ -101,7 +109,7 @@ def render(cfg, name='sales'):
     page = re.sub(r'<!--include:([\w.-]+\.html)-->', lambda m: (SRC / m.group(1)).read_text(), page)
     css = (SRC / 'styles.css').read_text()
     # affiliate.js runs first: it sets window.SUT_AFFILIATE for app.js.
-    js = (SRC / 'affiliate.js').read_text() + '\n' + (SRC / 'app.js').read_text()
+    js = '\n'.join((SRC / f).read_text() for f in ('affiliate.js', 'tracking.js', 'app.js'))
     cfg = dict(cfg)
     # Plan IDs come from the checkout URLs so there is a single source of truth.
     for url_key, plan_key in (('checkout_url', 'plan_monthly'), ('checkout_url_annual', 'plan_annual')):
@@ -116,6 +124,11 @@ def render(cfg, name='sales'):
     cfg['cta_href'] = '#checkout' if embed_on else cfg['checkout_url']
     values = {k: html.escape(str(v), quote=True) for k, v in cfg.items()}
     values['candles'] = candles()
+    values['nav'] = nav_html(cfg, name)
+    values['tool_filters'], values['tool_cards'] = directory_html(cfg)
+    values['subscribe'] = subscribe_html(cfg, name)
+    values['membership_note'] = membership_note_html(cfg)
+    values['tv_cta'] = tv_cta_html(cfg)
     values['cta_attr'] = '' if embed_on else ' data-checkout'
     cfg['exit_offer'] = 'true' if str(cfg.get('exit_offer', '')).lower() == 'true' and cfg.get('free_indicator_url') else ''
     for place in FREE_PLACEMENTS:
@@ -156,6 +169,12 @@ def render(cfg, name='sales'):
     return embed, full
 
 
+def breadcrumbs(site, trail):
+    items = [{'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': site + '/'}]
+    items += [{'@type': 'ListItem', 'position': i, 'name': n, 'item': u} for i, (n, u) in enumerate(trail, 2)]
+    return {'@type': 'BreadcrumbList', 'itemListElement': items}
+
+
 def _text(fragment):
     return ' '.join(html.unescape(re.sub(r'<[^>]+>', ' ', fragment)).split())
 
@@ -187,6 +206,26 @@ def structured_data(name, cfg, body):
                        'publisher': {'@id': site + '/#org'}}, app]
         if faq:
             graph.append({'@type': 'FAQPage', 'mainEntity': faq})
+    elif name == 'free_tools':
+        reg = load_tools()
+        items = []
+        for i, t in enumerate(reg['tools'], 1):
+            items.append({'@type': 'ListItem', 'position': i, 'url': cfg.get(t['page'], ''), 'name': t['name']})
+        graph = [org, {'@type': 'CollectionPage', 'name': 'Free futures trading tools', 'url': cfg['free_tools_url'],
+                       'publisher': {'@id': site + '/#org'},
+                       'mainEntity': {'@type': 'ItemList', 'itemListElement': items}},
+                 breadcrumbs(site, [('Free tools', cfg['free_tools_url'])])]
+    elif name == 'tv_atr':
+        app = {'@type': 'SoftwareApplication', 'name': 'ATR Position Size & Stop Planner',
+               'applicationCategory': 'FinanceApplication', 'operatingSystem': 'TradingView',
+               'description': 'Free TradingView indicator that sizes futures positions from a dollar risk and an '
+                              'ATR-based stop, rounding contracts down so risk never exceeds the limit.',
+               'url': cfg['tv_atr_page_url'], 'publisher': {'@id': site + '/#org'},
+               'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'}}
+        if cfg.get('tv_atr_script_url'):
+            app['downloadUrl'] = cfg['tv_atr_script_url']
+        graph = [org, app, breadcrumbs(site, [('Free tools', cfg['free_tools_url']),
+                                              ('ATR Position Size & Stop Planner', cfg['tv_atr_page_url'])])]
     elif name == 'calculator':
         graph = [org, {'@type': 'WebApplication', 'name': 'Futures Position Size Calculator & Prop-Firm Risk Planner',
                        'applicationCategory': 'FinanceApplication', 'operatingSystem': 'Any (web browser)',
@@ -207,7 +246,149 @@ def main():
         (DIST / full_name).write_text(full)
         print(f'{name}: wrote dist/{full_name} and dist/{embed_name} ({len(embed) // 1024} KB)')
     (DIST / 'affiliate-tracking.html').write_text(affiliate_snippet())
-    print('affiliate: wrote dist/affiliate-tracking.html (GoHighLevel site-wide tracking code)')
+    (DIST / 'site-tracking.html').write_text(site_tracking_snippet())
+    print('tracking: wrote dist/site-tracking.html (GoHighLevel site-wide tracking code; replaces affiliate-tracking.html)')
+
+
+NAV_HOME_ANCHORS = (('Technology', '#indicators'), ('Free Tools', None), ('Education', None),
+                    ('Community', '#room'), ('About Jack', '#jack'))
+
+
+def membership_open(cfg):
+    return str(cfg.get('membership_open', '')).strip().lower() == 'true'
+
+
+def nav_html(cfg, name):
+    """Main navigation. On the sales page, section links are on-page anchors. On
+    other pages they point at the sales page, but only once the membership is
+    open (membership_open); until then free pages link only to free resources.
+    Education goes to /learn when learn_url is set, otherwise to the sales page's
+    education section, so there are never links to pages that don't exist."""
+    e = lambda v: html.escape(v, quote=True)
+    on_sales = name == 'sales'
+    sales = '' if on_sales else cfg['sales_page_url']
+    show_sales = on_sales or membership_open(cfg)
+    links = []
+    for label, anchor in NAV_HOME_ANCHORS:
+        if label == 'Free Tools':
+            links.append((label, cfg['free_tools_url'], ''))
+        elif label == 'Education':
+            if cfg.get('learn_url'):
+                links.append((label, cfg['learn_url'], ''))
+            elif show_sales:
+                links.append((label, sales + '#room', ''))
+        elif show_sales:
+            links.append((label, sales + anchor, ''))
+    items = ''.join(f'<a href="{e(href)}"{attr}>{label}</a>' for label, href, attr in links)
+    if on_sales:
+        attr = '' if cfg.get('embed_checkout') else ' data-checkout'
+        cta = f'<a class="sut-btn sut-btn-sm" href="{e(cfg["cta_href"])}"{attr} data-member-cta="nav">Become a Member</a>'
+    elif show_sales:
+        cta = f'<a class="sut-btn sut-btn-sm" href="{e(sales)}#pricing" data-member-cta="nav">Become a Member</a>'
+    elif cfg.get('ghl_subscribe_form_url'):
+        cta = '<a class="sut-btn sut-btn-sm" href="#subscribe">Get updates</a>'
+    else:
+        cta = ''
+    home = '#top' if on_sales else cfg['site_url'] + '/'
+    logo = ('<a class="sut-logo" href="' + e(home) + '" aria-label="StartUpTrading home">'
+            '<svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>'
+            'STARTUPTRADING</a>')
+    return (f'<header class="sut-nav">\n  <div class="sut-wrap sut-nav-in">\n    {logo}\n'
+            f'    <nav class="sut-links" aria-label="Main">{items}</nav>\n    {cta}\n  </div>\n</header>')
+
+
+def load_tools():
+    return json.loads((HERE / 'tools.json').read_text())
+
+
+def tool_links(cfg, tool):
+    page = cfg.get(tool['page'], '')
+    ext = cfg.get(tool.get('external_url', ''), '') if tool.get('external_url') else ''
+    return page, ext
+
+
+def directory_html(cfg):
+    """Filter buttons and one card per tool, from tools.json."""
+    e = lambda v: html.escape(str(v), quote=True)
+    reg = load_tools()
+    used = {c for t in reg['tools'] for c in t['categories']}
+    filters = ''.join(
+        f'<button type="button" class="sut-filter" data-filter="{key}" aria-pressed="{"true" if key == "all" else "false"}">'
+        f'{e(label)}</button>' for key, label in reg['categories'].items())
+    cards = []
+    for t in reg['tools']:
+        page, ext = tool_links(cfg, t)
+        status = 'is-live' if t['status'] == 'available' else 'is-soon'
+        extra = ''
+        if ext:
+            extra = (f' <a class="sut-tool-ext" href="{e(ext)}" target="_blank" rel="noopener" data-outbound="tradingview" '
+                     f'data-tool-id="{e(t["id"])}">Open on TradingView ↗</a>')
+        cards.append(
+            f'<article class="sut-tool" data-categories="{" ".join(t["categories"])}" data-tool-id="{e(t["id"])}">'
+            f'<div class="sut-tool-top"><span class="sut-tool-platform">{e(t["platform"])}</span>'
+            f'<span class="sut-tool-status {status}">{e(t["status_label"])}</span></div>'
+            f'<h3>{e(t["name"])}</h3><p>{e(t["summary"])}</p>'
+            f'<div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="{e(page)}">{e(t["cta"])} '
+            f'<span class="sut-arrow" aria-hidden="true">→</span></a>{extra}</div></article>')
+    empty = ''.join(
+        f'<p class="sut-tool-empty" data-empty-for="{key}" hidden>{e(label)} resources are on the way. '
+        + ('<a href="#subscribe">Get notified</a> when they land.' if cfg.get('ghl_subscribe_form_url') else 'Check back soon.')
+        + '</p>' for key, label in reg['categories'].items() if key != 'all' and key not in used)
+    return filters, ''.join(cards) + empty
+
+
+def subscribe_html(cfg, name):
+    """Optional email signup (a GoHighLevel form). Never required to use a tool.
+    Omitted entirely until ghl_subscribe_form_url is set."""
+    url = cfg.get('ghl_subscribe_form_url', '')
+    if not url:
+        return ''
+    e = lambda v: html.escape(str(v), quote=True)
+    interest = {'tv_atr': 'tradingview', 'calculator': 'calculators', 'free_tools': 'free-tools'}.get(name, 'general')
+    sep = '&' if '?' in url else '?'
+    src = e(f'{url}{sep}source_page={name}&interest={interest}')
+    return (f'<section class="sut-section sut-alt" id="subscribe"><div class="sut-wrap sut-sub">'
+            f'<div><p class="sut-eyebrow">Optional</p><h2>New tools, first.</h2>'
+            f'<p class="sut-lead">Get an email when Jack releases a new free tool or lesson. The tools on this page '
+            f'never need an email. Unsubscribe anytime.</p></div>'
+            f'<iframe class="sut-sub-form" data-ghl-form data-interest="{e(interest)}" data-source-page="{e(name)}" '
+            f'src="{src}" title="Email updates sign-up" loading="lazy"></iframe></div></section>')
+
+
+def membership_note_html(cfg):
+    """Secondary membership introduction on free pages: a link only once the
+    membership is open; until then, an optional 'get notified'."""
+    e = lambda v: html.escape(str(v), quote=True)
+    head = ('<p class="sut-eyebrow muted">Trade on NinjaTrader?</p>'
+            '<h3>The membership does this for you.</h3>'
+            '<p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, '
+            'alongside the Trend Scanner &amp; Market Selector, Jack\'s trade room and masterclasses. Every new tool is included.</p>')
+    if membership_open(cfg):
+        link = (f'<a class="sut-btn sut-btn-ghost" href="{e(cfg["sales_page_url"])}" data-member-cta="free_page">'
+                f'See the membership <span class="sut-arrow" aria-hidden="true">→</span></a>')
+    elif cfg.get('ghl_subscribe_form_url'):
+        link = '<a class="sut-btn sut-btn-ghost" href="#subscribe">Get notified when it opens</a>'
+    else:
+        link = '<p class="sut-fine">Opening soon.</p>'
+    return f'<aside class="sut-free sut-member-note"><div class="sut-free-copy">{head}{link}</div></aside>'
+
+
+def tv_cta_html(cfg):
+    """The TradingView button: a real link once the script is published, a
+    clear 'coming soon' (never a dead link) until then."""
+    e = lambda v: html.escape(str(v), quote=True)
+    if cfg.get('tv_atr_script_url'):
+        return (f'<a class="sut-btn sut-btn-lg" href="{e(cfg["tv_atr_script_url"])}" target="_blank" rel="noopener" '
+                f'data-outbound="tradingview" data-tool-id="atr-position-size-planner">Open on TradingView ↗</a>')
+    return ('<span class="sut-btn sut-btn-lg sut-btn-disabled" aria-disabled="true">Coming soon to TradingView</span>'
+            f'<a class="sut-btn sut-btn-ghost sut-btn-lg" href="{e(cfg["calculator_url"])}">Use the web calculator now</a>')
+
+
+def site_tracking_snippet():
+    """Site-wide GoHighLevel tracking code: affiliate capture plus attribution
+    and analytics events (sales-site/src/affiliate.js + tracking.js)."""
+    return ('<!-- StartUpTrading: affiliate attribution + analytics (sales-site/src/affiliate.js, tracking.js) -->\n'
+            '<script>\n' + (SRC / 'affiliate.js').read_text() + '\n' + (SRC / 'tracking.js').read_text() + '</script>\n')
 
 
 def affiliate_snippet():

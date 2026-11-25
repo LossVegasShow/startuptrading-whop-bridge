@@ -1,0 +1,49 @@
+{
+  "_comment": "Free tools directory (/free-tools). Add a tool by adding one object to 'tools'. status: available | coming_soon. Every 'page' must be a live startuptrading.com page; 'external_url' (optional) is only shown when set. Categories must be keys of 'categories'.",
+  "categories": {
+    "all": "All tools",
+    "tradingview": "TradingView",
+    "ninjatrader": "NinjaTrader",
+    "calculators": "Calculators",
+    "education": "Education"
+  },
+  "tools": [
+    {
+      "id": "atr-position-size-planner",
+      "name": "ATR Position Size & Stop Planner",
+      "platform": "TradingView",
+      "categories": ["tradingview", "calculators"],
+      "status": "coming_soon",
+      "status_label": "Coming soon to TradingView",
+      "page": "tv_atr_page_url",
+      "external_url": "tv_atr_script_url",
+      "summary": "Set your dollar risk, let ATR place the stop, and see how many contracts fit, right on your TradingView chart.",
+      "cta": "See how it works",
+      "interest": "tradingview"
+    },
+    {
+      "id": "futures-position-size-calculator",
+      "name": "Futures Position Size Calculator",
+      "platform": "Web: any browser",
+      "categories": ["calculators"],
+      "status": "available",
+      "status_label": "Free · no sign-up",
+      "page": "calculator_url",
+      "summary": "Contracts for ES, NQ, MES, MNQ, CL, GC and more from your risk and stop, plus a prop-firm risk planner.",
+      "cta": "Open the calculator",
+      "interest": "calculators"
+    },
+    {
+      "id": "atr-expansion-bar",
+      "name": "ATR Expansion Bar Indicator",
+      "platform": "NinjaTrader 8",
+      "categories": ["ninjatrader"],
+      "status": "available",
+      "status_label": "Free download",
+      "page": "free_indicator_url",
+      "summary": "The ATR Expansion Bar and risk calculator Jack runs on his own NinjaTrader charts to size every trade.",
+      "cta": "Get the free indicator",
+      "interest": "ninjatrader"
+    }
+  ]
+}

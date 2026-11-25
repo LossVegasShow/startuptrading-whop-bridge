@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Futures Trading Tools for TradingView &amp; NinjaTrader</title>
+<meta name="description" content="Free tools from futures trader Jack Gleason: an ATR position size planner for TradingView, a position size calculator and an ATR indicator for NinjaTrader 8.">
+<meta name="theme-color" content="#07090d">
+<style>html,body{margin:0;background:#07090d}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* StartUpTrading sales page. Every rule is scoped under .sut so the page can
+   live inside a GoHighLevel Code element without fighting the builder's CSS. */
+.sut {
+  --bg: #07090d; --bg-2: #0b0e14; --surface: #10151d; --surface-2: #161c26;
+  --line: #1d2530; --line-2: #2a3441;
+  --text: #ecf0f5; --text-2: #b3bcc9; --muted: #7b8698;
+  --accent: #fa7b39; --accent-2: #ff925a; --accent-ink: #170b03; --accent-soft: rgba(250,123,57,.12);
+  --up: #3ddc97; --down: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Full-bleed even when GHL wraps the element in a fixed-width container. */
+  position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+  background: var(--bg); color: var(--text);
+  font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-align: left;
+  overflow-x: clip;
+}
+.sut *, .sut *::before, .sut *::after { box-sizing: border-box; }
+.sut :where(h1, h2, h3, p, ul, ol, figure) { margin: 0; padding: 0; }
+.sut :where(ul, ol) { list-style: none; }
+.sut a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.sut a:hover { color: var(--accent-2); }
+.sut :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.sut ::selection { background: var(--accent); color: var(--accent-ink); }
+.sut h1, .sut h2, .sut h3 { color: var(--text); font-family: var(--sans); font-weight: 600; letter-spacing: -.03em; }
+.sut h1 { font-size: clamp(38px, 4.9vw, 64px); line-height: 1.02; letter-spacing: -.045em; }
+.sut h2 { font-size: clamp(28px, 3.8vw, 44px); line-height: 1.08; }
+.sut h3 { font-size: clamp(20px, 2.2vw, 26px); line-height: 1.2; }
+.sut .sut-dim { color: var(--muted); }
+.sut-wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+.sut .sut-eyebrow, .sut .sut-tag {
+  display: inline-flex; align-items: center; gap: 9px;
+  font: 500 12px/1.4 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--accent);
+}
+.sut .sut-tag { color: var(--muted); letter-spacing: .04em; }
+.sut-live { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 0 4px rgba(61,220,151,.14); animation: sut-pulse 2.4s ease-in-out infinite; }
+@keyframes sut-pulse { 50% { box-shadow: 0 0 0 7px rgba(61,220,151,.04); } }
+.sut .sut-lead { font-size: clamp(16.5px, 1.5vw, 19px); line-height: 1.6; color: var(--text-2); max-width: 600px; }
+.sut .sut-fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+/* Buttons */
+.sut .sut-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 46px; padding: 0 20px; border-radius: 9px; border: 1px solid transparent;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font: 600 15px/1 var(--sans); letter-spacing: -.01em; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.sut .sut-btn:hover { background: var(--accent-2); color: var(--accent-ink); }
+.sut .sut-btn:active { transform: translateY(1px); }
+.sut .sut-btn-sm { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.sut .sut-btn-lg { min-height: 54px; padding: 0 26px; font-size: 16.5px; }
+.sut .sut-btn-block { width: 100%; }
+.sut .sut-btn-ghost { background: transparent; color: var(--text); border-color: var(--line-2); }
+.sut .sut-btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: #3b4757; }
+.sut .sut-arrow { transition: transform .15s ease; }
+.sut .sut-btn:hover .sut-arrow { transform: translateX(3px); }
+
+/* Nav */
+.sut-nav { position: sticky; top: 0; z-index: 20; background: rgba(7,9,13,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.sut-nav-in { display: flex; align-items: center; gap: 28px; height: 64px; }
+.sut .sut-logo { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 14px var(--sans); letter-spacing: .08em; }
+.sut .sut-logo:hover { color: var(--text); }
+.sut-links { display: flex; gap: 26px; margin-left: auto; }
+.sut .sut-links a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-links a:hover { color: var(--text); }
+
+/* Hero */
+.sut-hero { position: relative; padding: 84px 0 72px; border-bottom: 1px solid var(--line); isolation: isolate; }
+.sut-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: -1px -1px;
+  -webkit-mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%); mask-image: radial-gradient(90% 80% at 70% 30%, #000 30%, transparent 85%);
+}
+.sut-hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.sut-hero-copy h1 { margin: 22px 0 22px; }
+.sut-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.sut-assure { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+.sut-assure li { font: 500 12.5px var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.sut-assure li::before { content: "✓"; color: var(--up); }
+
+/* Platform-window frames */
+.sut-frame { border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: 0 30px 80px -40px rgba(0,0,0,.8); }
+.sut-frame-bar { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-frame-bar span { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); }
+.sut-frame-bar em { margin-left: 10px; font: 500 11.5px var(--mono); font-style: normal; color: var(--muted); letter-spacing: .03em; }
+.sut-frame-body { position: relative; aspect-ratio: 16 / 10; background: linear-gradient(to bottom, var(--surface), var(--bg-2)); }
+.sut-candles { position: absolute; inset: 22px 18px; width: calc(100% - 36px); height: calc(100% - 44px); opacity: .5; }
+.sut-candles .up { fill: var(--up); stroke: var(--up); }
+.sut-candles .dn { fill: var(--down); stroke: var(--down); }
+.sut-candles line { stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* Placeholders: obvious on purpose so nothing ships unreplaced. */
+.sut .sut-ph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  padding: 24px; border: 1.5px dashed rgba(250,123,57,.45); border-radius: 10px; background: rgba(250,123,57,.04);
+}
+.sut .sut-ph strong { font: 600 14px var(--mono); color: var(--accent); letter-spacing: .02em; }
+.sut .sut-ph small { font-size: 13px; color: var(--muted); max-width: 340px; line-height: 1.5; }
+.sut .sut-frame > .sut-ph { border: 0; border-radius: 0; }
+.sut .sut-ph-overlay { position: absolute; inset: 0; border: 0; border-radius: 0; background: linear-gradient(rgba(7,9,13,.35), rgba(7,9,13,.7)); }
+.sut-play { width: 62px; height: 62px; border-radius: 50%; background: var(--accent); position: relative; margin-bottom: 8px; box-shadow: 0 0 0 10px rgba(250,123,57,.15); }
+.sut-play::after { content: ""; position: absolute; left: 25px; top: 20px; border-left: 17px solid var(--accent-ink); border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+.sut .sut-ph-shot { aspect-ratio: 16 / 10; }
+.sut .sut-ph-tall { aspect-ratio: 4 / 5; }
+.sut .sut-ph-portrait { aspect-ratio: 4 / 5; }
+.sut .sut-ph-text { align-items: flex-start; text-align: left; margin-top: 22px; min-height: 150px; }
+.sut .sut-ph-quote { min-height: 190px; }
+
+/* Strip */
+.sut-strip { border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.sut-strip-in { display: grid; grid-template-columns: repeat(4, 1fr); }
+.sut-strip-in > div { padding: 26px 24px; display: flex; flex-direction: column; gap: 4px; }
+.sut-strip-in > div + div { border-left: 1px solid var(--line); }
+.sut-strip b { font: 600 26px/1.1 var(--mono); color: var(--text); letter-spacing: -.02em; font-feature-settings: "tnum"; }
+.sut-strip span { font-size: 13.5px; color: var(--muted); }
+
+/* Sections */
+.sut-section { padding: 112px 0; border-bottom: 1px solid var(--line); }
+.sut-alt { background: var(--bg-2); }
+.sut-head { max-width: 760px; margin-bottom: 64px; }
+.sut-head h2 { margin: 16px 0 18px; }
+.sut-section h2 + .sut-lead { margin-top: 18px; }
+.sut-section .sut-eyebrow + h2 { margin-top: 16px; }
+
+/* Indicators */
+.sut-ind { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
+.sut-ind + .sut-ind { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow h3 { margin: 14px 0 14px; }
+.sut-ind-flip .sut-ind-copy { order: 2; }
+.sut-ind-copy h3 { margin: 14px 0 14px; }
+.sut-ind-copy > p:not(.sut-tag) { color: var(--text-2); font-size: 16.5px; }
+.sut-ticks { margin-top: 22px; display: grid; gap: 10px; }
+.sut-ticks li { display: grid; grid-template-columns: 22px 1fr; color: var(--text-2); font-size: 15px; }
+.sut-ticks li::before { content: "+"; font: 600 15px var(--mono); color: var(--accent); }
+
+/* Trade room */
+.sut-room { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 64px; align-items: center; }
+.sut-list { margin-top: 34px; border-top: 1px solid var(--line); }
+.sut-list li { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.sut-list b { color: var(--text); font-weight: 600; }
+.sut-list span { color: var(--muted); font-size: 15px; }
+
+/* Jack */
+.sut-jack { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: center; }
+.sut .sut-yt { margin-top: 22px; font-weight: 500; }
+
+/* Steps */
+.sut-steps { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sut-steps li { padding: 30px 28px; background: var(--surface); }
+.sut-steps li + li { border-left: 1px solid var(--line); }
+.sut-steps span { font: 500 12px var(--mono); color: var(--accent); letter-spacing: .06em; }
+.sut-steps h3 { margin: 14px 0 10px; font-size: 21px; }
+.sut-steps p { color: var(--text-2); font-size: 15px; }
+
+/* Pricing */
+.sut-price-grid { position: relative; display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.sut-price-grid > .sut-price:only-of-type { grid-column: 1 / -1; max-width: 460px; }
+.sut-price { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 32px; box-shadow: 0 0 0 1px rgba(250,123,57,.08), 0 40px 90px -50px rgba(250,123,57,.35); }
+.sut-price-head { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sut .sut-amount { margin-top: 12px; display: flex; align-items: baseline; gap: 6px; }
+.sut .sut-amount b { font: 600 60px/1 var(--sans); letter-spacing: -.05em; color: var(--text); font-feature-settings: "tnum"; }
+.sut .sut-amount span { color: var(--muted); font-size: 16px; }
+.sut-price .sut-ticks { margin: 24px 0 28px; }
+
+/* Billing toggle (CSS-only). Inputs sit first in .sut-price so the
+   sibling selector (~) can switch everything after them. */
+.sut .sut-bill-in { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.sut-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 24px;
+  border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg-2); }
+.sut .sut-toggle label { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px;
+  border-radius: 7px; cursor: pointer; font: 600 14px var(--sans); color: var(--muted); transition: background-color .15s ease, color .15s ease; }
+.sut .sut-toggle label:hover { color: var(--text); }
+.sut .sut-toggle em { font: 600 11px var(--mono); font-style: normal; letter-spacing: .02em; color: var(--up);
+  background: rgba(61,220,151,.12); padding: 2px 6px; border-radius: 999px; }
+.sut #sut-bill-m:checked ~ * .sut-toggle-m,
+.sut #sut-bill-y:checked ~ * .sut-toggle-y { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.sut #sut-bill-m:focus-visible ~ * .sut-toggle-m,
+.sut #sut-bill-y:focus-visible ~ * .sut-toggle-y { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sut #sut-bill-m:checked ~ * .sut-y, .sut #sut-bill-m:checked ~ .sut-y,
+.sut #sut-bill-y:checked ~ * .sut-m, .sut #sut-bill-y:checked ~ .sut-m { display: none; }
+.sut .sut-per { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+/* Embedded Whop checkout */
+.sut-checkout { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); padding: 24px 24px 18px; scroll-margin-top: 88px; }
+.sut-checkout-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.sut .sut-checkout-plan { font: 500 12.5px var(--mono); color: var(--text-2); }
+.sut-lock { display: inline-block; width: 10px; height: 8px; margin-right: 2px; border-radius: 2px; background: var(--up); position: relative; top: 1px; }
+.sut-lock::before { content: ""; position: absolute; left: 2px; top: -5px; width: 6px; height: 6px; border: 1.5px solid var(--up); border-bottom: 0; border-radius: 4px 4px 0 0; box-sizing: border-box; }
+.sut-embed { position: relative; min-height: 480px; }
+.sut-embed-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: 500 13px var(--mono); color: var(--muted); border: 1px dashed var(--line-2); border-radius: 10px; pointer-events: none; }
+.sut-embed > [data-whop-checkout-plan-id] { position: relative; z-index: 1; }
+.sut-embed.is-loaded { min-height: 0; }
+.sut-embed.is-loaded .sut-embed-loading { display: none; }
+/* The unselected plan's checkout stays mounted but collapsed, so Whop's iframe
+   keeps its width and is sized correctly when the visitor switches. */
+.sut #sut-bill-m:checked ~ * .sut-embed.sut-y,
+.sut #sut-bill-y:checked ~ * .sut-embed.sut-m { display: block; height: 0; min-height: 0; overflow: hidden; visibility: hidden; }
+.sut .sut-checkout-fallback { margin-top: 12px; text-align: center; }
+
+/* "Not ready yet?" free-indicator offer */
+.sut-free { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center;
+  margin-top: 28px; padding: 32px; border: 1px dashed var(--line-2); border-radius: 14px; background: var(--bg-2); }
+.sut-free h3 { margin: 10px 0 10px; font-size: 22px; }
+.sut-free-copy > p:not(.sut-eyebrow) { color: var(--text-2); font-size: 15.5px; max-width: 460px; }
+.sut-free .sut-btn { margin-top: 20px; }
+.sut .sut-eyebrow.muted { color: var(--muted); }
+.sut-compare { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sut-compare th, .sut-compare td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+.sut-compare thead th { font: 600 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sut-compare thead th:last-child { color: var(--accent); }
+.sut-compare tbody th { font-weight: 500; color: var(--text-2); }
+.sut-compare td { width: 92px; text-align: center; font: 600 14px var(--mono); }
+.sut-compare thead th:not(:first-child) { text-align: center; }
+.sut-compare td.yes { color: var(--up); }
+.sut-compare td.no { color: var(--muted); }
+.sut-compare tbody tr:last-child th, .sut-compare tbody tr:last-child td { border-bottom: 0; }
+.sut .sut-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Exit-intent offer (desktop only, at most once a week; see app.js) */
+.sut-exit[hidden] { display: none; }
+.sut-exit { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
+.sut-exit-backdrop { position: absolute; inset: 0; background: rgba(4,6,9,.72); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.sut-exit-card { position: relative; max-width: 480px; width: 100%; padding: 32px; border: 1px solid var(--line-2);
+  border-radius: 14px; background: var(--surface); box-shadow: 0 40px 100px -30px rgba(0,0,0,.9); animation: sut-pop .18s ease-out; }
+@keyframes sut-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+.sut-exit-card h3 { margin: 12px 0 10px; font-size: 24px; }
+.sut-exit-card > p:not(.sut-eyebrow) { color: var(--text-2); }
+.sut-exit-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.sut .sut-exit-x { position: absolute; top: 10px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted); font: 400 24px/1 var(--sans); cursor: pointer; }
+.sut .sut-exit-x:hover { color: var(--text); background: var(--surface-2); }
+
+/* Quotes */
+.sut-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* FAQ */
+.sut-faq-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: start; }
+.sut-faq details { border-top: 1px solid var(--line); }
+.sut-faq details:last-child { border-bottom: 1px solid var(--line); }
+.sut-faq summary { cursor: pointer; list-style: none; position: relative; padding: 22px 40px 22px 0; font-weight: 550; font-size: 17px; color: var(--text); }
+.sut-faq summary::-webkit-details-marker { display: none; }
+.sut-faq summary::after { content: "+"; position: absolute; right: 4px; top: 18px; font: 400 24px var(--mono); color: var(--muted); transition: transform .2s ease; }
+.sut-faq details[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+.sut-faq details p { padding: 0 40px 24px 0; color: var(--text-2); }
+
+/* Final CTA */
+.sut-final { padding: 120px 0; text-align: center; border-bottom: 1px solid var(--line);
+  background: radial-gradient(60% 80% at 50% 100%, rgba(250,123,57,.12), transparent 70%); }
+.sut-final-in { display: flex; flex-direction: column; align-items: center; }
+.sut-final h2 { font-size: clamp(32px, 4.6vw, 56px); max-width: 760px; }
+.sut-final .sut-lead { margin: 18px auto 32px; }
+
+/* Footer */
+.sut-foot { padding: 48px 0 56px; }
+.sut-foot-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.sut-foot-top nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.sut .sut-foot-top nav a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.sut .sut-foot-top nav a:hover { color: var(--text); }
+.sut-risk { margin-top: 28px; display: grid; gap: 12px; max-width: 900px; }
+.sut-risk p { font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+.sut-risk b { color: var(--text-2); }
+.sut .sut-copy { margin-top: 8px; font-family: var(--mono); }
+
+/* Thank-you page (/welcome) */
+.sut-welcome { padding: 96px 0 84px; }
+.sut-welcome-in > * { max-width: 760px; }
+.sut-welcome h1 { margin: 22px 0 22px; }
+.sut-welcome .sut-fine { margin-top: 16px; }
+.sut .sut-links-always { display: flex; }
+.sut-next { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sut-next > li { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: 28px; background: var(--surface); }
+.sut-next > li + li { border-top: 1px solid var(--line); }
+.sut-next-n { font: 600 13px/28px var(--mono); color: var(--muted); }
+.sut-next h3 { font-size: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sut-next p { margin-top: 8px; color: var(--text-2); font-size: 15.5px; max-width: 640px; }
+.sut-next .sut-btn { margin-top: 18px; }
+.sut-next > li.is-done .sut-next-n { color: var(--up); }
+.sut-next > li.is-current { background: linear-gradient(90deg, var(--accent-soft), transparent 60%), var(--surface); box-shadow: inset 3px 0 0 var(--accent); }
+.sut-next > li.is-current .sut-next-n { color: var(--accent); }
+.sut-done-chip { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--up); background: rgba(61,220,151,.12); padding: 3px 8px; border-radius: 999px; }
+.sut-help { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+.sut-help > div { border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+.sut-help h3 { font-size: 17px; }
+.sut-help p { margin-top: 8px; color: var(--text-2); font-size: 15px; word-break: break-word; }
+
+/* Responsive */
+@media (max-width: 980px) {
+  .sut-hero-grid, .sut-ind, .sut-room, .sut-jack, .sut-price-grid, .sut-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sut-price-grid { gap: 20px; }
+  .sut-free { grid-template-columns: 1fr; gap: 28px; }
+  .sut-price-grid > .sut-price { max-width: none; }
+  .sut-ind-flip .sut-ind-copy { order: 0; }
+  .sut-portrait { max-width: 420px; }
+  .sut-links { display: none; }
+  .sut-nav-in .sut-btn { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  .sut-welcome { padding: 56px 0 52px; }
+  .sut-next > li { grid-template-columns: 1fr; gap: 6px; padding: 22px 18px; }
+  .sut-help { grid-template-columns: 1fr; }
+  .sut-welcome .sut-cta-row .sut-btn, .sut-next .sut-btn { width: 100%; }
+  .sut-wrap { padding: 0 18px; }
+  .sut-hero { padding: 52px 0 48px; }
+  .sut-section { padding: 76px 0; }
+  .sut-head { margin-bottom: 40px; }
+  .sut-ind + .sut-ind { margin-top: 64px; padding-top: 64px; }
+  .sut-grow { margin-top: 64px; padding-top: 64px; }
+  .sut-strip-in { grid-template-columns: 1fr 1fr; }
+  .sut-strip-in > div:nth-child(3) { border-left: 0; }
+  .sut-strip-in > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .sut-steps, .sut-quotes { grid-template-columns: 1fr; }
+  .sut-steps li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .sut-list li { grid-template-columns: 1fr; gap: 4px; }
+  .sut .sut-cta-row .sut-btn { width: 100%; }
+  .sut-price { padding: 24px; }
+  .sut-free { padding: 22px 18px; }
+  .sut-compare th, .sut-compare td { padding: 9px 6px; }
+  .sut-compare td { width: 72px; }
+  .sut-exit-card { padding: 26px 20px; }
+  .sut-checkout { padding: 18px 14px 14px; }
+  .sut-final { padding: 84px 0; }
+  .sut-logo svg + * { display: none; }
+}
+@media (max-width: 400px) {
+  .sut .sut-nav .sut-logo { font-size: 12.5px; letter-spacing: .06em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sut *, .sut *::before, .sut *::after { animation: none !important; transition: none !important; }
+}
+
+/* Free calculator page */
+.sut-calc-hero { padding: 72px 0 8px; }
+.sut-calc-hero h1 { font-size: clamp(32px, 4.2vw, 54px); }
+.sut-calc-hero .sut-lead { margin-top: 20px; }
+.sut-calc { padding-top: 48px; }
+.sut-calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.sut .sut-calc-card { display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
+.sut .sut-calc-h { font-size: 22px; letter-spacing: -.02em; }
+.sut .sut-calc-card label { display: grid; gap: 6px; font: 500 13px/1.3 var(--sans); color: var(--text-2); }
+.sut .sut-calc-card input, .sut .sut-calc-card select {
+  width: 100%; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line-2);
+  background: var(--bg-2); color: var(--text); font: 500 16px/1 var(--mono);
+}
+.sut .sut-calc-card input:focus, .sut .sut-calc-card select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sut .sut-calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sut .sut-calc-row[hidden] { display: none; }
+.sut .sut-calc-out { display: grid; gap: 4px; padding: 16px; border-radius: 10px; background: var(--accent-soft); border: 1px solid rgba(250,123,57,.3); color: var(--text-2); font-size: 14px; }
+.sut .sut-calc-out b { color: var(--text); font-size: 22px; letter-spacing: -.02em; }
+.sut .sut-calc-out span { display: block; }
+.sut .sut-calc-cta { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-top: 32px; padding: 28px; border: 1px solid var(--line-2); border-radius: 14px; }
+.sut .sut-calc-cta p { color: var(--text-2); margin-top: 6px; }
+.sut .sut-calc-how { display: grid; gap: 14px; max-width: 760px; color: var(--text-2); }
+.sut .sut-calc-how b { color: var(--text); }
+.sut .sut-calc-table-h { margin: 48px 0 16px; font-size: 20px; }
+.sut .sut-calc-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+.sut .sut-calc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sut .sut-calc-table th, .sut .sut-calc-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.sut .sut-calc-table th { font: 500 12px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sut .sut-calc-table td:first-child { font: 600 14px var(--mono); color: var(--text); }
+@media (max-width: 860px) {
+  .sut-calc-grid { grid-template-columns: 1fr; }
+  .sut .sut-calc-cta { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .sut .sut-calc-row { grid-template-columns: 1fr; }
+  .sut .sut-calc-card { padding: 20px; }
+}
+
+/* ── Free tools directory, related links, optional sign-up ───────────────── */
+.sut-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.sut .sut-filter { font: 500 13.5px var(--sans); color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.sut .sut-filter:hover { color: var(--text); }
+.sut .sut-filter[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); }
+.sut-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.sut-tool { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+.sut-tool[hidden] { display: none; }
+.sut-tool-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 500 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.sut-tool-platform { color: var(--muted); }
+.sut-tool-status { padding: 2px 8px; border-radius: 999px; }
+.sut-tool-status.is-live { color: var(--up); background: rgba(61,220,151,.1); }
+.sut-tool-status.is-soon { color: var(--accent-2); background: var(--accent-soft); }
+.sut-tool h3 { margin: 16px 0 8px; font-size: 20px; }
+.sut-tool p { color: var(--text-2); font-size: 15px; flex: 1; }
+.sut-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 18px; }
+.sut .sut-tool-ext { font-size: 14px; }
+.sut-tool-empty { color: var(--text-2); padding: 28px; border: 1px dashed var(--line-2); border-radius: 14px; grid-column: 1 / -1; }
+.sut-tool-empty[hidden] { display: none; }
+.sut .sut-btn-disabled { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line-2); cursor: default; }
+.sut-related { list-style: none; margin: 0 0 32px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.sut .sut-related a { display: block; height: 100%; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-decoration: none; }
+.sut .sut-related a:hover { border-color: var(--line-2); }
+.sut-related b { display: block; color: var(--text); font-weight: 600; }
+.sut-related span { display: block; color: var(--text-2); font-size: 14.5px; margin-top: 6px; }
+.sut-member-note { margin-top: 8px; }
+.sut-sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.sut-sub-form { width: 100%; min-height: 460px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+@media (max-width: 980px) {
+  .sut-tools, .sut-related { grid-template-columns: 1fr 1fr; }
+  .sut-sub { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 640px) {
+  .sut-tools, .sut-related { grid-template-columns: 1fr; }
+}
+
+</style>
+<div class="sut" id="top" data-page="free_tools" data-tool-id="free-tools-directory">
+<!-- Free tools directory (GHL path /free-tools). Cards come from sales-site/tools.json;
+     add a tool there, not here. Built by sales-site/build.py; edit src/, not dist/. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <a class="sut-logo" href="https://startuptrading.com/" aria-label="StartUpTrading home"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>STARTUPTRADING</a>
+    <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/free-tools">Free Tools</a></nav>
+    
+  </div>
+</header>
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Free trading tools</p>
+    <h1>Free tools.<br><span class="sut-dim">Built by a futures trader.</span></h1>
+    <p class="sut-lead">The sizing and risk tools Jack Gleason uses in his own futures trading, free for TradingView, NinjaTrader and your browser. No sign-up needed.</p>
+  </div>
+</section>
+
+<section class="sut-section sut-tools-section">
+  <div class="sut-wrap">
+    <div class="sut-filters" role="group" aria-label="Filter tools" hidden><button type="button" class="sut-filter" data-filter="all" aria-pressed="true">All tools</button><button type="button" class="sut-filter" data-filter="tradingview" aria-pressed="false">TradingView</button><button type="button" class="sut-filter" data-filter="ninjatrader" aria-pressed="false">NinjaTrader</button><button type="button" class="sut-filter" data-filter="calculators" aria-pressed="false">Calculators</button><button type="button" class="sut-filter" data-filter="education" aria-pressed="false">Education</button></div>
+    <div class="sut-tools"><article class="sut-tool" data-categories="tradingview calculators" data-tool-id="atr-position-size-planner"><div class="sut-tool-top"><span class="sut-tool-platform">TradingView</span><span class="sut-tool-status is-soon">Coming soon to TradingView</span></div><h3>ATR Position Size &amp; Stop Planner</h3><p>Set your dollar risk, let ATR place the stop, and see how many contracts fit, right on your TradingView chart.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/tradingview/atr-position-size-planner">See how it works <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="calculators" data-tool-id="futures-position-size-calculator"><div class="sut-tool-top"><span class="sut-tool-platform">Web: any browser</span><span class="sut-tool-status is-live">Free · no sign-up</span></div><h3>Futures Position Size Calculator</h3><p>Contracts for ES, NQ, MES, MNQ, CL, GC and more from your risk and stop, plus a prop-firm risk planner.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/futures-position-size-calculator">Open the calculator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="ninjatrader" data-tool-id="atr-expansion-bar"><div class="sut-tool-top"><span class="sut-tool-platform">NinjaTrader 8</span><span class="sut-tool-status is-live">Free download</span></div><h3>ATR Expansion Bar Indicator</h3><p>The ATR Expansion Bar and risk calculator Jack runs on his own NinjaTrader charts to size every trade.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/indicators">Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><p class="sut-tool-empty" data-empty-for="education" hidden>Education resources are on the way. Check back soon.</p></div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">The idea behind them</p>
+      <h2>Size every trade from risk.</h2>
+    </div>
+    <div class="sut-calc-how">
+      <p>Every tool here starts from the same rule: <b>decide what you're willing to lose first, let volatility set the stop, and let the stop set the size.</b> Contracts are always rounded down, so the real risk never exceeds the risk you chose.</p>
+      <p>ATR (average true range) measures how far a market typically moves per bar. Placing the stop a multiple of ATR away keeps it outside normal noise. When volatility expands the stop widens and the size shrinks, so a quiet session and a news-driven session risk the same dollars.</p>
+      <p>The tools are planning aids. They don't tell you when or which way to trade, and they can't remove the risk of trading futures.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap">
+    <aside class="sut-free sut-member-note"><div class="sut-free-copy"><p class="sut-eyebrow muted">Trade on NinjaTrader?</p><h3>The membership does this for you.</h3><p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, alongside the Trend Scanner &amp; Market Selector, Jack's trade room and masterclasses. Every new tool is included.</p><p class="sut-fine">Opening soon.</p></div></aside>
+  </div>
+</section>
+
+
+
+<footer class="sut-foot">
+  <div class="sut-wrap">
+    <div class="sut-foot-top">
+      <span class="sut-logo">STARTUPTRADING</span>
+      <nav aria-label="Footer">
+        <a href="https://startuptrading.com/free-tools">Free tools</a>
+        <a href="https://activate.startuptrading.com/">Member activation</a>
+        <a href="mailto:support@startuptrading.com">Support</a>
+        
+        
+      </nav>
+    </div>
+    <div class="sut-risk">
+      <p><b>Risk disclosure.</b> Futures and forex trading involves substantial risk of loss and is not suitable for every investor. You could lose more than your initial investment. Only trade with money you can afford to lose. Past performance is not indicative of future results.</p>
+      <p>StartUpTrading provides software tools and educational content only. Nothing on this site or in the community is financial, investment or trading advice, or a recommendation to buy or sell any instrument. Hypothetical or simulated performance results have certain limitations; unlike an actual performance record, simulated results do not represent actual trading and may have under- or over-compensated for the impact of certain market factors, such as lack of liquidity.</p>
+      <p>NinjaTrader® is a registered trademark of NinjaTrader Group, LLC. StartUpTrading is not affiliated with or endorsed by NinjaTrader. Payments are processed by Whop.</p>
+      <p class="sut-copy">© <span data-year>2026</span> StartUpTrading</p>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://startuptrading.com/#org","name":"StartUpTrading","url":"https://startuptrading.com/"},{"@type":"CollectionPage","name":"Free futures trading tools","url":"https://startuptrading.com/free-tools","publisher":{"@id":"https://startuptrading.com/#org"},"mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://startuptrading.com/tradingview/atr-position-size-planner","name":"ATR Position Size & Stop Planner"},{"@type":"ListItem","position":2,"url":"https://startuptrading.com/futures-position-size-calculator","name":"Futures Position Size Calculator"},{"@type":"ListItem","position":3,"url":"https://startuptrading.com/indicators","name":"ATR Expansion Bar Indicator"}]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://startuptrading.com/"},{"@type":"ListItem","position":2,"name":"Free tools","item":"https://startuptrading.com/free-tools"}]}]}</script>
+<script>
+/* Whop affiliate attribution.
+   Affiliates share startuptrading.com/join?a=THEIR_CODE (or any startuptrading.com
+   page with ?a=). The code is remembered in this browser for AFF_DAYS, most recent
+   affiliate wins, and is passed to both embedded Whop checkouts (monthly and annual)
+   and to any Whop checkout or /join link on the page. It never changes the
+   checkout's return URL, plan or price. Used by the sales pages and, standalone,
+   as GoHighLevel's site-wide tracking code (dist/affiliate-tracking.html). */
+/*aff-core*/
+var SUT_AFF_KEY = 'sut_aff';
+var SUT_AFF_DAYS = 30;
+
+// Whop affiliate codes are usernames: letters, digits, dot, dash, underscore.
+function sutAffClean(v) {
+  v = String(v == null ? '' : v).trim();
+  return /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/.test(v) ? v : '';
+}
+
+// Decide the code for this visit. `search` is location.search, `stored` the saved
+// JSON (or null). Returns {code, save}: save is the JSON to store, or null.
+function sutAffPick(search, stored, now) {
+  var fromUrl = sutAffClean(new URLSearchParams(search || '').get('a'));
+  if (fromUrl) {
+    return { code: fromUrl, save: JSON.stringify({ code: fromUrl, exp: now + SUT_AFF_DAYS * 86400000 }) };
+  }
+  try {
+    var o = JSON.parse(stored || 'null');
+    var kept = o && o.exp > now ? sutAffClean(o.code) : '';
+    return { code: kept, save: null };
+  } catch (e) {
+    return { code: '', save: null };
+  }
+}
+
+// Add ?a=CODE to Whop checkout links and to links to the /join page, unless the
+// link already names an affiliate. Other links are returned unchanged.
+function sutAffDecorate(href, code, siteHost) {
+  if (!code) return href;
+  try {
+    var url = new URL(href);
+    var host = url.hostname.replace(/^www\./, '');
+    var site = String(siteHost || '').replace(/^www\./, '');
+    var whop = host === 'whop.com' && (/^\/checkout\//.test(url.pathname) || /^\/startuptrading\/?/i.test(url.pathname));
+    var join = host === site && /^\/join\/?$/.test(url.pathname);
+    if (!(whop || join) || url.searchParams.has('a')) return href;
+    url.searchParams.set('a', code);
+    return url.toString();
+  } catch (e) {
+    return href;
+  }
+}
+/*end-aff-core*/
+
+(function () {
+  var stored = null;
+  try { stored = window.localStorage.getItem(SUT_AFF_KEY); } catch (e) { /* storage blocked */ }
+  var pick = sutAffPick(window.location.search, stored, Date.now());
+  if (pick.save) { try { window.localStorage.setItem(SUT_AFF_KEY, pick.save); } catch (e) { /* this visit only */ } }
+  window.SUT_AFFILIATE = pick.code;
+  if (!pick.code) return;
+  var decorate = function () {
+    var links = document.querySelectorAll('a[href]');
+    for (var i = 0; i < links.length; i++) {
+      var next = sutAffDecorate(links[i].href, pick.code, window.location.hostname);
+      if (next !== links[i].href) links[i].href = next;
+    }
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+  else decorate();
+})();
+
+/* Attribution and analytics events for startuptrading.com.
+   Pushes events to window.dataLayer, so Google Tag Manager / GA4 (added through
+   GoHighLevel's tracking code) can turn them into reports. Nothing here sends data
+   anywhere by itself, sets cookies, or reads personal data.
+
+   Events
+     sut_attribution   once per page: first-touch and last-touch source (UTMs, referrer)
+     free_tool_view    a free tool's page was opened         {tool_id}
+     tool_use          a free tool was used (first input)     {tool_id}
+     outbound_click    a TradingView script link was clicked  {destination, tool_id}
+     email_subscribe   the optional sign-up form was submitted (GHL redirect ?subscribed=1)
+     checkout_intent   a Become a Member / Join button was clicked {placement}
+     checkout_view     the on-page Whop checkout scrolled into view
+     sut_purchase      the /welcome page loaded after checkout (sent by app.js)
+   Every event carries first_touch / last_touch so sales can be traced to a source. */
+/*track-core*/
+var SUT_ATTR_KEY = 'sut_attr';
+var SUT_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+// Where did this visit come from? UTMs win; otherwise an external referrer's host; otherwise direct.
+function sutTouch(search, referrer, ownHost, now) {
+  var q = new URLSearchParams(search || '');
+  var t = { at: now };
+  var hasUtm = false;
+  SUT_UTM_KEYS.forEach(function (k) {
+    var v = (q.get(k) || '').slice(0, 100);
+    if (v) { t[k] = v; hasUtm = true; }
+  });
+  if (!hasUtm) {
+    var host = '';
+    try { host = referrer ? new URL(referrer).hostname.replace(/^www\./, '') : ''; } catch (e) { host = ''; }
+    var own = String(ownHost || '').replace(/^www\./, '');
+    if (!host || host === own || host.slice(-(own.length + 1)) === '.' + own) return null;   // internal or direct
+    t.utm_source = host; t.utm_medium = 'referral';
+  }
+  return t;
+}
+
+// Keep the first touch forever (well, until storage is cleared) and update the last touch.
+function sutAttribution(stored, touch) {
+  var o = null;
+  try { o = JSON.parse(stored || 'null'); } catch (e) { o = null; }
+  if (!o || typeof o !== 'object') o = {};
+  if (touch) {
+    if (!o.first) o.first = touch;
+    o.last = touch;
+  }
+  return o;
+}
+/*end-track-core*/
+
+(function () {
+  var w = window, d = document;
+  w.dataLayer = w.dataLayer || [];
+  var stored = null;
+  try { stored = w.localStorage.getItem(SUT_ATTR_KEY); } catch (e) { /* storage blocked */ }
+  var attr = sutAttribution(stored, sutTouch(w.location.search, d.referrer, w.location.hostname, Date.now()));
+  try { w.localStorage.setItem(SUT_ATTR_KEY, JSON.stringify(attr)); } catch (e) { /* this page only */ }
+  var base = { first_touch: attr.first || null, last_touch: attr.last || null, affiliate: w.SUT_AFFILIATE || '' };
+  var push = function (event, data) {
+    var o = { event: event };
+    for (var k in base) o[k] = base[k];
+    for (var j in (data || {})) o[j] = data[j];
+    w.dataLayer.push(o);
+  };
+  w.SUT_TRACK = push;
+  push('sut_attribution');
+
+  var ready = function () {
+    // Free tool page views and first use.
+    var root = d.querySelector('.sut[data-tool-id]');
+    if (root) {
+      var tool = root.getAttribute('data-tool-id');
+      push('free_tool_view', { tool_id: tool });
+      var used = false;
+      var forms = root.querySelectorAll('[data-tool-use]');
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('input', function () {
+          if (!used) { used = true; push('tool_use', { tool_id: tool }); }
+        });
+      }
+    }
+    // Outbound TradingView clicks, and Become a Member / Join clicks.
+    d.addEventListener('click', function (ev) {
+      var a = ev.target.closest ? ev.target.closest('a') : null;
+      if (!a) return;
+      if (a.hasAttribute('data-outbound')) {
+        push('outbound_click', { destination: a.getAttribute('data-outbound'), tool_id: a.getAttribute('data-tool-id') || '' });
+      }
+      if (a.hasAttribute('data-member-cta')) {
+        push('checkout_intent', { placement: a.getAttribute('data-member-cta') });
+      }
+    }, true);
+    // The embedded checkout coming into view.
+    var checkout = d.getElementById('checkout');
+    if (checkout && w.IntersectionObserver) {
+      var seen = false;
+      new IntersectionObserver(function (entries, obs) {
+        if (!seen && entries.some(function (e) { return e.isIntersecting; })) {
+          seen = true; push('checkout_view'); obs.disconnect();
+        }
+      }, { threshold: 0.4 }).observe(checkout);
+    }
+    // Optional sign-up: GoHighLevel redirects back with ?subscribed=1.
+    if (new URLSearchParams(w.location.search).get('subscribed') === '1') {
+      push('email_subscribe', { source_page: (d.querySelector('.sut') || {}).getAttribute ? d.querySelector('.sut').getAttribute('data-page') : '' });
+    }
+    // Pass the source to the sign-up form so the CRM records it (GHL hidden fields).
+    var frames = d.querySelectorAll('iframe[data-ghl-form]');
+    for (var f = 0; f < frames.length; f++) {
+      try {
+        var src = new URL(frames[f].src);
+        var t = attr.first || {};
+        SUT_UTM_KEYS.forEach(function (k) { if (t[k] && !src.searchParams.has(k)) src.searchParams.set(k, t[k]); });
+        if (w.SUT_AFFILIATE) src.searchParams.set('affiliate', w.SUT_AFFILIATE);
+        frames[f].src = src.toString();
+      } catch (e) { /* keep the static src */ }
+    }
+  };
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', ready); else ready();
+})();
+
+(function () {
+  // Forward UTM tags from this page's URL to every checkout link, so Whop can
+  // attribute the sale to the campaign. The affiliate code comes from
+  // affiliate.js (this visit's ?a=, or the one remembered from an earlier visit).
+  var keep = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+  var here = new URLSearchParams(window.location.search);
+  var aff = window.SUT_AFFILIATE || '';
+  var links = document.querySelectorAll('.sut a[data-checkout]');
+  for (var i = 0; i < links.length; i++) {
+    try {
+      var url = new URL(links[i].href);
+      keep.forEach(function (k) {
+        if (here.has(k) && !url.searchParams.has(k)) url.searchParams.set(k, here.get(k));
+      });
+      if (aff && !url.searchParams.has('a')) url.searchParams.set('a', aff);
+      links[i].href = url.toString();
+    } catch (e) { /* leave the link as it is */ }
+  }
+  // Embedded Whop checkout: pass the affiliate code to EVERY mount (monthly and
+  // annual), so the sale is attributed whichever plan is chosen. UTM tags are
+  // forwarded by Whop's loader itself. Runs before the async loader mounts.
+  // Only adds this attribute: plan, theme and return URL are left as they are.
+  var embeds = document.querySelectorAll('.sut [data-whop-checkout-plan-id]');
+  for (var j = 0; j < embeds.length; j++) {
+    if (aff) embeds[j].setAttribute('data-whop-checkout-affiliate-code', aff);
+    (function (box) {
+      // Hide the "Loading…" note once Whop's iframe has loaded.
+      var wrap = box.parentNode;
+      var mark = function () { wrap.classList.add('is-loaded'); };
+      if (!window.MutationObserver) return;
+      new MutationObserver(function (_, obs) {
+        var frame = box.querySelector('iframe');
+        if (frame) { frame.addEventListener('load', mark); obs.disconnect(); }
+      }).observe(box, { childList: true });
+    })(embeds[j]);
+  }
+
+  // Thank-you page: tell any tag manager on the page that a purchase finished,
+  // once per browser session (GTM can map 'sut_purchase' to Meta/Google tags).
+  if (document.querySelector('.sut[data-page="welcome"]')) {
+    try {
+      if (!sessionStorage.getItem('sut_purchase_sent')) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ event: 'sut_purchase' });
+        sessionStorage.setItem('sut_purchase_sent', '1');
+      }
+    } catch (e) { /* storage blocked: skip */ }
+  }
+
+  // Free-indicator links: keep the visitor's original campaign (e.g. YouTube)
+  // when there is one; the placement tag (utm_content) always says which spot.
+  var free = document.querySelectorAll('.sut a[data-free]');
+  for (var f = 0; f < free.length; f++) {
+    try {
+      var furl = new URL(free[f].href);
+      ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) {
+        if (here.get(k)) furl.searchParams.set(k, here.get(k));
+      });
+      free[f].href = furl.toString();
+    } catch (e) { /* keep the static link */ }
+  }
+
+  // Exit-intent offer: desktop only, after 8s on the page, at most once a week,
+  // and never for someone who clicked Join or started the checkout.
+  var exitBox = document.getElementById('sut-exit');
+  if (exitBox && window.matchMedia && window.matchMedia('(pointer: fine) and (min-width: 900px)').matches) {
+    var store = {
+      get: function () { try { return Number(localStorage.getItem('sut_exit_seen') || 0); } catch (e) { return 0; } },
+      set: function () { try { localStorage.setItem('sut_exit_seen', String(Date.now())); } catch (e) {} }
+    };
+    var armed = false, committed = false, lastFocus = null;
+    setTimeout(function () { armed = true; }, 8000);
+    document.addEventListener('click', function (ev) {
+      var t = ev.target.closest && ev.target.closest('a');
+      if (t && (t.hasAttribute('data-checkout') || t.getAttribute('href') === '#checkout')) committed = true;
+    });
+    var checkoutBox = document.getElementById('checkout');
+    if (checkoutBox) checkoutBox.addEventListener('pointerdown', function () { committed = true; });
+    var close = function () {
+      exitBox.hidden = true;
+      document.removeEventListener('keydown', onKey);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    };
+    var onKey = function (ev) {
+      if (ev.key === 'Escape') close();
+      if (ev.key === 'Tab') {            // keep focus inside the dialog
+        var items = exitBox.querySelectorAll('a, button');
+        var first = items[0], last = items[items.length - 1];
+        if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+        else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      }
+    };
+    var closers = exitBox.querySelectorAll('[data-exit-close]');
+    for (var c = 0; c < closers.length; c++) closers[c].addEventListener('click', close);
+    document.addEventListener('mouseout', function (ev) {
+      if (!armed || committed || !exitBox.hidden || ev.relatedTarget || ev.clientY > 0) return;
+      if (Date.now() - store.get() < 7 * 24 * 3600 * 1000) return;
+      store.set();
+      lastFocus = document.activeElement;
+      exitBox.hidden = false;
+      document.addEventListener('keydown', onKey);
+      var cta = exitBox.querySelector('a[data-free]');
+      if (cta) cta.focus();
+    });
+  }
+
+  var year = document.querySelector('.sut [data-year]');
+  if (year) year.textContent = new Date().getFullYear();
+
+  // Free tools directory: category filters (all cards stay visible without JS).
+  var filterBar = document.querySelector('.sut .sut-filters');
+  if (filterBar) {
+    filterBar.hidden = false;
+    var cards = document.querySelectorAll('.sut .sut-tool');
+    var empties = document.querySelectorAll('.sut [data-empty-for]');
+    filterBar.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('[data-filter]');
+      if (!btn) return;
+      var key = btn.getAttribute('data-filter');
+      var shown = 0;
+      Array.prototype.forEach.call(filterBar.querySelectorAll('[data-filter]'), function (b) {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      Array.prototype.forEach.call(cards, function (c) {
+        var hit = key === 'all' || (' ' + c.getAttribute('data-categories') + ' ').indexOf(' ' + key + ' ') >= 0;
+        c.hidden = !hit; if (hit) shown++;
+      });
+      Array.prototype.forEach.call(empties, function (p) { p.hidden = !(shown === 0 && p.getAttribute('data-empty-for') === key); });
+    });
+  }
+})();
+
+</script>
+</body>
+</html>

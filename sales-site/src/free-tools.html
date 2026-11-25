@@ -1,0 +1,45 @@
+<div class="sut" id="top" data-page="free_tools" data-tool-id="free-tools-directory">
+<!-- Free tools directory (GHL path /free-tools). Cards come from sales-site/tools.json;
+     add a tool there, not here. Built by sales-site/build.py; edit src/, not dist/. -->
+
+{{nav}}
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Free trading tools</p>
+    <h1>Free tools.<br><span class="sut-dim">Built by a futures trader.</span></h1>
+    <p class="sut-lead">The sizing and risk tools Jack Gleason uses in his own futures trading, free for TradingView, NinjaTrader and your browser. No sign-up needed.</p>
+  </div>
+</section>
+
+<section class="sut-section sut-tools-section">
+  <div class="sut-wrap">
+    <div class="sut-filters" role="group" aria-label="Filter tools" hidden>{{tool_filters}}</div>
+    <div class="sut-tools">{{tool_cards}}</div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">The idea behind them</p>
+      <h2>Size every trade from risk.</h2>
+    </div>
+    <div class="sut-calc-how">
+      <p>Every tool here starts from the same rule: <b>decide what you're willing to lose first, let volatility set the stop, and let the stop set the size.</b> Contracts are always rounded down, so the real risk never exceeds the risk you chose.</p>
+      <p>ATR (average true range) measures how far a market typically moves per bar. Placing the stop a multiple of ATR away keeps it outside normal noise. When volatility expands the stop widens and the size shrinks, so a quiet session and a news-driven session risk the same dollars.</p>
+      <p>The tools are planning aids. They don't tell you when or which way to trade, and they can't remove the risk of trading futures.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap">
+    {{membership_note}}
+  </div>
+</section>
+
+{{subscribe}}
+
+<!--include:_footer.html-->
+</div>
