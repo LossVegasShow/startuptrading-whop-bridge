@@ -178,7 +178,10 @@ longStop    = entry - stopPts
 shortStop   = entry + stopPts
 longTarget  = targetR > 0 ? entry + stopPts * targetR : na
 shortTarget = targetR > 0 ? entry - stopPts * targetR : na
-hypoReward  = contracts * stopPts * pointValue * targetR
+// Hypothetical reward if the target is reached. Gross = price move only. Net = gross
+// less the same round-turn costs that are included in the estimated stop risk.
+grossReward = contracts * stopPts * pointValue * targetR
+netReward   = grossReward - contracts * myCost
 
 cur = syminfo.currency == "USD" ? "$" : syminfo.currency + " "
 money(float v) =>
@@ -216,7 +219,7 @@ if barstate.islast
     array.clear(drawnBoxes)
     if levelMode != "Off" and dataOk
         riskTxt = contracts > 0 ? "-" + money(estRisk) + " est." : ""
-        rewTxt  = contracts > 0 ? "+" + money(hypoReward) + " hypothetical" : ""
+        rewTxt  = contracts > 0 ? "+" + money(netReward) + " net hypothetical" : ""
         level(entry, C_VALUE, "PLAN ENTRY", "")
         if side != "Short"
             level(longStop, C_BAD, "PLAN LONG STOP", riskTxt)
@@ -315,9 +318,16 @@ if barstate.islast
                  C_VALUE)
             r += 1
             if targetR > 0 and contracts > 0
-                row(r, "If " + str.tostring(targetR) + "R target is reached",
-                     money(hypoReward) + " hypothetical", C_MUTED)
-                r += 1
+                rLabel = "At " + str.tostring(targetR) + "R target (hypothetical)"
+                if myCost > 0
+                    row(r, rLabel + ", net", money(netReward), C_MUTED)
+                    r += 1
+                    row(r, "  gross / costs", money(grossReward) + " / " +
+                         money(contracts * myCost), C_MUTED)
+                    r += 1
+                else
+                    row(r, rLabel, money(grossReward) + " (no costs set)", C_MUTED)
+                    r += 1
         if showPair and pairIdx >= 0
             wide(r, "SAME STOP, BOTH CONTRACTS", C_MUTED, C_SUB, TSs)
             r += 1

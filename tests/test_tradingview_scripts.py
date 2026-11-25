@@ -289,3 +289,37 @@ def test_invalid_data_gives_zero_not_errors():
     assert 'dataOk = not na(atr) and atr > 0 and not na(pointValue) and pointValue > 0 and tick > 0' in src
     assert '"Waiting for ATR data"' in src and '"Set the value per point"' in src
     assert 'syminfo.currency == "USD" ? "$" : syminfo.currency' in src     # non-USD symbols labelled
+
+
+# ---- Hypothetical reward: gross vs net (QA report item 4) ----
+
+def reward(p, pv, target_r, cost):
+    gross = p['n'] * p['stop'] * pv * target_r          # Pine: grossReward
+    return gross, gross - p['n'] * cost                 # Pine: netReward
+
+
+def test_reward_net_uses_the_same_costs_as_the_stop_risk():
+    # The reported case: MNQ, $500 budget, 138-point stop, $2/pt, $5 micro costs, 2R.
+    p = plan(500, 92.0, 1.5, 'MNQ', cost_micro=5.0)
+    assert (p['stop'], p['n'], p['risk']) == (138.0, 1, 281.0)          # stop risk includes costs
+    gross, net = reward(p, 2.0, 2.0, 5.0)
+    assert (gross, net) == (552.0, 547.0)
+    # Without costs, net equals gross.
+    p0 = plan(500, 92.0, 1.5, 'MNQ')
+    assert reward(p0, 2.0, 2.0, 0.0) == (552.0, 552.0)
+
+
+def test_dashboard_and_chart_labels_use_the_same_reward_variables():
+    src = PLANNER.read_text()
+    assert 'grossReward = contracts * stopPts * pointValue * targetR' in src
+    assert 'netReward   = grossReward - contracts * myCost' in src
+    assert 'hypoReward' not in src
+    assert '"+" + money(netReward) + " net hypothetical"' in src          # chart label = net
+    assert 'row(r, rLabel + ", net", money(netReward), C_MUTED)' in src   # dashboard = net
+    assert 'money(grossReward) + " / " +' in src                         # plus gross / costs
+    assert '" (no costs set)"' in src
+
+
+def test_atr_is_tradingviews_native_atr():
+    src = PLANNER.read_text()
+    assert 'a = ta.atr(atrLen)' in src and 'ta.rma(' not in src and 'ta.sma(ta.tr' not in src
