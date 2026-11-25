@@ -1,7 +1,9 @@
 # Automatic YouTube uploads
 
-The `video-publish` GitHub Action renders each episode and uploads it to your channel
-(`@giannisecchi9682`), scheduled for its `publish_at` time. It runs daily and picks up every
+> **Channel change:** per `growth/AWARENESS_FIRST_PLAN.md` §1, uploads move to **Jack's own channel**. Re-run the auth step below signed in as a Manager on Jack's channel and replace `YT_REFRESH_TOKEN`. Until then, upload files stay on `"hold": true`.
+
+The `video-publish` GitHub Action renders each episode and uploads it to the connected channel
+(originally `@giannisecchi9682`), scheduled for its `publish_at` time. It runs daily and picks up every
 episode due in the next 3 days. It skips anything whose title is already on the channel, so a
 re-run never double-posts. It sets the AI-content disclosure, uploads the captions and thumbnail,
 and fills the chapters into the description.

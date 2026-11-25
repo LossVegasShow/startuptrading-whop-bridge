@@ -3,31 +3,179 @@
 **Goal:** futures traders recognise Jack: his face, his voice and his point of view.
 The tools and the membership benefit from that recognition; they don't lead it.
 This plan replaces the tool-first emphasis of `FLAGSHIP_POSITIONING.md` §8 and §10.
+**Updated:** Jack is on camera; the channel is Jack's own; the AI pipeline becomes his visual
+engine; collaborations are the primary growth engine; visitor harvesting is §3.
 The SEO, tool pages and Risk Lab remain, at a smaller share.
 
 ---
 
-## 0. Three decisions before production starts
+## 0. Decisions
 
-1. **Jack has to be on camera, or at least on his own voice.** The YouTube pipeline in
-   `video/` produces narrated explainers with an AI voice under "The Risk Desk" name.
-   That builds a topic channel, not a recognisable person.
-   - Discovery and authority content (80% of the mix) needs **Jack's face and/or his
-     voice**.
-   - The AI pipeline remains useful for Risk Lab visuals, charts and B-roll.
-   - **Minimum viable setup:** a phone on a tripod, a lavalier mic, window light, and
-     one 60–90-minute batch session a week (8–10 shorts + 1 long-form segment).
-2. **"20 Years at the Screens" must be literally true.** Jack's previously stated start
-   year is 2008, about 18 years in 2026. Either Jack confirms 20 years (counting from
-   when he actually started), or the series becomes **"From the Screens"** or
-   **"Since 2008"**. Every experience claim in this plan uses only what Jack confirms.
-3. **Channel home.** Use **one** YouTube channel in Jack's name: rename the existing
-   channel or create "Jack Gleason | StartUpTrading". Series live as playlists. A
-   separate brand channel splits the audience at the moment it matters most.
+| Decision | Status |
+|---|---|
+| Jack on camera | ✅ **Yes.** Discovery and authority content is Jack on camera, in his own voice |
+| YouTube channel | ✅ **A channel in Jack's name**, set up as in §1. **Don't rename `@giannisecchi9682`**: that's your personal channel, and Jack's audience should sit on an account he owns |
+| "20 Years at the Screens" | ⏳ **Open.** Jack's stated start is 2008 (about 18 years). Use it only if Jack confirms 20 years; otherwise "From the Screens" or "Since 2008" |
+| AI video pipeline | ✅ **Retargeted as Jack's visual engine** (§1). The AI-voiced episode 001 is **on hold** (`"hold": true` in `video/uploads/001-how-many-contracts.json`) so nothing publishes to your channel in the meantime |
+| Collaborations | ✅ **The primary growth engine** (§2) |
 
----
+## 1. Channel and AI automation setup
 
-## 1. Content allocation
+### Jack's channel (do this first, about 1 hour)
+1. **If Jack already has a YouTube channel:** use it. Rename it **"Jack Gleason"** and set
+   the handle to **@JackGleason** (or the closest available).
+   **If not:** create one from Jack's Google account (or a StartUpTrading Google
+   Workspace account Jack owns). Use a **Brand Account** so the team can help.
+2. **Access:** in YouTube Studio → Settings → **Permissions**, add yourself as **Manager**.
+   Jack stays the Owner.
+3. **Channel setup:**
+   - Banner and avatar: use the existing `youtube/assets/banner.html` and `avatar.html`
+     renders, updated with Jack's photo.
+   - About text: verified facts only.
+   - Links: Free tools · Newsletter · TradingView (each with UTMs, §3).
+   - Playlists, one per series.
+   - A 45-second **channel trailer** (Jack on camera: who he is, what the channel
+     teaches, "risk first").
+4. **Verify the channel by phone** (youtube.com/verify) for custom thumbnails and longer uploads.
+5. **Point the automation at Jack's channel.** Re-run `python video/youtube_auth.py`,
+   signing in as the **Manager on Jack's channel** and choosing that channel. Then
+   replace the GitHub secret `YT_REFRESH_TOKEN`. Until then, keep every upload file on
+   `"hold": true`.
+6. **Set `youtube_url`** in `sales-site/site.config.json` to the new channel, then
+   rebuild. The sales page's "Watch Jack trade on YouTube" link appears automatically.
+
+### Filming setup (minimum viable)
+- **Kit:** a phone on a tripod at eye level, a lavalier or USB mic, window light or one
+  soft light, and a tidy background with the trading screens visible.
+- **One 60–90-minute batch session a week:** 8–10 shorts (read hooks from §7) plus one
+  long-form segment. Screen recordings (the planner, the calculator, charts) are
+  captured separately and cut in.
+- **Editing:** captions on every short; the first frame shows Jack and the hook text.
+
+### Should the AI video automation feed Jack's channel?
+**Yes, but as Jack's production assistant, not as a second presenter.**
+
+- **Don't** publish AI-voiced explainers under Jack's name. Viewers would hear a
+  different voice from the person on camera. That works against recognition, needs
+  synthetic-media disclosure on every upload, and repetitive templated narration is
+  the kind of content YouTube's inauthentic-content policy targets.
+- **Do** use the pipeline for what it does best:
+  1. **Chart and animation segments** (Risk Lab, ATR explainers, MES vs ES cards,
+     formula scenes) that drop into Jack's videos as B-roll.
+  2. **Captions, chapters and thumbnails** (`video/build.py`, `thumb.js`) for every upload.
+  3. **Scheduled uploads:** Jack's edited videos go into `video/uploads/` and the daily
+     workflow uploads them **as private, scheduled** videos with captions, chapters and
+     thumbnail. Nothing goes public without a `publish_at` you set.
+- **How episode 001 moves over:**
+  - Keep the visuals.
+  - Jack records the narration from `video/episodes/001-how-many-contracts.json` (the
+    `say` lines are the script), in about 4 minutes on camera or as voice-over.
+  - Drop his audio in place of the AI voice.
+  - Set `"contains_synthetic_media": false` if nothing synthetic remains.
+  - Remove `"hold"`.
+- **Optional, later:** a clone of **Jack's own voice** (with his written consent) for
+  quick corrections only. Still disclose it where YouTube asks.
+
+## 2. Collaborations: the primary growth engine
+
+**Why first:** a new channel has no reach. A guest appearance borrows an audience that
+already trusts the host, and a good 45-minute conversation yields 5–8 shorts.
+Collaborations do three jobs at once: reach, credibility and content supply.
+
+**Effort split:**
+- **About 40% of weekly growth time** goes to collaborations (finding, pitching,
+  recording, clipping, following up).
+- Clips from collaborations count toward the 50% **discovery** bucket in §4, with
+  permission.
+
+### Targets for the first 30 days
+| Activity | Target |
+|---|---|
+| Personalised pitches sent | 40 (10 a week) |
+| Bookings | 6–10 |
+| Recorded appearances | 2–4 (podcasts and live streams book weeks out) |
+| Shorts cut from appearances (with host permission) | 10–20 |
+| "Jack Talks To" episodes recorded (Jack as host, §2.3) | 2 |
+| Joint content with creators (duet, stitch, joint Risk Lab) | 2–4 |
+
+### 2.1 Tiered approach
+- **Tier 1, start now (more accessible):**
+  - smaller futures and prop podcasts and YouTubers
+  - TradingView Ideas comments on others' educational posts
+  - r/FuturesTrading and NexusFi answers
+  - roundtables (2 Bulls in a China Shop, Diary Of A Trader, Trading Nut, Optimus
+    Futures Podcast, Futures Radio Show)
+- **Tier 2, once 2–3 appearances exist as proof:**
+  - prop-firm media (Funded: A Tradeify Podcast / TradeifyTV, The Day Trading Show,
+    Speculators Podcast)
+  - mid-size creators (1 Minute Futures Trader, Damn Good Trading)
+  - the NinjaTrader Ecosystem vendor webinar (Jack is already a vendor)
+- **Tier 3, once there's a body of appearances and clips:**
+  - TopstepTV
+  - NinjaTrader Live
+  - Chat With Traders
+  - Benzinga shows
+  - RealSimpleAriel
+
+Full list, with sources, in §8.
+
+### 2.2 Guest kit (build once, about 2 hours, reuse for every pitch)
+A one-page PDF or web page at `startuptrading.com/press`, containing:
+- Jack's headshot (2 sizes)
+- a short bio and a long bio (verified facts only)
+- 5 talk topics with one-line descriptions:
+  - "Size from the drawdown you have left"
+  - "NQ vs MNQ: the 10× mistake"
+  - "What changes on CPI/FOMC days"
+  - "Why traders blow prop accounts on good days"
+  - "Building your own trading tools"
+- 2–3 sample clips
+- a listener offer: the **free** tools, with no sign-up required
+- a contact email
+
+### 2.3 Jack as host: "Jack Talks To…" (a sixth series)
+- **What:** Jack interviews other traders, prop-firm educators and developers on his
+  channel.
+- **Why it works:** guests share their episode with their own audience, so it's a
+  collaboration that also builds Jack's catalogue. Hosting positions Jack as a peer of
+  established names.
+- **Cadence:** two a month to start.
+- **Format:** recorded remotely (Riverside, or StreamYard with separate tracks), 30–45
+  minutes, 3–5 clips each.
+
+### 2.4 How collaborations are tracked
+- **A vanity redirect per appearance,** read out on air. For example,
+  `startuptrading.com/tradingnut` → `/free-tools?utm_source=podcast&utm_medium=referral&utm_campaign=tradingnut`.
+  GoHighLevel can create URL redirects (Sites → Settings → URL redirects). Name every
+  campaign after the show.
+- **A log, `growth/collabs.csv`:** date, show, tier, status (pitched / booked /
+  recorded / live), episode link, clip count, vanity URL, and the sessions, sign-ups and
+  follows it brought in (from GA4 and the platforms).
+
+## 3. Harvesting visitors: turning attention into an owned audience
+
+Followers belong to the platforms. Email addresses and website visits belong to
+StartUpTrading. Each item below turns a viewer into someone Jack can reach again.
+
+| # | Action | Where | Status |
+|---|---|---|---|
+| H1 | **Switch on the email list.** Create the GHL form and workflow (`FREE_TOOLS_LIBRARY.md` §4) and set `ghl_subscribe_form_url`. The optional sign-up then appears on every free page | GHL + config | To do (highest priority) |
+| H2 | **A weekly email, "The Opening Bell with Jack":** the week's volatility context, one lesson, one new clip or tool. It's the recurring reason to subscribe | GHL email | To do |
+| H3 | **A "Start here" page (`/start`)** for link-in-bio: Jack's photo, one line, then Free tools · Weekly email · YouTube · TradingView. Every social bio links here with platform UTMs | New GHL page (I can build it the same way as the others) | Proposed |
+| H4 | **A pinned comment and description template on every video:** one free-tool link matched to the topic, with `utm_source=youtube&utm_campaign=<series>`. End screen → the series playlist plus subscribe | YouTube | To do |
+| H5 | **A verbal call to action in each video, once, near the end:** "The calculator I used is free on the site; no sign-up." Never mid-content | Scripts | To do |
+| H6 | **A vanity URL per collaboration** (§2.4) | GHL redirects | To do |
+| H7 | **Reply to comments in the first hour** after each upload. It's the cheapest reach multiplier, and it shows Jack is real | Jack (15 min/day) | To do |
+| H8 | **Measurement pixels for later amplification:** Meta and Google tags via GTM, with consent. When an organic short over-performs, a small paid boost to similar audiences can follow, but only after month 1 shows what works | GTM | Later |
+| H9 | **A tagged nurture sequence** (after launch Gate 2): 5 emails, education first, then one honest membership email. GHL tags by source and interest decide which tool each subscriber hears about | GHL | After Gate 2 |
+| H10 | **A free Discord "lobby" channel (optional, Jack's call):** a public channel inside the existing server for questions and announcements, with members-only channels kept for paying members. It captures community-minded visitors, but it costs moderation time | Discord | Decide |
+
+**Order of execution:**
+- **First:** H1, H2, H4, H5 and H7.
+- **Then:** H3 and H6 alongside the first collaborations.
+- **Later:** H8 and H9.
+
+## 4. Content allocation
 
 | Share | Bucket | Purpose | Series |
 |---|---|---|---|
@@ -40,24 +188,24 @@ The SEO, tool pages and Risk Lab remain, at a smaller share.
 - 7–8 shorts, spread across YouTube Shorts, Instagram Reels and TikTok
 - 1–2 long-form episodes
 - 2 TradingView ideas
-- 1 collaboration action (pitch, recording or follow-up)
+- **10 collaboration pitches** plus recordings and follow-ups (§2): about 40% of weekly growth time
 
 **Promotion runs only after launch Gate 2.** `growth/LAUNCH_AND_GROWTH.md`: the
 membership must be open and licensing working before promoting it.
 
 ---
 
-## 2. Competitive intelligence
+## 5. Competitive intelligence
 
 ### What I could and couldn't establish
 - **Could:** who the visible futures creators, podcasts, prop-firm media and
-  NinjaTrader educators are (sources in §5), and title and topic patterns visible in
+  NinjaTrader educators are (sources in §8), and title and topic patterns visible in
   public listings.
 - **Couldn't:** view counts relative to each channel's normal performance. That needs
   per-video data. **No performance metrics appear in this plan.**
 
 ### How to do the outlier analysis (about 2 hours, then monthly)
-1. **List 10–15 futures creators.** Start with §5 and add the ones Jack watches.
+1. **List 10–15 futures creators.** Start with §8 and add the ones Jack watches.
 2. **Get the data.** For each channel, export the last ~50 videos with their views,
    publish date and title. YouTube's channel "Popular" tab, or a third-party tool
    such as vidIQ or ViewStats, gives this. Do the same manually for Reels and TikToks.
@@ -100,7 +248,7 @@ professionals do, builds his own tools, and never sells a lifestyle.**
 
 ---
 
-## 3. The five series
+## 6. The six series
 
 | Series | Bucket | Format | What it is | Guardrails |
 |---|---|---|---|---|
@@ -108,11 +256,12 @@ professionals do, builds his own tools, and never sells a lifestyle.**
 | **From the Screens** (or "20 Years at the Screens" if confirmed) | Discovery | 45–90 s stories; occasional 10–15 min | Experience, mistakes and lessons from Jack's years trading | Only true stories Jack confirms. No P&L figures or income |
 | **The Opening Bell** | Authority | 60 s pre-market short; weekly 10–15 min "week ahead"; TradingView ideas | Timely commentary: the session's events, volatility regime, levels Jack watches, and what that means for risk | Educational, not signals. No "buy here / sell there". Disclaimers |
 | **The Risk Lab** | Tech / Risk Lab | 45–60 s shorts; 8–12 min episodes | Measurable experiments **about risk and process**, using the free tools | Measure risk variability, rounding, cost effects and drawdown survival. **Not** profit results or backtested returns |
+| **Jack Talks To…** | Discovery (collaboration) | 30–45 min long-form; 3–5 clips each | Jack interviews traders, prop-firm educators and developers; guests share it with their audiences (§2.3) | Guests' claims are theirs; no performance claims presented as fact; permission for clips is part of the booking |
 | **Inside StartUpTrading** | Tech / Promotion | 60 s shorts; occasional 8–10 min | How the tools are built, why, what's next. The membership explained plainly | Promotion episodes only after Gate 2. Honest about who it's *not* for |
 
 ---
 
-## 4. First 30 days: production calendar
+## 7. First 30 days: production calendar
 
 **Legend:**
 - **Bucket:** D = discovery · A = authority · T = tech/Risk Lab · P = promotion.
@@ -172,8 +321,9 @@ presented as results.
 | L5 | Risk Lab | "Fixed size vs ATR size across a month of ES: the risk you didn't see" | 10–12 min | S+AI+V | Planner, calculator |
 | L6 | Inside StartUpTrading | "Building a free futures risk tool, from idea to TradingView" | 8–10 min | C+S | `/free-tools`, the planner |
 
-The existing AI-narrated video 001 ("How many contracts…") can be re-cut with a
-**Jack-recorded intro and voice-over** instead of being published as-is.
+**Collaborations can take long-form slots.** A recorded "Jack Talks To…" episode, or a
+podcast appearance published with permission, replaces any of L1–L6 that week.
+Episode 001 ("How many contracts…") is re-cut with Jack's voice before it goes up (§1).
 
 ### 8 TradingView publications (ideas, not scripts)
 All are educational and use a clean chart. There are no links, handles or company
@@ -199,7 +349,7 @@ For each one:
 
 ---
 
-## 5. Borrowed audiences: outreach plan (20 opportunities)
+## 8. Borrowed audiences: the full outreach list (20 opportunities; strategy in §2)
 
 Priority is a qualitative judgement of relevance to futures and risk, credibility, and
 access for a first-time guest. No relationships are implied. Each one needs a fresh
@@ -246,7 +396,7 @@ check of current guest policies.
 
 ---
 
-## 6. Measurement: a 30-day baseline, then adapt
+## 9. Measurement: a 30-day baseline, then adapt
 
 | Metric | Where | How |
 |---|---|---|
@@ -258,6 +408,7 @@ check of current guest policies.
 | Branded search | Search Console (queries containing "jack gleason" or "startuptrading"), Google Trends (Jack's name, if there's enough volume) | Monthly |
 | Free tool adoption | GA4 `free_tool_view`, `tool_use`; TradingView script users and favorites | Weekly |
 | Website referrals | GA4 sessions by `utm_source` (youtube, instagram, tiktok, tradingview) with `utm_medium=social` and `utm_campaign=<series>` | Weekly |
+| Collaboration yield | `growth/collabs.csv` + GA4 by vanity-URL campaign | Sessions, sign-ups and follows per appearance; clips produced |
 | Qualified subscribers | GA4 `email_subscribe` and GHL contacts with source tags; later `sut_purchase` and Whop memberships by first touch | Monthly |
 
 **Link conventions** (in bios and descriptions only):
@@ -268,13 +419,13 @@ check of current guest policies.
    per 1,000.
 2. **Double** the top quartile, **keep** the middle half, and **rework or drop** the
    bottom quartile (change the hook or format once before dropping).
-3. Re-run the outlier analysis (§2) with month-1 data from your own channel.
+3. Re-run the outlier analysis (§5) with month-1 data from your own channel.
 4. Only then revisit the 50/30/15/5 split. If authority content wins on followers per
    1,000 views, shift toward it.
 
 ---
 
-## 7. Guardrails (unchanged and non-negotiable)
+## 10. Guardrails (unchanged and non-negotiable)
 
 - **No earnings or P&L claims,** no "millionaire" or lifestyle framing, and no
   fabricated or hypothetical trading results.
