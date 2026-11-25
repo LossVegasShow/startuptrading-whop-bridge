@@ -471,12 +471,12 @@
     </div>
     <div class="sut-room">
       <ul class="sut-list">
-        <li><b>Contracts and actual risk</b><span>Rounded down, so the actual risk is never more than your budget.</span></li>
-        <li><b>The micro alternative</b><span>On ES, NQ, YM, RTY, CL and GC: when a full contract is too much, the panel shows what still fits in MES, MNQ, MYM, M2K, MCL or MGC.</span></li>
+        <li><b>Maximum position size, first</b><span>The headline number, with the symbol, timeframe and risk mode above it. Then risk budget, estimated stop risk, budget remaining and budget used.</span></li>
+        <li><b>Standard vs micro, side by side</b><span>ES/MES, NQ/MNQ, YM/MYM, RTY/M2K, CL/MCL, GC/MGC, SI/SIL, 6E/M6E and BTC/MBT, for the same stop, each with its own tick size, value per point and costs.</span></li>
+        <li><b>Prop-firm planning</b><span>Remaining drawdown against the original, a safety buffer, the losing streak to survive, and an optional remaining daily loss allowance.</span></li>
         <li><b>Volatility vs normal</b><span>ATR compared with its own 100-bar average: quiet, normal or elevated. It shows why your size changed today.</span></li>
-        <li><b>Stop, entry and target levels</b><span>Drawn on the chart with the stop in ticks and the target as an R multiple. Plan from the last price or a level you choose.</span></li>
-        <li><b>Three risk modes</b><span>A fixed dollar amount, a percent of your account, or prop-firm mode (drawdown ÷ the losing streak to survive), with an optional daily loss limit.</span></li>
-        <li><b>Costs and alerts</b><span>Add round-turn costs per contract. Get an alert when the size changes or volatility expands.</span></li>
+        <li><b>Planning levels</b><span>Entry, stop and an R-multiple target, as clean lines or with prices and estimated risk. Shaded zones when you plan one side. Drawings only: no orders are placed.</span></li>
+        <li><b>Your settings, your way</b><span>Adjustable text size, compact or full panel, costs per contract, higher-timeframe or closed-bar ATR, and alerts when the size changes or volatility expands.</span></li>
       </ul>
       <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Screenshot: the planner on an ES chart</strong><small>Panel top right, stop levels drawn. Add once the script is published.</small></div></figure>
     </div>
@@ -510,7 +510,9 @@
       <details><summary>It isn't a signal</summary><p>The planner sizes a trade you've already decided to consider. It doesn't say when, where or which way to trade.</p></details>
       <details><summary>ATR changes while a bar is forming</summary><p>On the live bar, ATR (and so the stop and size) can change until the bar closes. Turn on "Use the last closed bar's ATR" for numbers that stay fixed. You can also take ATR from a higher timeframe than the chart.</p></details>
       <details><summary>The point value depends on the symbol</summary><p>It uses TradingView's point value for the chart symbol. For non-futures symbols, CFDs or anything unusual, type the dollars per point in yourself and check it against your broker's contract specs.</p></details>
-      <details><summary>Costs and slippage aren't included</summary><p>Commissions, fees and slippage add to the real loss. Gaps and fast markets can fill a stop well beyond its level.</p></details>
+      <details><summary>Costs and slippage</summary><p>Commissions and fees are included only if you enter them (separately for standard and micro contracts). Slippage isn't: gaps and fast markets can fill a stop well beyond its level, so the real loss can exceed the estimated stop risk.</p></details>
+      <details><summary>Planning levels are not orders</summary><p>The entry, stop and target lines are drawings to plan with. Nothing is sent to a broker. The reward shown at a target is not a forecast or an expected return: it's only realised if price gets there and your fill matches the plan.</p></details>
+      <details><summary>Prop-firm rules vary</summary><p>Firms define drawdown differently: a trailing limit moves up with your peak balance, a static one doesn't. Enter the current remaining allowances from your firm's dashboard. The planner is a planning aid: it doesn't check your account against any firm's rules, so staying within them remains your responsibility.</p></details>
       <details><summary>Rounding</summary><p>Stops round up to a whole tick and contracts round down, which keeps actual risk at or below your limit. Very small risk amounts can therefore show 0.</p></details>
     </div>
   </div>
