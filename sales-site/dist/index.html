@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>StartUpTrading: NinjaTrader indicators, trade room and masterclass</title>
-<meta name="description" content="Jack&#x27;s two NinjaTrader indicators, the private StartUpTrading Discord and his masterclass. $99/month, cancel anytime.">
+<title>StartUpTrading: proprietary NinjaTrader tools, trade room and masterclasses</title>
+<meta name="description" content="Jack&#x27;s proprietary NinjaTrader 8 tools, licensed to your account automatically, plus the StartUpTrading Discord and masterclasses. $99/month, cancel anytime.">
 <meta name="theme-color" content="#07090d">
 <style>html,body{margin:0;background:#07090d}</style>
 </head>
@@ -140,6 +140,8 @@
 /* Indicators */
 .sut-ind { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
 .sut-ind + .sut-ind { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow { margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-grow h3 { margin: 14px 0 14px; }
 .sut-ind-flip .sut-ind-copy { order: 2; }
 .sut-ind-copy h3 { margin: 14px 0 14px; }
 .sut-ind-copy > p:not(.sut-tag) { color: var(--text-2); font-size: 16.5px; }
@@ -319,6 +321,7 @@
   .sut-section { padding: 76px 0; }
   .sut-head { margin-bottom: 40px; }
   .sut-ind + .sut-ind { margin-top: 64px; padding-top: 64px; }
+  .sut-grow { margin-top: 64px; padding-top: 64px; }
   .sut-strip-in { grid-template-columns: 1fr 1fr; }
   .sut-strip-in > div:nth-child(3) { border-left: 0; }
   .sut-strip-in > div:nth-child(n+3) { border-top: 1px solid var(--line); }
@@ -393,7 +396,7 @@
       STARTUPTRADING
     </a>
     <nav class="sut-links" aria-label="Sections">
-      <a href="#indicators">Indicators</a><a href="#room">Trade room</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+      <a href="#indicators">Tools</a><a href="#room">Community</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
     </nav>
     <a class="sut-btn sut-btn-sm" href="#checkout">Join · $99/mo</a>
   </div>
@@ -402,12 +405,12 @@
 <section class="sut-hero">
   <div class="sut-wrap sut-hero-grid">
     <div class="sut-hero-copy">
-      <p class="sut-eyebrow"><span class="sut-live"></span>NinjaTrader 8 indicators + trade room + masterclass</p>
-      <h1>Jack's indicators.<br>His trade room.<br><span class="sut-dim">One membership.</span></h1>
-      <p class="sut-lead">Both of his NinjaTrader indicators (ATR Order Automation and the Trend Scanner &amp; Market Selector) licensed to your own NinjaTrader account minutes after you join. Plus the members-only Discord with Jack and the community, and his masterclass.</p>
+      <p class="sut-eyebrow"><span class="sut-live"></span>NinjaTrader 8 tools · Trade room · Masterclasses</p>
+      <h1>The tools Jack built<br>for his own trading.<br><span class="sut-dim">Now on your charts.</span></h1>
+      <p class="sut-lead">Jack has traded futures since 2008. With his team he built proprietary NinjaTrader&nbsp;8 tools for the way he actually trades. One membership licenses them to your own NinjaTrader account automatically, adds eligible new tools as they're released, and puts you in the room with Jack, plus his masterclasses.</p>
       <div class="sut-cta-row">
         <a class="sut-btn sut-btn-lg" href="#checkout">Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
-        <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See the indicators</a>
+        <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See what's included</a>
       </div>
       <ul class="sut-assure">
         <li>Cancel anytime</li><li>Secure checkout by Whop</li><li>No NinjaTrader password needed</li>
@@ -415,13 +418,13 @@
     </div>
 
     <figure class="sut-frame sut-hero-frame">
-      <div class="sut-frame-bar"><span></span><span></span><span></span><em>Demo · indicators on a live chart</em></div>
+      <div class="sut-frame-bar"><span></span><span></span><span></span><em>Demo · the tools on a live chart</em></div>
       <div class="sut-frame-body">
         <svg class="sut-candles" viewBox="0 0 640 300" preserveAspectRatio="none" aria-hidden="true"><line class="dn" x1="5.0" x2="5.0" y1="261.6" y2="270.2"/><rect class="dn" x="2.2" y="266.3" width="5.6" height="1.8"/><line class="dn" x1="15.0" x2="15.0" y1="259.6" y2="273.0"/><rect class="dn" x="12.2" y="268.1" width="5.6" height="2.9"/><line class="up" x1="25.0" x2="25.0" y1="243.9" y2="280.5"/><rect class="up" x="22.2" y="247.8" width="5.6" height="23.2"/><line class="up" x1="35.0" x2="35.0" y1="236.8" y2="249.5"/><rect class="up" x="32.2" y="240.4" width="5.6" height="7.4"/><line class="dn" x1="45.0" x2="45.0" y1="232.6" y2="272.7"/><rect class="dn" x="42.2" y="240.4" width="5.6" height="27.6"/><line class="up" x1="55.0" x2="55.0" y1="240.5" y2="284.0"/><rect class="up" x="52.2" y="256.0" width="5.6" height="12.0"/><line class="dn" x1="65.0" x2="65.0" y1="251.7" y2="272.3"/><rect class="dn" x="62.2" y="256.0" width="5.6" height="13.5"/><line class="up" x1="75.0" x2="75.0" y1="262.7" y2="275.3"/><rect class="up" x="72.2" y="267.4" width="5.6" height="2.1"/><line class="up" x1="85.0" x2="85.0" y1="255.3" y2="273.5"/><rect class="up" x="82.2" y="258.9" width="5.6" height="8.5"/><line class="up" x1="95.0" x2="95.0" y1="219.5" y2="269.9"/><rect class="up" x="92.2" y="224.6" width="5.6" height="34.3"/><line class="dn" x1="105.0" x2="105.0" y1="217.8" y2="236.3"/><rect class="dn" x="102.2" y="224.6" width="5.6" height="8.5"/><line class="up" x1="115.0" x2="115.0" y1="226.4" y2="235.4"/><rect class="up" x="112.2" y="232.2" width="5.6" height="1.0"/><line class="dn" x1="125.0" x2="125.0" y1="223.4" y2="242.3"/><rect class="dn" x="122.2" y="232.2" width="5.6" height="5.3"/><line class="up" x1="135.0" x2="135.0" y1="204.9" y2="239.8"/><rect class="up" x="132.2" y="212.3" width="5.6" height="25.2"/><line class="up" x1="145.0" x2="145.0" y1="188.0" y2="212.8"/><rect class="up" x="142.2" y="201.6" width="5.6" height="10.7"/><line class="up" x1="155.0" x2="155.0" y1="156.4" y2="204.6"/><rect class="up" x="152.2" y="174.9" width="5.6" height="26.7"/><line class="up" x1="165.0" x2="165.0" y1="166.5" y2="179.4"/><rect class="up" x="162.2" y="173.9" width="5.6" height="1.0"/><line class="up" x1="175.0" x2="175.0" y1="158.8" y2="181.5"/><rect class="up" x="172.2" y="172.2" width="5.6" height="1.7"/><line class="up" x1="185.0" x2="185.0" y1="148.4" y2="185.4"/><rect class="up" x="182.2" y="157.1" width="5.6" height="15.1"/><line class="up" x1="195.0" x2="195.0" y1="146.5" y2="169.0"/><rect class="up" x="192.2" y="147.6" width="5.6" height="9.5"/><line class="up" x1="205.0" x2="205.0" y1="127.9" y2="151.8"/><rect class="up" x="202.2" y="133.5" width="5.6" height="14.1"/><line class="dn" x1="215.0" x2="215.0" y1="124.6" y2="158.6"/><rect class="dn" x="212.2" y="133.5" width="5.6" height="20.3"/><line class="up" x1="225.0" x2="225.0" y1="108.7" y2="167.1"/><rect class="up" x="222.2" y="127.3" width="5.6" height="26.5"/><line class="up" x1="235.0" x2="235.0" y1="106.8" y2="132.6"/><rect class="up" x="232.2" y="120.1" width="5.6" height="7.2"/><line class="dn" x1="245.0" x2="245.0" y1="97.0" y2="155.3"/><rect class="dn" x="242.2" y="120.1" width="5.6" height="31.9"/><line class="dn" x1="255.0" x2="255.0" y1="141.7" y2="171.6"/><rect class="dn" x="252.2" y="152.0" width="5.6" height="10.6"/><line class="up" x1="265.0" x2="265.0" y1="138.1" y2="164.9"/><rect class="up" x="262.2" y="139.6" width="5.6" height="23.0"/><line class="up" x1="275.0" x2="275.0" y1="114.2" y2="145.2"/><rect class="up" x="272.2" y="128.8" width="5.6" height="10.8"/><line class="up" x1="285.0" x2="285.0" y1="111.4" y2="143.1"/><rect class="up" x="282.2" y="116.4" width="5.6" height="12.4"/><line class="up" x1="295.0" x2="295.0" y1="81.3" y2="121.3"/><rect class="up" x="292.2" y="90.1" width="5.6" height="26.3"/><line class="dn" x1="305.0" x2="305.0" y1="84.3" y2="131.1"/><rect class="dn" x="302.2" y="90.1" width="5.6" height="33.3"/><line class="dn" x1="315.0" x2="315.0" y1="121.7" y2="163.0"/><rect class="dn" x="312.2" y="123.4" width="5.6" height="30.3"/><line class="dn" x1="325.0" x2="325.0" y1="138.9" y2="179.9"/><rect class="dn" x="322.2" y="153.7" width="5.6" height="21.1"/><line class="up" x1="335.0" x2="335.0" y1="171.7" y2="180.8"/><rect class="up" x="332.2" y="174.7" width="5.6" height="1.0"/><line class="up" x1="345.0" x2="345.0" y1="159.1" y2="180.8"/><rect class="up" x="342.2" y="169.6" width="5.6" height="5.1"/><line class="dn" x1="355.0" x2="355.0" y1="160.1" y2="174.6"/><rect class="dn" x="352.2" y="169.6" width="5.6" height="4.8"/><line class="dn" x1="365.0" x2="365.0" y1="165.7" y2="201.1"/><rect class="dn" x="362.2" y="174.4" width="5.6" height="13.2"/><line class="dn" x1="375.0" x2="375.0" y1="175.0" y2="194.2"/><rect class="dn" x="372.2" y="187.6" width="5.6" height="5.3"/><line class="up" x1="385.0" x2="385.0" y1="190.1" y2="205.8"/><rect class="up" x="382.2" y="192.8" width="5.6" height="1.0"/><line class="dn" x1="395.0" x2="395.0" y1="181.2" y2="220.3"/><rect class="dn" x="392.2" y="192.8" width="5.6" height="15.9"/><line class="dn" x1="405.0" x2="405.0" y1="202.9" y2="230.6"/><rect class="dn" x="402.2" y="208.7" width="5.6" height="11.6"/><line class="up" x1="415.0" x2="415.0" y1="198.5" y2="221.6"/><rect class="up" x="412.2" y="201.7" width="5.6" height="18.6"/><line class="up" x1="425.0" x2="425.0" y1="190.8" y2="203.3"/><rect class="up" x="422.2" y="196.0" width="5.6" height="5.7"/><line class="up" x1="435.0" x2="435.0" y1="182.9" y2="196.0"/><rect class="up" x="432.2" y="188.1" width="5.6" height="7.9"/><line class="up" x1="445.0" x2="445.0" y1="166.1" y2="206.5"/><rect class="up" x="442.2" y="171.2" width="5.6" height="16.9"/><line class="up" x1="455.0" x2="455.0" y1="158.5" y2="174.7"/><rect class="up" x="452.2" y="162.4" width="5.6" height="8.8"/><line class="up" x1="465.0" x2="465.0" y1="151.3" y2="165.5"/><rect class="up" x="462.2" y="159.8" width="5.6" height="2.6"/><line class="up" x1="475.0" x2="475.0" y1="133.1" y2="183.3"/><rect class="up" x="472.2" y="149.9" width="5.6" height="9.9"/><line class="dn" x1="485.0" x2="485.0" y1="147.6" y2="171.2"/><rect class="dn" x="482.2" y="149.9" width="5.6" height="17.7"/><line class="up" x1="495.0" x2="495.0" y1="156.4" y2="173.6"/><rect class="up" x="492.2" y="160.4" width="5.6" height="7.2"/><line class="up" x1="505.0" x2="505.0" y1="147.6" y2="182.6"/><rect class="up" x="502.2" y="152.3" width="5.6" height="8.1"/><line class="up" x1="515.0" x2="515.0" y1="137.9" y2="153.3"/><rect class="up" x="512.2" y="143.0" width="5.6" height="9.3"/><line class="dn" x1="525.0" x2="525.0" y1="142.4" y2="169.2"/><rect class="dn" x="522.2" y="143.0" width="5.6" height="1.2"/><line class="dn" x1="535.0" x2="535.0" y1="135.0" y2="161.0"/><rect class="dn" x="532.2" y="144.2" width="5.6" height="6.1"/><line class="up" x1="545.0" x2="545.0" y1="139.9" y2="158.1"/><rect class="up" x="542.2" y="148.7" width="5.6" height="1.6"/><line class="up" x1="555.0" x2="555.0" y1="102.9" y2="151.9"/><rect class="up" x="552.2" y="118.5" width="5.6" height="30.2"/><line class="dn" x1="565.0" x2="565.0" y1="112.8" y2="131.9"/><rect class="dn" x="562.2" y="118.5" width="5.6" height="3.4"/><line class="dn" x1="575.0" x2="575.0" y1="111.9" y2="181.4"/><rect class="dn" x="572.2" y="121.9" width="5.6" height="46.2"/><line class="up" x1="585.0" x2="585.0" y1="139.1" y2="169.8"/><rect class="up" x="582.2" y="152.8" width="5.6" height="15.3"/><line class="up" x1="595.0" x2="595.0" y1="126.7" y2="154.5"/><rect class="up" x="592.2" y="128.0" width="5.6" height="24.8"/><line class="up" x1="605.0" x2="605.0" y1="109.3" y2="128.8"/><rect class="up" x="602.2" y="110.6" width="5.6" height="17.4"/><line class="up" x1="615.0" x2="615.0" y1="70.0" y2="113.3"/><rect class="up" x="612.2" y="79.6" width="5.6" height="31.0"/><line class="up" x1="625.0" x2="625.0" y1="16.0" y2="88.0"/><rect class="up" x="622.2" y="26.5" width="5.6" height="53.1"/><line class="dn" x1="635.0" x2="635.0" y1="25.3" y2="35.0"/><rect class="dn" x="632.2" y="26.5" width="5.6" height="2.0"/></svg>
         <div class="sut-ph sut-ph-overlay">
           <span class="sut-play" aria-hidden="true"></span>
           <strong>Demo video goes here</strong>
-          <small>Replace with a 30–60 second screen recording of both indicators on one chart.</small>
+          <small>Replace with a 30–60 second screen recording of both tools on one chart.</small>
         </div>
       </div>
     </figure>
@@ -430,8 +433,8 @@
 
 <section class="sut-strip" aria-label="What's included">
   <div class="sut-wrap sut-strip-in">
-    <div><b>03</b><span>Proprietary NinjaTrader&nbsp;8 indicators</span></div>
-    <div><b>01</b><span>Private Discord trade room with Jack</span></div>
+    <div><b>02</b><span>Proprietary NinjaTrader&nbsp;8 tools today</span></div>
+    <div><b>+</b><span>Eligible new tools as they're released</span></div>
     <div><b>~3 min</b><span>From checkout to licensed</span></div>
     <div><b>$0</b><span>Setup fees. Cancel anytime.</span></div>
   </div>
@@ -440,16 +443,16 @@
 <section class="sut-section" id="indicators">
   <div class="sut-wrap">
     <div class="sut-head">
-      <p class="sut-eyebrow">01 · The indicators</p>
-      <h2>Built for the decisions you make in the seconds before you click.</h2>
-      <p class="sut-lead">Each one does a single job well. Together they answer the questions every trade starts with: which market, which way, and how much risk.</p>
+      <p class="sut-eyebrow">01 · The tools</p>
+      <h2>Proprietary technology, not another chat room.</h2>
+      <p class="sut-lead">Each tool does one job well. Together they answer the questions every trade starts with: which market, which way, and how much risk.</p>
     </div>
 
     <article class="sut-ind">
       <div class="sut-ind-copy">
         <p class="sut-tag">#2071 · Trend Scanner &amp; Market Selector</p>
-        <h3>Know which market to trade before the open.</h3>
-        <p>Daily trend strength and direction for every market on your watchlist, so you spend the session on the market that's actually moving, not the one you happened to open.</p>
+        <h3>Focus on the markets that are actually moving.</h3>
+        <p>Market analysis that reads trend strength and direction across your whole watchlist, so you spend the session on developing opportunities, not on the chart you happened to open.</p>
         <ul class="sut-ticks"><li>Trend direction and strength per market</li><li>Scans your whole watchlist</li><li>Bullish, neutral and bearish split for the session</li></ul>
       </div>
       <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>Trend Scanner screenshot</strong><small>1600×1000 chart capture, annotated</small></div></figure>
@@ -458,27 +461,33 @@
     <article class="sut-ind sut-ind-flip">
       <div class="sut-ind-copy">
         <p class="sut-tag">#2067 · ATR Order Automation</p>
-        <h3>The same dollar risk in fast and slow markets.</h3>
-        <p>ATR Order Automation sizes each trade from ATR and places your stop and target in NinjaTrader as you enter, so two contracts on a quiet day and two contracts on a fast day stop being the same mistake.</p>
+        <h3>Execution and trade management, handled.</h3>
+        <p>ATR Order Automation sizes each trade from your dollar risk and the market's current ATR, then places your stop and target in NinjaTrader as you enter. Two contracts on a quiet day and two on a fast day stop being the same mistake.</p>
         <ul class="sut-ticks"><li>Contracts set from your dollar risk</li><li>Stop and target placed automatically</li><li>Same dollar risk in fast and slow markets</li></ul>
       </div>
       <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>ATR Order Automation screenshot</strong><small>Show the order panel with ATR-based brackets</small></div></figure>
     </article>
+
+    <div class="sut-head sut-grow">
+      <p class="sut-eyebrow">The toolkit keeps growing</p>
+      <h3>New tools reach you through the same membership.</h3>
+      <p class="sut-lead">The licensing platform that activates these two tools is built for more. As Jack's team releases eligible new tools, they're licensed to active members' NinjaTrader accounts the same way, without buying each one separately.</p>
+    </div>
   </div>
 </section>
 
 <section class="sut-section sut-alt" id="room">
   <div class="sut-wrap sut-room">
     <div>
-      <p class="sut-eyebrow">02 · The trade room</p>
-      <h2>Indicators show you the setup. The room shows you how it's traded.</h2>
-      <p class="sut-lead">Your membership includes the private StartUpTrading Discord: where Jack shares his reads, members compare notes, and you can ask questions when something doesn't make sense.</p>
+      <p class="sut-eyebrow">02 · Community &amp; education</p>
+      <h2>The tools show you the setup. The room shows you how it's traded.</h2>
+      <p class="sut-lead">Your membership includes the private StartUpTrading Discord, where Jack shares his reads and members discuss market conditions, plus the masterclasses behind the methodology.</p>
       <ul class="sut-list">
-        <li><b>Direct line to Jack</b><span>Ask about setups and how he uses each indicator.</span></li>
-        <li><b>Education &amp; walkthroughs</b><span>Demonstrations of the indicators in real market conditions.</span></li>
-        <li><b>Jack's masterclass</b><span>Included with your membership, alongside the Discord.</span></li>
-        <li><b>Members-only channels</b><span>Talk shop with traders using the same tools as you.</span></li>
+        <li><b>Direct line to Jack</b><span>Ask about setups and how he uses each tool.</span></li>
+        <li><b>Masterclasses &amp; trading education</b><span>The methodology, market structure and strategies behind the technology.</span></li>
+        <li><b>Members-only channels</b><span>Exchange ideas with futures traders using the same tools as you.</span></li>
         <li><b>Setup help</b><span>Stuck installing? The community and support have you covered.</span></li>
+        <li><b>Discord tools, in development</b><span>Custom bots and utilities for your daily workflow, released to members as they're ready.</span></li>
       </ul>
     </div>
     <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Discord screenshot</strong><small>A real (anonymised) channel view: Jack's chart call + member replies</small></div></figure>
@@ -490,7 +499,7 @@
     <figure class="sut-frame sut-portrait"><div class="sut-ph sut-ph-portrait"><strong>Photo of Jack</strong><small>At his actual trading desk. No stock photos.</small></div></figure>
     <div>
       <p class="sut-eyebrow">03 · Who's behind it</p>
-      <h2>Built by a trader, for the way he actually trades.</h2>
+      <h2>Built by traders, for traders.</h2>
       <div class="sut-ph sut-ph-text">
         <strong>Jack's bio goes here</strong>
         <small>3–4 sentences in Jack's voice: how long he's traded, what he trades, why he built these indicators, and where people can watch him (YouTube). Verified facts only.</small>
@@ -504,12 +513,13 @@
   <div class="sut-wrap">
     <div class="sut-head">
       <p class="sut-eyebrow">04 · How it works</p>
-      <h2>From checkout to charts in about three minutes.</h2>
+      <h2>One membership. One connected ecosystem.</h2>
+      <p class="sut-lead">Most memberships stop at commentary and a chat room. StartUpTrading brings proprietary technology, education and community together, connected straight to your NinjaTrader account. From checkout to charts takes about three minutes.</p>
     </div>
     <ol class="sut-steps">
       <li><span>STEP 01</span><h3>Join on Whop</h3><p>Secure checkout. Your Discord and masterclass access are granted automatically.</p></li>
       <li><span>STEP 02</span><h3>Connect NinjaTrader</h3><p>Sign in on our activation page and confirm your NinjaTrader email with a 6-digit code. No account? Create a free one in two minutes.</p></li>
-      <li><span>STEP 03</span><h3>Add them to a chart</h3><p>Both indicators are licensed to your account. Follow the install guide and you're trading with them.</p></li>
+      <li><span>STEP 03</span><h3>Add them to a chart</h3><p>Your tools are licensed to your account. Follow the install guide and add them to a chart. Eligible new tools are licensed the same way when they're released.</p></li>
     </ol>
   </div>
 </section>
@@ -519,7 +529,7 @@
     <div class="sut-head sut-price-intro">
       <p class="sut-eyebrow">05 · Pricing</p>
       <h2>One plan. Everything included.</h2>
-      <p class="sut-lead">Everything, on either billing period. No upsells, no tiers, no setup fees. Cancel from your Whop account whenever you want; you keep access until the end of the period you've paid for.</p>
+      <p class="sut-lead">Everything below, on either billing period. No tiers, no upsells, no setup fees. Both plans renew automatically until you cancel from your Whop account, and you keep access until the end of the period you've paid for.</p>
     </div>
 
     <div class="sut-price-grid">
@@ -543,9 +553,9 @@
         <ul class="sut-ticks">
           <li>ATR Order Automation</li>
           <li>Trend Scanner &amp; Market Selector</li>
+          <li>Eligible new tools as they're released</li>
           <li>Private StartUpTrading Discord with Jack</li>
-          <li>Jack's masterclass</li>
-          <li>Walkthroughs, education and setup help</li>
+          <li>Masterclasses &amp; trading education</li>
           <li>Automatic licensing to your NinjaTrader account</li>
         </ul>
         
@@ -598,8 +608,9 @@
           <tr><th scope="row">ATR Headliner Indicator</th><td class="yes">✓</td><td class="yes">✓</td></tr>
           <tr><th scope="row">ATR Order Automation</th><td class="no">—</td><td class="yes">✓</td></tr>
           <tr><th scope="row">Trend Scanner &amp; Market Selector</th><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Eligible new tools as released</th><td class="no">—</td><td class="yes">✓</td></tr>
           <tr><th scope="row">Private Discord with Jack</th><td class="no">—</td><td class="yes">✓</td></tr>
-          <tr><th scope="row">Masterclass</th><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Masterclasses</th><td class="no">—</td><td class="yes">✓</td></tr>
           <tr><th scope="row">Walkthroughs &amp; setup help</th><td class="no">—</td><td class="yes">✓</td></tr>
         </tbody>
       </table>
@@ -615,7 +626,7 @@
       <h2>What members say.</h2>
     </div>
     <div class="sut-quotes">
-      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Real, permissioned quote with first name + how long they've been a member. No P&amp;L or income figures.</small></div>
+      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Real, permissioned quote with first name + how long they've been a member. No trading results or earnings figures.</small></div>
       <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Ideally about a specific indicator or the Discord.</small></div>
       <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Remove this whole section if real quotes aren't available yet.</small></div>
     </div>
@@ -630,25 +641,27 @@
       <p class="sut-lead">Something else? Email <a href="mailto:support@startuptrading.com">support@startuptrading.com</a>.</p>
     </div>
     <div class="sut-faq">
-      <details><summary>What do I need to use the indicators?</summary><p>NinjaTrader 8 on a Windows computer and a NinjaTrader account. The account is free to create if you don't have one yet.</p></details>
-      <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the indicators are licensed to it. It can be different from the email you use on Whop.</p></details>
-      <details><summary>How fast do I get access?</summary><p>Discord access is granted at checkout. Indicator licensing happens as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
+      <details><summary>What do I need to use the tools?</summary><p>NinjaTrader 8 on a Windows computer and a NinjaTrader account. The account is free to create if you don't have one yet.</p></details>
+      <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the tools are licensed to it. It can be different from the email you use on Whop.</p></details>
+      <details><summary>How fast do I get access?</summary><p>Discord and masterclass access are granted at checkout. Your tools are licensed as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
+      <details><summary>What does "eligible new tools" mean?</summary><p>When Jack's team releases a new tool for the membership, it's licensed to active members through the same activation platform, with no separate purchase. Anything sold separately is clearly labelled as not included.</p></details>
       <details><summary>Do you need my NinjaTrader password?</summary><p>Never. We only need the email address on your account, confirmed with a one-time code.</p></details>
-      <details><summary>Is there an annual plan?</summary><p>Yes: $495 a year, which works out to $41.25 a month (about 58% less than paying monthly). Same indicators, same Discord access. Pick "Annual" in the pricing section and check out right there.</p></details>
-      <details><summary>I already bought ATR Order Automation or the Trend Scanner. Can I join?</summary><p>Yes. You keep the license you bought; the membership never changes or removes it. When you join, the indicators you don't own yet are licensed to the same NinjaTrader account, and you get the Discord and everything else.</p></details>
-      <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the indicators deactivate and Discord access ends. You can rejoin anytime and they come back.</p></details>
-      <details><summary>Can I try something before I pay?</summary><p>Yes. Jack's ATR Headliner Indicator is free. <a href="https://startuptrading.com/indicators?utm_source=startuptrading&amp;utm_medium=sales_page&amp;utm_campaign=not_ready&amp;utm_content=faq" data-free="faq">Get it here</a>, use it on your charts, and join when you want the full set of indicators and the trade room.</p></details>
-      <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room is for education and discussion. You make your own trading decisions.</p></details>
+      <details><summary>Is there an annual plan?</summary><p>Yes: $495 a year, which works out to $41.25 a month (about 58% less than paying monthly). Same tools, same Discord and masterclass access. Both plans renew automatically until you cancel. Pick "Annual" in the pricing section and check out right there.</p></details>
+      <details><summary>I already bought ATR Order Automation or the Trend Scanner. Can I join?</summary><p>Yes. You keep the license you bought; the membership never changes or removes it. When you join, the tools you don't own yet are licensed to the same NinjaTrader account, and you get the Discord, the masterclasses and everything else.</p></details>
+      <details><summary>What happens if I cancel?</summary><p>You keep everything until the end of the period you've paid for. After that, the tools deactivate and Discord and masterclass access end. You can rejoin anytime and they come back.</p></details>
+      <details><summary>Can I try something before I pay?</summary><p>Yes. Jack's ATR Headliner Indicator is free. <a href="https://startuptrading.com/indicators?utm_source=startuptrading&amp;utm_medium=sales_page&amp;utm_campaign=not_ready&amp;utm_content=faq" data-free="faq">Get it here</a>, use it on your charts, and join when you want the full toolkit and the trade room.</p></details>
+      <details><summary>Are these trade signals or financial advice?</summary><p>No. They're analysis and order-management tools, and the room and masterclasses are for education and discussion. They support your trading process; you make your own trading decisions, and your results depend on them and on the market.</p></details>
     </div>
   </div>
 </section>
 
 <section class="sut-final">
   <div class="sut-wrap sut-final-in">
-    <h2>Get the indicators. Join the room.</h2>
-    <p class="sut-lead">$99/month. Licensed to your NinjaTrader in minutes. Cancel anytime.</p>
+    <h2>One membership. One connected ecosystem. Continuous innovation.</h2>
+    <p class="sut-lead">$99/month or $495/year. Licensed to your NinjaTrader in minutes. Both plans renew automatically; cancel anytime.</p>
     <a class="sut-btn sut-btn-lg" href="#checkout">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
-    <p class="sut-fine">Already a member? <a href="https://activate.startuptrading.com/">Activate your indicators</a>. Not ready? <a href="https://startuptrading.com/indicators?utm_source=startuptrading&amp;utm_medium=sales_page&amp;utm_campaign=not_ready&amp;utm_content=final" data-free="final">Start with the free ATR Headliner Indicator</a>.</p>
+    <p class="sut-fine">Already a member? <a href="https://activate.startuptrading.com/">Activate your trading tools</a>. Not ready? <a href="https://startuptrading.com/indicators?utm_source=startuptrading&amp;utm_medium=sales_page&amp;utm_campaign=not_ready&amp;utm_content=final" data-free="final">Start with the free ATR Headliner Indicator</a>.</p>
+    <p class="sut-fine">Futures trading involves substantial risk of loss. Our tools and education are designed to support your trading process, not to replace your own judgement. STARTUPTRADING · Every move shapes your future.</p>
   </div>
 </section>
 

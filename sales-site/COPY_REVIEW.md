@@ -12,6 +12,10 @@ placeholder box instead.
 | 1 | Indicators → Trend Scanner & Market Selector | Copy taken from startuptrading.com's Tools section ("Daily trend strength and direction for every market on your watchlist…") | ✅ Jack's own wording. |
 | 2 | What's included → masterclass | "Jack's masterclass", included with the membership and granted through Whop | TSMS & Fibs was removed from the membership (Nov 2026). Confirm the masterclass name, what it covers and that Whop grants it on checkout. |
 | 3 | Indicators → ATR Order Automation | Copy taken from startuptrading.com's Tools section ("Sizes each trade from ATR and places your stop and target…") | ✅ Jack's own wording. |
+| 2a | Hero | "Jack has traded futures since 2008" | Your brief said "20 years"; 2008 to 2026 is about 18. "Since 2008" matches what Jack has said elsewhere. Confirm the start year before using "20 years" anywhere. |
+| 2b | Strip, tools, pricing, FAQ | "Eligible new tools as they're released … licensed to active members … with no separate purchase" | A commitment customers will hold you to. Confirm that new tools released for the membership will be included at no extra cost, and that anything sold separately will be labelled. |
+| 2c | Community | "Discord tools, in development: custom bots and utilities … released to members as they're ready" | Shown as in development, not as included today. Keep it that way until they ship. |
+| 2d | Community, pricing, FAQ | "Masterclasses & trading education", granted at checkout through Whop | Confirm the masterclasses exist on Whop and are attached to both plans. |
 | 4 | Hero, strip, FAQ | "Licensed … minutes after you join" / "~3 min" | True once live license writes are enabled (Phase 3). Until then, licensing isn't automatic. |
 | 5 | Hero, pricing, FAQ | "Cancel anytime … keep access until the end of the period you've paid for" | Matches the bridge's logic. Confirm it's the business policy, and add a refund line if there is one. |
 | 6 | FAQ | "NinjaTrader 8 on a Windows computer" | Confirm the indicators are NT8 desktop only. |
