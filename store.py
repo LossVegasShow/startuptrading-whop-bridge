@@ -57,6 +57,14 @@ CREATE TABLE IF NOT EXISTS message_outbox (
   PRIMARY KEY(customer_id,kind));
 CREATE TABLE IF NOT EXISTS alert_log (
   key TEXT PRIMARY KEY, first_seen INTEGER NOT NULL, last_sent INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS control_state (
+  key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS license_write_log (
+  id INTEGER PRIMARY KEY, at INTEGER NOT NULL, kind TEXT NOT NULL, customer_id INTEGER, product_id INTEGER);
+CREATE INDEX IF NOT EXISTS idx_write_log ON license_write_log(kind, at);
+CREATE TABLE IF NOT EXISTS reminder_approvals (
+  customer_id INTEGER NOT NULL, kind TEXT NOT NULL, approved_at INTEGER NOT NULL,
+  batch TEXT NOT NULL, PRIMARY KEY(customer_id, kind));
 '''
 
 # Persistent PostgreSQL is required for hosted customer storage. SQLite remains
@@ -167,7 +175,9 @@ def request_crm_sync(db,cid):
     c=customer(db,cid)
     if not c:return
     licenses=db.execute('SELECT product_id,license_id,expiration FROM licenses WHERE customer_id=?',(cid,)).fetchall()
-    active=sorted(int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through'] and c['status']=='eligible')
+    from config import INDICATORS
+    active=sorted(int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through'] and c['status']=='eligible'
+                  and int(r['product_id']) in INDICATORS)
     fields=(c['membership_id'],c['whop_user_id'],c['buyer_email'],c['nt_email'] if c['verified'] else None,
             c['status'],c['plan_id'],c['paid_through'],tuple(active))
     fingerprint=hashlib.sha256(json.dumps(fields,sort_keys=True).encode()).hexdigest()
@@ -180,15 +190,15 @@ def request_crm_sync(db,cid):
         status='pending',next_attempt_at=0,updated_at=excluded.updated_at""",(cid,fingerprint,now))
 
 def queue_activation_email(db,cid):
-    """One welcome email per customer, only when all 3 licenses have been recorded."""
+    """One welcome email per customer, only when every membership indicator is licensed."""
     c=customer(db,cid)
     if not c or not c['verified'] or not c['nt_email'] or c['status']!='eligible':return False
     from config import INDICATORS
     licenses=db.execute('SELECT product_id,license_id,expiration,state FROM licenses WHERE customer_id=?',(cid,)).fetchall()
     # Bridge-issued licenses matching the paid-through date, plus indicators the
-    # member already owns from a one-time purchase, together cover all three.
+    # member already owns from a one-time purchase, together cover every indicator.
     valid={int(r['product_id']) for r in licenses
-           if (r['license_id'] and r['expiration']==c['paid_through']) or r['state']=='owned_separately'}
+           if (r['license_id'] and r['expiration']==c['paid_through']) or r['state']=='owned_separately'} & set(INDICATORS)
     if valid!=set(INDICATORS):return False
     db.execute("""INSERT INTO message_outbox(customer_id,kind,target_email,updated_at)
         VALUES(?,'activation',?,?) ON CONFLICT(customer_id,kind) DO NOTHING""",(cid,c['nt_email'],int(time.time())))

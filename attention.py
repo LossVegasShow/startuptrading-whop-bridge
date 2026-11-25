@@ -28,6 +28,14 @@ def find_issues(db, cfg, now=None):
     now = now or int(time.time())
     issues = []
 
+    # 0. Circuit breaker tripped: every license write (grants AND revocations) is paused.
+    import controls
+    paused = controls.breaker(db)
+    if paused:
+        issues.append(_issue('breaker:tripped', HIGH, 'License writes paused (circuit breaker)',
+                             f'{paused.get("reason", "")}. No licenses are granted or revoked until you resume '
+                             f'writes in /admin (see PRODUCTION_LICENSING.md).'))
+
     # 1. Paid members whose access should have ended but whose licenses still look active.
     for r in db.execute("""SELECT c.id, c.membership_id, COUNT(*) AS n FROM customers c
             JOIN licenses l ON l.customer_id=c.id
@@ -47,14 +55,16 @@ def find_issues(db, cfg, now=None):
         issues.append(_issue(f'sync:{r["customer_id"]}', HIGH, 'License sync failing',
                              f'{r["membership_id"]}: {r["details"][:140]}', r['customer_id']))
 
-    # 3. Verified, paying members on the write allowlist without all licenses after 30 minutes.
+    # 3. Verified, paying members in licensing scope without all licenses after 30 minutes.
     allow = cfg.write_allowlist() if cfg.license_writes else set()
+    everyone = cfg.license_writes and getattr(cfg, 'license_all_members', False)
     for r in db.execute("""SELECT id, membership_id, nt_email, updated_at FROM customers
             WHERE status='eligible' AND verified=1 AND updated_at<?""", (now - 1800,)):
-        if (r['membership_id'], (r['nt_email'] or '').casefold()) not in allow:
+        if not everyone and (r['membership_id'], (r['nt_email'] or '').casefold()) not in allow:
             continue
-        have = db.execute("SELECT COUNT(*) AS n FROM licenses WHERE customer_id=? AND state IN ('created','renewed','unchanged','owned_separately')",
-                          (r['id'],)).fetchone()['n']
+        have = sum(1 for x in db.execute("SELECT product_id FROM licenses WHERE customer_id=? AND state IN "
+                                         "('created','renewed','unchanged','owned_separately')", (r['id'],))
+                   if int(x['product_id']) in INDICATORS)
         if have < len(INDICATORS):
             issues.append(_issue(f'licensing:{r["id"]}', HIGH, 'Paying member missing licenses',
                                  f'{r["membership_id"]}: {have}/{len(INDICATORS)} indicators active', r['id']))

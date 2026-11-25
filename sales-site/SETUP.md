@@ -99,7 +99,7 @@ On the current home page (`/`) in GHL:
 - Change **"Join the Discord"** (now `https://whop.com/startuptrading/`) to
   **`/join`**, so visitors see the membership offer and pay on your site.
 - Optional: in the Tools section, add a line under the one-time products such as
-  *"Or get all three plus the Discord: membership from $99/month →"* linking to
+  *"Or get both indicators plus the Discord and masterclass: membership from $99/month →"* linking to
   `/join`.
 - In Render, set `CHECKOUT_URL=https://startuptrading.com/join#pricing`. It's the
   "rejoin" link in the access-ended email and the "Become a member" button

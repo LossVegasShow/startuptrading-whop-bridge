@@ -31,7 +31,7 @@ Annual plan: `plan_B84PWLvXemyFX`
 
 ## Licensing safety and account paths
 
-Three vendor products: `2067` (ATR Order Automation), `2071` (Trend Scanner & Market Selector), `2205` (TSMS & Fibs). No other products will be managed.
+Two vendor products: `2067` (ATR Order Automation) and `2071` (Trend Scanner & Market Selector). `2205` (TSMS & Fibs) was removed from the membership in Nov 2026: licenses the bridge issued for it are switched off on the next sync, and licenses it didn't issue are never touched. No other products are managed. The membership also includes the Discord and masterclass, which Whop grants directly.
 
 Customer chooses (a) existing NinjaTrader account, or (b) create an account using the **configurable** NinjaTrader registration/referral link and return. Jack's affiliate arrangement is unconfirmed. Do not claim commission or invent his link. A missing referral URL uses NinjaTrader's official account page.
 
@@ -39,7 +39,7 @@ Whop `GET /api/v1/memberships/{mem_id}` is used to fetch `account.id`, `product_
 
 Vendor tokens come from `POST https://demo.tradovateapi.com/v1/auth/accesstokenrequest`, then the app uses `GET/POST/PATCH` on the verified Ecosystem vendor endpoints with separate `license` (POST) vs `product` (PATCH) JSON wrappers. It handles real `result` values rather than invented objects.
 
-**Default `LICENSE_WRITES_ENABLED=false`. There is NO production write option built into this version.** For a strictly authorized test, set all three `.env` values:
+**Default `LICENSE_WRITES_ENABLED=false`.** Production licensing for every member (`LICENSE_ALL_MEMBERS`), the circuit breaker, the emergency stop and reminder release are documented in [PRODUCTION_LICENSING.md](PRODUCTION_LICENSING.md). For a strictly authorized test, set all three `.env` values:
 
 - `LICENSE_WRITES_ENABLED=true`
 - `ALLOWED_TEST_EMAIL=the-owned-test-ninjatrader-email`

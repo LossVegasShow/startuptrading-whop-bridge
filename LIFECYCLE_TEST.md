@@ -78,23 +78,32 @@ NinjaTrader Desktop shows, and anything odd.
 **Failure-mode checks** (optional, already covered offline):
 - If Whop is unreachable, the snapshot shows `whop.error` and nothing is
   revoked.
-- If one NinjaTrader write fails, no activation email is sent until all three
-  succeed.
+- If one NinjaTrader write fails, no activation email is sent until every indicator
+  succeeds.
 
 ## 4. Results
 
-| # | Date / time | Snapshot `overall` | NinjaTrader Desktop | Notes |
+Run on 24–25 Nov 2026 against the live app, test NinjaTrader account
+`bitbanditbrand@gmail.com`, Whop account `phonysolvent77`. At the time the
+membership had three indicators (2067, 2071, 2205). TSMS & Fibs (2205) was
+removed from the membership afterwards (see PRODUCTION_LICENSING.md, section 6).
+
+| # | Date / time (UTC) | Snapshot `overall` | NinjaTrader Desktop | Notes |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| 6 | | | | |
-| 7 | | | | |
-| 8 | | | | |
-| 9 | | | | |
-| 10 | | | | |
+| 1 | 24 Nov | `entitled: true` | — | `mem_T1AdJRcFkJNNSk`, $0 promo, no period dates from Whop. Needed fixes #24 (sign-in lookup) and #25 (active promo memberships without dates). |
+| 2 | 24 Nov ~22:1x | `consistent` | Licensed | Needed #26 (adopt the account's already-expired licenses 82908/82912/82913 instead of manual review) and #27 (admin buttons). Licenses extended to 2026-12-24. |
+| 3 | 24 Nov | `consistent` | — | Repeat reconciles: `ninjatrader_unchanged`, no new licenses, no second email. |
+| 4 | — | — | — | Not run (needs a real renewal). Renewal path covered by the offline rehearsal. |
+| 5 | — | — | — | Skipped: the $0 promo membership has no period end. Cancel-at-period-end is covered offline. |
+| 6 | 24 Nov 23:03 | `consistent` (not entitled) | **Pending confirmation** | Membership ended in Whop → `writes: 3`, all three `expired` at 23:03:49–50Z. NinjaTrader Desktop check to be confirmed. |
+| 7 | — | — | — | Skipped: Whop can't reactivate an ended membership. Same-membership restore is covered offline. |
+| 8 | 25 Nov ~00:2x | `consistent` | — | New purchase `mem_XN7y9ppQsdx2np`: `ninjatrader_link_transferred_in` from customer 1; the same licenses 82908/82912/82913 were `renewed` to 2026-12-24T23:21:22Z. No duplicates. |
+| 9 | 25 Nov | — | — | Whop test webhook sent and recorded. |
+| 10 | 25 Nov | `write_gate.allowed: false` | — | `LICENSE_WRITES_ENABLED=false`; test membership ended. |
+
+Also found during the run and fixed: the buyer email now comes from Whop's
+Members API (#28), and activation reminders are held while licensing is
+test-only (#29).
 
 **Pass** = steps 1–7 and 9 behave as expected, *and* step 6 shows the
 indicators actually stop working in NinjaTrader.

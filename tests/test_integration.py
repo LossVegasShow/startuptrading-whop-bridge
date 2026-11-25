@@ -62,7 +62,9 @@ def test_license_writes_require_both_allowlist_matches():
     assert not Engine(cfg).allowed({'nt_email':'test@example.com','membership_id':'mem_test'})
 
 def test_correct_ninja_products():
-    assert set(INDICATORS)=={2067,2071,2205}
+    assert set(INDICATORS)=={2067,2071}
+    from config import RETIRED_INDICATORS
+    assert set(RETIRED_INDICATORS)=={2205} and not set(RETIRED_INDICATORS)&set(INDICATORS)
 
 def test_hashed_tokens():
     assert hash_token('private-link')==hashlib.sha256(b'private-link').hexdigest()
@@ -102,7 +104,7 @@ def test_engine_reconciles_one_allowlisted_test_account(tmp_path):
                    ('mem_test','user_test','buyer@example.com','test@example.com',1,'verified',int(time.time())))
     e=Engine(cfg);e.whop=FakeWhop();e.nt=FakeNT()
     result=asyncio.run(e.reconcile(1))
-    assert result['status']=='eligible' and len(e.nt.created)==3
+    assert result['status']=='eligible' and len(e.nt.created)==len(INDICATORS)
     assert {x[0] for x in e.nt.created}==set(INDICATORS)
     with connect(cfg) as db:
-        assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0]==3
+        assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0]==len(INDICATORS)

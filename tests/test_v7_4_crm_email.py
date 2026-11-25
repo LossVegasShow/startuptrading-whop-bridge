@@ -27,7 +27,7 @@ def test_email_never_queued_in_observe_mode(tmp_path):
 
 def test_email_queued_once_only_after_three_licenses(tmp_path):
     e,cfg=setup(tmp_path)
-    assert asyncio.run(e.reconcile(1))['writes']==3
+    assert asyncio.run(e.reconcile(1))['writes']==len(INDICATORS)
     with connect(cfg) as db:
         row=db.execute('SELECT * FROM message_outbox').fetchone()
         assert row['status']=='pending' and row['target_email']=='test@example.com'

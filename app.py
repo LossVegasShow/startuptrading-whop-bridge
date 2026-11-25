@@ -28,6 +28,7 @@ from purchaser_intake import handle_queued_event, import_membership
 from security import verify_webhook,hash_token,require_admin
 import customer_errors
 import email_templates
+import controls
 
 cfg=Config(); engine=Engine(cfg)
 ROOT=Path(__file__).parent
@@ -211,7 +212,9 @@ async def secure_headers(request,call_next):
 
 @app.get('/health')
 def health():
-    return {'status':'ok','mode':'single_test_membership' if cfg.license_writes else 'observe_only',
+    with connect(cfg) as db:paused=bool(controls.breaker(db))
+    return {'status':'ok','mode':{'off':'observe_only','allowlist':'allowlist_only','all_members':'all_members'}[controls.mode(cfg)],
+            'circuit_breaker':'tripped' if paused else 'ok',
             'whop_configured':bool(cfg.whop_api_key),'webhook_configured':bool(cfg.whop_webhook_secret),
             'ninjatrader_configured':bool(cfg.nt_cid and cfg.nt_sec), 'reconciler_enabled':cfg.run_reconciler,
             'public_host':urlsplit(cfg.public_base_url).netloc,'canonical_redirect':cfg.canonical_redirect}
@@ -728,7 +731,8 @@ def admin(request:Request):
         audits=[dict(r) for r in db.execute('SELECT * FROM audit ORDER BY id DESC LIMIT 20')]
         licenses=[dict(r) for r in db.execute('SELECT * FROM licenses ORDER BY updated_at DESC LIMIT 60')]
         issues=attention.find_issues(db,cfg)
-    return page(request,'admin.html',customers=customers,events=events,audits=audits,licenses=licenses,
+        control=controls.status(cfg,db)
+    return page(request,'admin.html',customers=customers,events=events,audits=audits,licenses=licenses,control=control,
                 attention_count=len(issues),attention_high=any(i['severity']=='high' for i in issues),
                 writes=cfg.license_writes,allow_email=cfg.allowed_test_email,allow_mem=cfg.allowed_test_membership,
                 whop=bool(cfg.whop_api_key),nt=bool(cfg.nt_sec and cfg.nt_cid),base=cfg.public_base_url)
@@ -755,6 +759,43 @@ async def admin_invite(request:Request,membership_id:str=Form(...),buyer_email:s
         audit(db,cid,'invitation_created','Admin invitation; buyer email must be verified')
     url=cfg.public_base_url+'/activate/'+quote(token)
     return page(request,'invite.html',url=url,recipient=buyer_email)
+
+@app.post('/admin/breaker/reset',response_class=HTMLResponse)
+def admin_breaker_reset(request:Request,confirm:str=Form('')):
+    # Resuming writes is deliberate: the form needs the word RESUME typed in.
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    if confirm.strip().upper()!='RESUME':
+        raise HTTPException(400,'Type RESUME to confirm resuming license writes')
+    with connect(cfg) as db:
+        previous=controls.reset(db)
+    return page(request,'result.html',result={'circuit_breaker':'reset',
+        'previous_reason':(previous or {}).get('reason','was not tripped'),
+        'next':'Writes resume on the next sync (within RECONCILE_INTERVAL_SECONDS) or when you press Reconcile.'})
+
+@app.get('/admin/reminders',response_class=HTMLResponse)
+def admin_reminders(request:Request):
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    with connect(cfg) as db:held=lifecycle_emails.held_reminders(db,cfg)
+    return page(request,'admin_reminders.html',held=held,mode=controls.MODE_LABEL[controls.mode(cfg)],
+                auto=cfg.activation_reminders_auto,now=int(time.time()))
+
+@app.post('/admin/reminders/release',response_class=HTMLResponse)
+async def admin_reminders_release(request:Request):
+    # Explicit approval: the operator ticks recipients and types the exact count.
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    form=await request.form()
+    keys=set()
+    for value in form.getlist('item'):
+        cid,_,kind=str(value).partition(':')
+        if cid.isdigit() and kind in lifecycle_emails.REMINDER_DELAYS:keys.add((int(cid),kind))
+    if not keys:raise HTTPException(400,'Tick at least one reminder to release')
+    if str(form.get('confirm','')).strip()!=f'SEND {len(keys)}':
+        raise HTTPException(400,f'Type SEND {len(keys)} to confirm releasing {len(keys)} reminder(s)')
+    batch=time.strftime('%Y%m%d-%H%M%S',time.gmtime())
+    with connect(cfg) as db:n=lifecycle_emails.approve(db,cfg,keys,batch)
+    return page(request,'result.html',result={'reminders_approved':n,'batch':batch,
+        'when':'Each approved reminder sends at its scheduled time (already-due ones within RECONCILE_INTERVAL_SECONDS), '
+               'and only while licensing is open for that member.'})
 
 @app.get('/admin/attention',response_class=HTMLResponse)
 def admin_attention(request:Request):

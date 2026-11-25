@@ -37,8 +37,8 @@ WHOP_LOADER = 'https://js.whop.com/static/checkout/loader.js'
 # name -> (source template, standalone file, embed file, <title>, description)
 PAGES = {
     'sales': ('page.html', 'index.html', 'ghl-embed.html',
-              'StartUpTrading: NinjaTrader indicators and private trade room',
-              "Jack's three NinjaTrader indicators and the private StartUpTrading Discord. "
+              'StartUpTrading: NinjaTrader indicators, trade room and masterclass',
+              "Jack's two NinjaTrader indicators, the private StartUpTrading Discord and his masterclass. "
               '${price_monthly}/month, cancel anytime.'),
     'welcome': ('welcome.html', 'welcome.html', 'welcome-embed.html',
                 'Welcome to StartUpTrading',

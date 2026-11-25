@@ -204,13 +204,13 @@ def activation_emails(cfg):
 def test_promo_member_is_licensed_once_and_repeat_reconciles_change_nothing(tmp_path):
     cfg, eng = rig(tmp_path)
     first = asyncio.run(eng.reconcile(1))
-    assert first['status'] == 'eligible' and first['writes'] == 3
+    assert first['status'] == 'eligible' and first['writes'] == len(INDICATORS)
     assert sorted(w[1] for w in eng.nt.writes) == sorted(INDICATORS)
     assert activation_emails(cfg) == 1
     for _ in range(2):
         again = asyncio.run(eng.reconcile(1))
         assert again['writes'] == 0 and {p['action'] for p in again['products']} == {'unchanged'}
-    assert len(eng.nt.writes) == 3 and activation_emails(cfg) == 1
+    assert len(eng.nt.writes) == len(INDICATORS) and activation_emails(cfg) == 1
 
 
 def test_promo_member_is_revoked_when_whop_ends_it(tmp_path):

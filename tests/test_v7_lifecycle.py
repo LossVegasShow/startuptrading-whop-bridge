@@ -33,16 +33,16 @@ def setup(tmp_path):
 
 def test_full_lifecycle(tmp_path):
     e,cfg=setup(tmp_path)
-    first=asyncio.run(e.reconcile(1));assert first['writes']==3;assert len(e.nt.created)==3
-    second=asyncio.run(e.reconcile(1));assert second['writes']==0;assert len(e.nt.created)==3
-    e.whop.period=30;third=asyncio.run(e.reconcile(1));assert third['writes']==3;assert len(e.nt.updated)==3
+    first=asyncio.run(e.reconcile(1));assert first['writes']==len(INDICATORS);assert len(e.nt.created)==len(INDICATORS)
+    second=asyncio.run(e.reconcile(1));assert second['writes']==0;assert len(e.nt.created)==len(INDICATORS)
+    e.whop.period=30;third=asyncio.run(e.reconcile(1));assert third['writes']==len(INDICATORS);assert len(e.nt.updated)==len(INDICATORS)
     e.whop.status='canceling';e.whop.period=30
     assert asyncio.run(e.reconcile(1))['writes']==0 # cancel at period end retains access
     e.whop.status='expired';out=asyncio.run(e.reconcile(1))
-    assert out['status']=='ineligible' and out['writes']==3
+    assert out['status']=='ineligible' and out['writes']==len(INDICATORS)
     assert all(r['expirationDateUTC']<datetime.now(timezone.utc).isoformat() for rows in e.nt.data.values() for r in rows)
     assert asyncio.run(e.reconcile(1))['writes']==0
-    with connect(cfg) as db:assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0]==3
+    with connect(cfg) as db:assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0]==len(INDICATORS)
 
 def test_do_not_touch_preexisting_license(tmp_path):
     e,cfg=setup(tmp_path)
@@ -51,7 +51,7 @@ def test_do_not_touch_preexisting_license(tmp_path):
     e.nt.data[2067].append({'id':222,'email':'test@example.com','expirationDateUTC':(datetime.now(timezone.utc)+timedelta(days=1)).isoformat()})
     try:asyncio.run(e.reconcile(1));assert False,'expected incomplete sync'
     except IntegrationError:pass
-    assert len(e.nt.created)==2
+    assert len(e.nt.created)==len(INDICATORS)-1
     assert not any(p==2067 for p,_ in e.nt.updated)
     with connect(cfg) as db:assert db.execute('SELECT * FROM licenses WHERE product_id=2067').fetchone() is None
 

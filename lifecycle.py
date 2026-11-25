@@ -15,19 +15,24 @@ NinjaTrader license-list GET; the create/update methods are never used.
 import datetime as dt
 
 from clients import IntegrationError, membership_entitlement, membership_plan_id, parse_utc
-from config import INDICATORS
+from config import INDICATORS, RETIRED_INDICATORS
 from store import connect, customer
+import controls
 
 # NinjaTrader expiry may differ from Whop's paid-through by a few seconds of rounding.
 TOLERANCE_SECONDS = 60
 
 
-def write_gate(cfg, c):
+def write_gate(cfg, c, paused=None):
     """Explain whether the engine is allowed to write licenses for this customer."""
     if not cfg.license_writes:
-        return {'allowed': False, 'reason': 'LICENSE_WRITES_ENABLED is false (observe-only)'}
+        return {'allowed': False, 'reason': 'LICENSE_WRITES_ENABLED is false (emergency stop / observe-only)'}
     if not c.get('verified') or not c.get('nt_email'):
         return {'allowed': False, 'reason': 'NinjaTrader email not verified yet'}
+    if paused:
+        return {'allowed': False, 'reason': 'circuit breaker tripped: ' + str(paused.get('reason', ''))}
+    if cfg.license_all_members:
+        return {'allowed': True, 'reason': 'LICENSE_ALL_MEMBERS is on'}
     pairs = cfg.write_allowlist()
     key = (c['membership_id'], c['nt_email'].casefold())
     if key in pairs:
@@ -77,13 +82,14 @@ async def snapshot(cfg, engine, cid):
             'SELECT product_id,license_id,expiration,state,updated_at FROM licenses WHERE customer_id=? ORDER BY product_id', (cid,))]
         outbox = [dict(r) for r in db.execute(
             'SELECT kind,status,attempts,last_error,updated_at FROM message_outbox WHERE customer_id=?', (cid,))]
+        paused = controls.breaker(db)
         recent = [dict(r) for r in db.execute(
             'SELECT at,action,details FROM audit WHERE customer_id=? ORDER BY id DESC LIMIT 20', (cid,))]
 
     out = {
         'customer': {k: c.get(k) for k in ('id', 'membership_id', 'whop_user_id', 'status', 'plan_id', 'paid_through',
                                            'buyer_email_verified', 'verified', 'nt_email', 'onboarding_path')},
-        'write_gate': write_gate(cfg, c),
+        'write_gate': write_gate(cfg, c, paused),
         'database': {'licenses': db_licenses, 'emails': outbox, 'recent_audit': recent},
     }
 
@@ -138,7 +144,29 @@ async def snapshot(cfg, engine, cid):
             v = verdict(expected, remote.get(pid))
         products.append({'product_id': pid, 'name': name, **v})
     out['products'] = products
-    statuses = {p['status'] for p in products}
+
+    # Retired products (no longer in the membership): a license the bridge issued
+    # must not stay active. Licenses it didn't issue are listed for information only.
+    retired = []
+    for r in db_licenses:
+        pid = int(r['product_id'])
+        if pid not in RETIRED_INDICATORS or r['license_id'] is None:
+            continue
+        item = {'product_id': pid, 'name': RETIRED_INDICATORS[pid], 'license_id': r['license_id'], 'state': r['state']}
+        if not out['ninjatrader']['readable']:
+            item.update(status='unknown', detail=out['ninjatrader']['reason'])
+        else:
+            try:
+                rows = [x for x in await engine.nt.licenses(pid) if int(x.get('id') or 0) == int(r['license_id'])]
+                v = verdict({'licensed': False, 'until': None},
+                            [{'id': x.get('id'), 'expirationDateUTC': x.get('expirationDateUTC')} for x in rows])
+                item.update(v)
+            except Exception as exc:
+                item.update(status='unknown', detail=f'NinjaTrader licenses could not be read: {str(exc)[:120]}')
+        retired.append(item)
+    out['retired_products'] = retired
+
+    statuses = {p['status'] for p in products} | {p['status'] for p in retired}
     out['overall'] = 'consistent' if statuses == {'ok'} else ('mismatch' if 'mismatch' in statuses else 'unknown')
     out['expected'] = expected
     return out

@@ -96,18 +96,18 @@ def test_full_lifecycle_matrix(rig):
 
     # 1. Purchase + activation: three licenses, one success email queued.
     out = run(eng)
-    assert out['writes'] == 3 and len(eng.nt.writes) == 3
+    assert out['writes'] == len(INDICATORS) and len(eng.nt.writes) == len(INDICATORS)
     assert snap(cfg, eng)['overall'] == 'consistent'
     assert outbox(cfg) == [{'status': 'pending'}]
 
     # 2. Duplicate webhook / repeated activation: no new licenses, no second email.
-    assert run(eng)['writes'] == 0 and len(eng.nt.writes) == 3
+    assert run(eng)['writes'] == 0 and len(eng.nt.writes) == len(INDICATORS)
     assert len(outbox(cfg)) == 1
 
     # 3. Renewal: paid-through moves forward, licenses extended to match.
     eng.whop.days = 60
     assert snap(cfg, eng)['overall'] == 'mismatch'      # snapshot notices before reconcile
-    assert run(eng)['writes'] == 3
+    assert run(eng)['writes'] == len(INDICATORS)
     assert snap(cfg, eng)['overall'] == 'consistent'
 
     # 4. Cancel at period end: still paid up, access kept, nothing written.
@@ -116,22 +116,22 @@ def test_full_lifecycle_matrix(rig):
     s = snap(cfg, eng)
     assert s['whop']['entitled'] and s['whop']['cancel_at_period_end'] and s['overall'] == 'consistent'
 
-    # 5. Expiry: all three licenses end now.
+    # 5. Expiry: every license ends now.
     eng.whop.status = 'expired'
     s = snap(cfg, eng)
     assert s['overall'] == 'mismatch'
     assert all(p['detail'] == 'NOT entitled, but the NinjaTrader license is still active' for p in s['products'])
-    assert run(eng)['writes'] == 3
+    assert run(eng)['writes'] == len(INDICATORS)
     s = snap(cfg, eng)
     assert s['overall'] == 'consistent' and not s['whop']['entitled']
     assert all(p['detail'].startswith('no active license (expired') for p in s['products'])
 
     # 6. Restore the same membership (e.g. payment recovered): licenses come back.
     eng.whop.status, eng.whop.days = 'active', 30
-    assert run(eng)['writes'] == 3
+    assert run(eng)['writes'] == len(INDICATORS)
     assert snap(cfg, eng)['overall'] == 'consistent'
     with connect(cfg) as db:
-        assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0] == 3   # reused, never duplicated
+        assert db.execute('SELECT COUNT(*) FROM licenses').fetchone()[0] == len(INDICATORS)   # reused, never duplicated
 
 
 def test_whop_outage_never_revokes(rig):
@@ -174,7 +174,7 @@ def test_staged_rollout_allowlist_requires_exact_pair(rig):
     cfg.license_write_allowlist = f'mem_other:{EMAIL}, {MEM}:wrong@example.com'
     assert run(eng).get('mode') == 'observe_only' and eng.nt.writes == []
     cfg.license_write_allowlist = f'mem_other:x@example.com, {MEM}:{EMAIL.upper()}'
-    assert run(eng)['writes'] == 3
+    assert run(eng)['writes'] == len(INDICATORS)
 
 
 def test_writes_switch_off_means_observe_only(rig):
