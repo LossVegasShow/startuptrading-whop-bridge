@@ -10,14 +10,14 @@
   "tools": [
     {
       "id": "atr-position-size-planner",
-      "name": "ATR Position Size & Stop Planner",
+      "name": "Futures Risk Planner for TradingView",
       "platform": "TradingView",
       "categories": ["tradingview", "calculators"],
       "status": "coming_soon",
       "status_label": "Coming soon to TradingView",
       "page": "tv_atr_page_url",
       "external_url": "tv_atr_script_url",
-      "summary": "Set your dollar risk, let ATR place the stop, and see how many contracts fit, right on your TradingView chart.",
+      "summary": "ATR position sizing, prop firm drawdown planning and a standard-vs-micro comparison, right on your TradingView chart.",
       "cta": "See how it works",
       "interest": "tradingview"
     },

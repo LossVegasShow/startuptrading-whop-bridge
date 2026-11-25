@@ -49,17 +49,17 @@ PAGES = {
               'Install your StartUpTrading tools',
               'How to download, import and add your StartUpTrading tools to NinjaTrader 8.'),
     'free_tools': ('free-tools.html', 'free-tools.html', 'free-tools-embed.html',
-                   'Free Futures Trading Tools for TradingView & NinjaTrader',
-                   'Free tools from futures trader Jack Gleason: an ATR position size planner for TradingView, '
-                   'a position size calculator and an ATR indicator for NinjaTrader 8.'),
+                   'Free Futures Trading Tools & Indicators | StartUpTrading',
+                   'Explore free TradingView indicators, NinjaTrader tools, futures position size calculators '
+                   'and risk management resources from StartUpTrading.'),
     'tv_atr': ('tradingview-atr-planner.html', 'tradingview-atr-planner.html', 'tradingview-atr-planner-embed.html',
-               'ATR Position Size & Stop Planner for TradingView (Free)',
-               'Free TradingView indicator: set your dollar risk, place the stop by ATR and see how many futures '
-               'contracts fit. Method, examples and limitations.'),
+               'Free TradingView Futures Position Size & Risk Indicator',
+               'Free TradingView indicator for ATR position sizing, prop firm drawdown planning, micro futures '
+               'comparison and visual trade risk management.'),
     'calculator': ('calculator.html', 'calculator.html', 'calculator-embed.html',
-                   'Futures Position Size Calculator & Prop-Firm Risk Planner (Free)',
-                   'Free futures position size calculator for ES, NQ, MES, MNQ, CL, GC and more. Size from ATR '
-                   'or a fixed stop, and plan risk per trade for a prop-firm drawdown.'),
+                   'Free Futures Position Size Calculator | ES, NQ, MES, MNQ',
+                   'Calculate futures contract size, ATR stops and estimated trade risk for ES, NQ, MES and MNQ. '
+                   'Free prop firm risk planner. No sign-up required.'),
 }
 
 
@@ -161,12 +161,20 @@ def render(cfg, name='sales'):
     full = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
             f'<title>{html.escape(title)}</title>\n'
+            + (f'<link rel="canonical" href="{html.escape(canonical_url(cfg, name), quote=True)}">\n'
+               if canonical_url(cfg, name) else '') +
             f'<meta name="description" content="{html.escape(description.replace("{price_monthly}", cfg["price_monthly"]), quote=True)}">\n'
             + ('<meta name="robots" content="noindex">\n' if name in ('welcome', 'setup') else '') +
             '<meta name="theme-color" content="#07090d">\n'
             '<style>html,body{margin:0;background:#07090d}</style>\n'
             f'</head>\n<body>\n{embed}</body>\n</html>\n')
     return embed, full
+
+
+def canonical_url(cfg, name):
+    """The one URL search engines should index for each page (members-only pages: none)."""
+    return {'sales': cfg['site_url'] + '/', 'free_tools': cfg['free_tools_url'], 'tv_atr': cfg['tv_atr_page_url'],
+            'calculator': cfg['calculator_url']}.get(name, '')
 
 
 def breadcrumbs(site, trail):
@@ -216,16 +224,19 @@ def structured_data(name, cfg, body):
                        'mainEntity': {'@type': 'ItemList', 'itemListElement': items}},
                  breadcrumbs(site, [('Free tools', cfg['free_tools_url'])])]
     elif name == 'tv_atr':
-        app = {'@type': 'SoftwareApplication', 'name': 'ATR Position Size & Stop Planner',
+        app = {'@type': 'SoftwareApplication', 'name': 'StartUpTrading Futures Risk Planner',
+               'alternateName': 'Futures Position Size Calculator - ATR & Prop Firm Risk',
+               'author': {'@type': 'Person', 'name': 'Jack Gleason'},
                'applicationCategory': 'FinanceApplication', 'operatingSystem': 'TradingView',
-               'description': 'Free TradingView indicator that sizes futures positions from a dollar risk and an '
-                              'ATR-based stop, rounding contracts down so risk never exceeds the limit.',
+               'description': 'Free, open-source TradingView indicator for ATR position sizing, prop firm '
+                              'drawdown planning, standard-versus-micro futures comparison and visual trade '
+                              'risk planning.',
                'url': cfg['tv_atr_page_url'], 'publisher': {'@id': site + '/#org'},
                'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'}}
         if cfg.get('tv_atr_script_url'):
             app['downloadUrl'] = cfg['tv_atr_script_url']
         graph = [org, app, breadcrumbs(site, [('Free tools', cfg['free_tools_url']),
-                                              ('ATR Position Size & Stop Planner', cfg['tv_atr_page_url'])])]
+                                              ('Futures Risk Planner for TradingView', cfg['tv_atr_page_url'])])]
     elif name == 'calculator':
         graph = [org, {'@type': 'WebApplication', 'name': 'Futures Position Size Calculator & Prop-Firm Risk Planner',
                        'applicationCategory': 'FinanceApplication', 'operatingSystem': 'Any (web browser)',

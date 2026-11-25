@@ -49,6 +49,8 @@ Rebuild and re-paste after each change.
 
 ## 3. SEO metadata
 
+> **Superseded for the three tool pages by `FLAGSHIP_POSITIONING.md` §6** (the final titles, descriptions, canonicals and alt text). The table below is kept for Home and `/indicators`.
+
 GHL ignores `<title>` and `<meta>` inside a Code element, so set them in each
 page's **SEO / meta** settings. GHL uses these for the social-sharing (Open Graph)
 title and description too. Add a **social image** (1200×630) where marked.

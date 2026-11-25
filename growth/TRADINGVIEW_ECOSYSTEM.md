@@ -116,7 +116,7 @@ method, and the Signature.** It never lives in a link or a logo.
 
   ```
   Free futures risk tools, the method behind them and new releases:
-  startuptrading.com/free-tools?utm_source=tradingview&utm_medium=signature&utm_campaign=profile
+  startuptrading.com/free-tools?utm_source=tradingview&utm_medium=social&utm_campaign=futures_risk_planner&utm_content=signature
   ```
 
   It points to the **free library**, not the sales page: it's useful first, and
@@ -193,7 +193,7 @@ Each release:
 |---|---|---|
 | Reach | Idea views, script page views, profile followers | TradingView (monthly log) |
 | Adoption | Script favorites and "uses", comments, likes; releases followed | TradingView |
-| Interest | Sessions from `utm_source=tradingview&utm_medium=signature` (by `utm_campaign`) | GA4 (`sut_attribution`) |
+| Interest | Sessions from `utm_source=tradingview&utm_medium=social` (by `utm_campaign`; see FLAGSHIP_POSITIONING.md §10) | GA4 (`sut_attribution`) |
 | Engagement | `free_tool_view`, `tool_use` on the companion page and calculator | GA4 |
 | Capture | `email_subscribe` with first touch = tradingview; GHL contacts tagged `source-tradingview` | GA4 + GHL |
 | Conversion | `checkout_intent`, `checkout_view`, `sut_purchase` with first touch = tradingview; Whop sales by UTM | GA4 + Whop |

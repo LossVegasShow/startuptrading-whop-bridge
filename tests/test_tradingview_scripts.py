@@ -53,7 +53,8 @@ def test_description_is_clean_and_signature_is_tracked():
     body = public.split('DESCRIPTION', 1)[1]
     body = body.split('\n', 1)[1]          # drop the internal instruction line
     assert FORBIDDEN.findall(body) == []
-    assert 'utm_source=tradingview' in signature and 'utm_medium=signature' in signature
+    assert 'utm_source=tradingview' in signature and 'utm_medium=social' in signature
+    assert 'utm_campaign=futures_risk_planner' in signature
 
 
 PLANNER = TV / 'atr-position-size-planner.pine'

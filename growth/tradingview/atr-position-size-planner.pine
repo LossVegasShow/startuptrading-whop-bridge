@@ -3,11 +3,12 @@
 // (c) {TradingView username}
 // Risk first. Stop second. Size last.
 //@version=6
-indicator("ATR Position Size & Stop Planner", shorttitle = "ATR Size", overlay = true,
+indicator("Futures Position Size Calculator - ATR & Prop Firm Risk",
+     shorttitle = "Futures Risk", overlay = true,
      max_lines_count = 20, max_labels_count = 20, max_boxes_count = 10)
 
 // ===== Design system: identical in every tool of this series =====
-TOOL_NAME    = "ATR POSITION SIZE"
+TOOL_NAME    = "FUTURES RISK PLANNER"
 TOOL_VERSION = "v1.2"
 MOTTO        = "Risk first | stop second | size last"
 C_PANEL      = color.new(#0b0e13, 4)
