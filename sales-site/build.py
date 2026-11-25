@@ -2,7 +2,8 @@
 
     python sales-site/build.py
 
-Reads src/*.html, src/styles.css, src/app.js and site.config.json, and writes,
+Reads src/*.html, src/styles.css, src/affiliate.js + src/app.js and site.config.json, and writes
+(plus dist/affiliate-tracking.html, the GoHighLevel site-wide affiliate snippet),
 for each page in PAGES:
   dist/<name>.html        full standalone page (preview it in a browser)
   dist/<name>-embed.html  the block to paste into a GoHighLevel "Code" element
@@ -95,7 +96,8 @@ def render(cfg, name='sales'):
     # <!--include:_file.html--> pulls in a shared partial from src/.
     page = re.sub(r'<!--include:([\w.-]+\.html)-->', lambda m: (SRC / m.group(1)).read_text(), page)
     css = (SRC / 'styles.css').read_text()
-    js = (SRC / 'app.js').read_text()
+    # affiliate.js runs first: it sets window.SUT_AFFILIATE for app.js.
+    js = (SRC / 'affiliate.js').read_text() + '\n' + (SRC / 'app.js').read_text()
     cfg = dict(cfg)
     # Plan IDs come from the checkout URLs so there is a single source of truth.
     for url_key, plan_key in (('checkout_url', 'plan_monthly'), ('checkout_url_annual', 'plan_annual')):
@@ -155,6 +157,15 @@ def main():
         (DIST / embed_name).write_text(embed)
         (DIST / full_name).write_text(full)
         print(f'{name}: wrote dist/{full_name} and dist/{embed_name} ({len(embed) // 1024} KB)')
+    (DIST / 'affiliate-tracking.html').write_text(affiliate_snippet())
+    print('affiliate: wrote dist/affiliate-tracking.html (GoHighLevel site-wide tracking code)')
+
+
+def affiliate_snippet():
+    """Paste into GoHighLevel → Settings → Tracking code (header), site-wide, so an
+    affiliate's ?a= is captured on ANY startuptrading.com page, not just /join."""
+    return ('<!-- StartUpTrading: Whop affiliate attribution (sales-site/src/affiliate.js) -->\n'
+            '<script>\n' + (SRC / 'affiliate.js').read_text() + '</script>\n')
 
 
 if __name__ == '__main__':

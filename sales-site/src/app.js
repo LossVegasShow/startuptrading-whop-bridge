@@ -1,8 +1,10 @@
 (function () {
-  // Forward UTM tags (and Whop's ?a= affiliate code) from this page's URL to
-  // every checkout link, so Whop can attribute the sale to the campaign.
-  var keep = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'a'];
+  // Forward UTM tags from this page's URL to every checkout link, so Whop can
+  // attribute the sale to the campaign. The affiliate code comes from
+  // affiliate.js (this visit's ?a=, or the one remembered from an earlier visit).
+  var keep = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
   var here = new URLSearchParams(window.location.search);
+  var aff = window.SUT_AFFILIATE || '';
   var links = document.querySelectorAll('.sut a[data-checkout]');
   for (var i = 0; i < links.length; i++) {
     try {
@@ -10,14 +12,17 @@
       keep.forEach(function (k) {
         if (here.has(k) && !url.searchParams.has(k)) url.searchParams.set(k, here.get(k));
       });
+      if (aff && !url.searchParams.has('a')) url.searchParams.set('a', aff);
       links[i].href = url.toString();
     } catch (e) { /* leave the link as it is */ }
   }
-  // Embedded Whop checkout: pass a Whop affiliate code (?a=) through. UTM tags
-  // are forwarded by Whop's loader itself. Runs before the async loader mounts.
+  // Embedded Whop checkout: pass the affiliate code to EVERY mount (monthly and
+  // annual), so the sale is attributed whichever plan is chosen. UTM tags are
+  // forwarded by Whop's loader itself. Runs before the async loader mounts.
+  // Only adds this attribute: plan, theme and return URL are left as they are.
   var embeds = document.querySelectorAll('.sut [data-whop-checkout-plan-id]');
   for (var j = 0; j < embeds.length; j++) {
-    if (here.get('a')) embeds[j].setAttribute('data-whop-checkout-affiliate-code', here.get('a'));
+    if (aff) embeds[j].setAttribute('data-whop-checkout-affiliate-code', aff);
     (function (box) {
       // Hide the "Loading…" note once Whop's iframe has loaded.
       var wrap = box.parentNode;

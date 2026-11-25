@@ -244,7 +244,75 @@ so new buyers get reminders without a manual release.
 - [ ] Create the `/setup` install page once Jack provides the installation steps,
       and keep `INDICATOR_SETUP_URL` pointing to it.
 
+### Affiliate attribution (before announcing the affiliate program)
+Setup:
+- [ ] **Whop:** turn on the affiliate program for the StartUpTrading product. The
+      commission rate is Jack's decision; nothing in this repo sets or changes it.
+- [ ] **GoHighLevel:** paste `sales-site/dist/affiliate-tracking.html` into
+      **Settings → Tracking code → Header** (site-wide), so `?a=` is captured on
+      any startuptrading.com page, not only `/join`.
+- [ ] Publish the rebuilt `/join` (`ghl-embed.html`) and `/welcome` pages.
+- [ ] Tell affiliates to share **`https://startuptrading.com/join?a=THEIR_WHOP_USERNAME`**.
+      (A link to `whop.com/startuptrading?a=…` also attributes, but skips the /join page.)
+
+Tests. Use a fresh incognito window per test and a 100%-off, single-use promo code
+on a test Whop account. **Commission rates and prices are not changed by any of these.**
+- [ ] **A1 Monthly, direct:** open `startuptrading.com/join?a=AFFILIATE` and buy
+      **monthly**. In Whop → Affiliates (or the membership's details), the sale is
+      credited to AFFILIATE.
+- [ ] **A2 Annual, direct:** same link, buy **annual**. Credited to AFFILIATE.
+      (Use a cheap test or refund the purchase, and don't change the annual price.)
+- [ ] **A3 Landing elsewhere:** open `startuptrading.com/?a=AFFILIATE` (Home), click
+      **Join**, buy. Credited (needs the GHL tracking code above).
+- [ ] **A4 Return visit:** open `startuptrading.com/join?a=AFFILIATE`, close the tab,
+      come back to `startuptrading.com/join` with no `?a=` in the same browser
+      within 30 days, buy. Credited.
+- [ ] **A5 Latest affiliate wins:** visit with `?a=AFF_ONE`, then `?a=AFF_TWO`, buy.
+      Credited to AFF_TWO.
+- [ ] **A6 No affiliate:** fresh browser, `startuptrading.com/join`, buy. No affiliate credited.
+- [ ] **A7 Nothing else changed**, for at least one of A1–A5:
+  - the browser lands on `startuptrading.com/welcome` after paying
+  - `/admin-test/member-lookup` shows the new membership as `eligible`
+  - activation at `activate.startuptrading.com` works as before (with
+    licensing writes still limited to the test pair)
+- [ ] Record the results (membership IDs and who was credited) under section 8.
+
 ### NinjaTrader (Jack)
 - [ ] Confirm the revocation check (`LIFECYCLE_TEST.md` step 6).
 - [ ] Tell us how current members' 2067/2071 licenses were issued (section 4).
 - [ ] Provide the indicator installation instructions for `/setup`.
+
+## 8. Affiliate attribution
+
+**How it works:** `sales-site/src/affiliate.js` runs on every built page, and site-wide
+through the GoHighLevel tracking code.
+- **Capture:** it reads Whop's `?a=` affiliate code from the page URL and keeps only
+  valid codes (letters, digits, `.`, `_`, `-`, up to 64 characters).
+- **Remember:** it stores the code in this browser for **30 days**
+  (`SUT_AFF_DAYS`). The most recent affiliate wins.
+- **Pass to Whop:** on `/join` it sets `data-whop-checkout-affiliate-code` on
+  **both** embedded checkouts (monthly and annual) before Whop's loader mounts them.
+- **Links:** it adds `?a=` to Whop checkout links and to links to `/join`. A link
+  that already names an affiliate is never changed.
+
+**What it doesn't touch:**
+- the plan IDs, prices and checkout theme
+- the return URL (`data-whop-checkout-return-url` stays `https://startuptrading.com/welcome`)
+- the licensing app. Attribution lives entirely in Whop: membership verification,
+  purchase intake and NinjaTrader licensing don't read it and don't change.
+
+**To verify before launch:** the attribute name `data-whop-checkout-affiliate-code`
+and the `?a=` link format follow Whop's embedded-checkout affiliate documentation
+(https://docs.whop.com/third-party-integrations/embedded-checkouts/attribute-affiliates-embedded-checkout).
+That page couldn't be fetched from the build environment, so confirm them against
+it. Tests A1–A6 in section 7 confirm the end-to-end behaviour either way.
+
+| Test | Date | Plan | Membership | Credited to | Pass? |
+|---|---|---|---|---|---|
+| A1 | | Monthly | | | |
+| A2 | | Annual | | | |
+| A3 | | | | | |
+| A4 | | | | | |
+| A5 | | | | | |
+| A6 | | | | (none) | |
+| A7 | | | | | |
