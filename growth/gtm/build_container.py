@@ -21,7 +21,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 GA4_ID = 'G-S0PT1NK0FK'
-GTM_ID = 'GTM-NXZL43PP'
+GTM_ID = 'GTM-ML2LKZ7C'
 ACTIVATE_HOST = 'activate.startuptrading.com'
 INITIALIZATION_ALL_PAGES = '2147479573'   # GTM built-in trigger "Initialization - All Pages"
 

@@ -14,7 +14,7 @@ Audited 25 Nov 2026 against the repository, the live site and the live app.
 | Piece | State found | Notes |
 |---|---|---|
 | Site attribution script (`sales-site/src/tracking.js`, in `site-tracking.html` and every page embed) | **Live** on every page | First/last touch in browser storage, `dataLayer` events, Form 7 hidden fields |
-| Google Tag Manager | Was not installed → **GTM-NXZL43PP** now in the site-wide header code and the activation app | Container: `growth/gtm/` |
+| Google Tag Manager | Was not installed → **GTM-ML2LKZ7C** now in the site-wide header code and the activation app | Container: `growth/gtm/` |
 | Google Analytics 4 | Was not installed → **G-S0PT1NK0FK** via GTM (browser) and Measurement Protocol (verified server events) | Data API connector for the dashboard |
 | Meta pixel | Not installed | — |
 | Google Search Console | Verified, sitemap submitted | Organic search queries only |
@@ -159,7 +159,17 @@ anonymous id (GA4 then shows it as unattributed). Nothing is invented.
 
 ## 6. GA4 and Google Tag Manager: install and publish (you)
 
-Production IDs: GA4 **G-S0PT1NK0FK** (stream 16417615246), GTM **GTM-NXZL43PP**.
+**Confirmed production identifiers**
+
+| What | ID | Used in |
+|---|---|---|
+| GTM container | **GTM-ML2LKZ7C** | `sales-site/site.config.json` → `site-tracking.html` / `site-tracking-body.html`; `growth/gtm/` container; Render `GTM_CONTAINER_ID` |
+| GA4 measurement ID | **G-S0PT1NK0FK** | GTM container (Google tag, events); Render `GA4_MEASUREMENT_ID` |
+| GA4 property ID | **565901572** | Render `GA4_PROPERTY_ID` (dashboard Data API); the service account gets Viewer on this property |
+| GA4 account ID | **417508101** | GA4 Admin (reference only) |
+| GA4 web stream ID | **16417615246** | GA4 Admin → Data streams (Measurement Protocol secret is created here) |
+
+An earlier GTM container ID was discontinued and must not be used anywhere; only GTM-ML2LKZ7C is valid.
 
 **6.1 GA4 property settings** (analytics.google.com → Admin):
 1. Data streams → *startuptrading.com* → **Enhanced measurement** (gear):
@@ -176,14 +186,14 @@ Production IDs: GA4 **G-S0PT1NK0FK** (stream 16417615246), GTM **GTM-NXZL43PP**.
    - **User scope:** `first_channel`, `last_channel`.
 6. Admin → Events (after the first events arrive): mark **`generate_lead`**, **`begin_checkout`**, **`purchase`** and **`activation_complete`** as key events.
 
-**6.2 Import the container** (tagmanager.google.com → GTM-NXZL43PP):
+**6.2 Import the container** (tagmanager.google.com → GTM-ML2LKZ7C):
 1. Admin → **Import container** → choose `growth/gtm/startuptrading-gtm-container.json` → workspace **Default Workspace** → **Merge** → **Overwrite conflicting tags, triggers and variables** → Confirm.
 2. Check: **5 tags**, **6 triggers** and **16 variables** were imported, plus the built-in Page URL, Page Hostname, Page Path, Referrer and Event.
 3. Admin → Container settings → enable **Consent Overview**. The tags use Google's built-in consent checks; the site sets Consent Mode v2 defaults before GTM loads (`static/gtm.js`).
 4. Don't publish yet: test first (section 9).
 
 **6.3 Install on GoHighLevel** (Settings → Tracking code, in **every** website/funnel serving startuptrading.com):
-- **Header tracking code:** replace everything with `sales-site/dist/site-tracking.html`. It contains the Consent Mode defaults, GTM-NXZL43PP, affiliate capture and attribution. Don't paste Google's own GTM snippet as well (that would load GTM twice).
+- **Header tracking code:** replace everything with `sales-site/dist/site-tracking.html`. It contains the Consent Mode defaults, GTM-ML2LKZ7C, affiliate capture and attribution. Don't paste Google's own GTM snippet as well (that would load GTM twice).
 - **Body / footer tracking code:** `sales-site/dist/site-tracking-body.html` (GTM's noscript fallback).
 - Don't add GA4 or GTM anywhere else (page code elements, funnel settings, GHL's "Google Analytics" integration). GA4 must come **only** from GTM, or page views double.
 
@@ -191,10 +201,10 @@ Production IDs: GA4 **G-S0PT1NK0FK** (stream 16417615246), GTM **GTM-NXZL43PP**.
 
 | Variable | Value |
 |---|---|
-| `GTM_CONTAINER_ID` | `GTM-NXZL43PP` (GTM on the activation app's customer pages; never on /admin) |
+| `GTM_CONTAINER_ID` | `GTM-ML2LKZ7C` (GTM on the activation app's customer pages; never on /admin) |
 | `GA4_MEASUREMENT_ID` | `G-S0PT1NK0FK` |
 | `GA4_API_SECRET` | the Measurement Protocol secret from 6.1 step 3 |
-| `GA4_PROPERTY_ID` | the numeric property ID (GA4 Admin → Property details) |
+| `GA4_PROPERTY_ID` | `565901572` |
 | `GA4_SERVICE_ACCOUNT_JSON` | see 8.1 (for the dashboard) |
 | `GA4_PROPERTY_URL` | optional: your GA4 home URL, linked from the dashboard |
 
@@ -323,7 +333,7 @@ GA4 data is cached for 6 hours. If GA4 fails or isn't configured, those columns 
 
 | # | Test | In Tag Assistant | In GA4 DebugView / elsewhere | Pass |
 |---|---|---|---|---|
-| L1 | GTM loads once | Container GTM-NXZL43PP listed **once**; Consent shows defaults (ad_storage denied) | — | |
+| L1 | GTM loads once | Container GTM-ML2LKZ7C listed **once**; Consent shows defaults (ad_storage denied) | — | |
 | L2 | One page view per page | On `sut_attribution`: "GA4 - Google tag (page view)" fired **once**. Navigate to the calculator and the TradingView page: once on each | One `page_view` per page; `page_location` has only the utm_* parameters | |
 | L3 | Attribution | Variables: `DLV - first_channel` = `other_referral` (utm_source=qa) | User properties `first_channel` / `last_channel` set | |
 | L4 | GoHighLevel referrer ignored | Open the page from GoHighLevel's editor (View live page) | `last_channel` unchanged (not gohighlevel) | |
