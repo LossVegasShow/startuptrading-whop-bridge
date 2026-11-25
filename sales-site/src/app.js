@@ -35,14 +35,16 @@
     })(embeds[j]);
   }
 
-  // Thank-you page: tell any tag manager on the page that a purchase finished,
-  // once per browser session (GTM can map 'sut_purchase' to Meta/Google tags).
+  // Thank-you page: the buyer came back from checkout. This is NOT a verified
+  // purchase (a reload or a shared link also lands here): verified subscriptions
+  // and revenue come from Whop's payment webhooks in the licensing app. Once per
+  // browser session.
   if (document.querySelector('.sut[data-page="welcome"]')) {
     try {
-      if (!sessionStorage.getItem('sut_purchase_sent')) {
+      if (!sessionStorage.getItem('sut_checkout_return_sent')) {
         window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ event: 'sut_purchase' });
-        sessionStorage.setItem('sut_purchase_sent', '1');
+        window.dataLayer.push({ event: 'checkout_return' });
+        sessionStorage.setItem('sut_checkout_return_sent', '1');
       }
     } catch (e) { /* storage blocked: skip */ }
   }

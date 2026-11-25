@@ -63,7 +63,7 @@ def test_directory_renders_every_tool_and_filter():
 
 def test_tradingview_link_only_once_published():
     embed = page('free_tools', tv_atr_script_url='', tv_profile_url='')
-    assert 'tradingview.com' not in embed
+    assert 'tradingview.com' not in markup(embed)   # the analytics script knows the host name
     url = 'https://www.tradingview.com/script/abc123-ATR-Position-Size-Stop-Planner/'
     embed = page('free_tools', tv_atr_script_url=url)
     assert f'href="{url}"' in embed and 'data-outbound="tradingview"' in embed
@@ -85,7 +85,7 @@ def test_published_script_is_live_everywhere():
 
 def test_companion_page():
     embed = page('tv_atr', tv_atr_script_url='', tv_profile_url='')
-    assert 'tradingview.com' not in embed and 'sut-btn-disabled' in embed
+    assert 'tradingview.com' not in markup(embed) and 'sut-btn-disabled' in embed
     assert f'href="{CFG["calculator_url"]}"' in embed and f'href="{CFG["free_indicator_url"]}"' in embed
     for heading in ('The method', 'Worked examples', 'Install', 'Know the limits', 'Related free resources'):
         assert heading in embed
@@ -254,12 +254,13 @@ def test_attribution_first_and_last_touch(tmp_path):
       sutTouch('', 'https://www.youtube.com/watch?v=1', 'startuptrading.com', 2),
       sutTouch('', 'https://startuptrading.com/free-tools', 'startuptrading.com', 3),
       sutTouch('', '', 'startuptrading.com', 4),
-      sutAttribution(JSON.stringify({first:{utm_source:'tradingview',at:1}}), {utm_source:'youtube.com',utm_medium:'referral',at:2})
+      sutAttribution(JSON.stringify({first:{utm_source:'tradingview',at:1}}), sutTouch('', 'https://youtube.com/x', 'startuptrading.com', 2), 'startuptrading.com', 2)
     ]""")
-    assert utm == {'at': 1, 'utm_source': 'tradingview', 'utm_medium': 'signature'}
-    assert ref == {'at': 2, 'utm_source': 'youtube.com', 'utm_medium': 'referral'}
-    assert internal is None and direct is None
-    assert first_kept['first']['utm_source'] == 'tradingview' and first_kept['last']['utm_source'] == 'youtube.com'
+    assert utm == {'at': 1, 'utm_source': 'tradingview', 'utm_medium': 'signature', 'channel': 'tradingview'}
+    assert ref == {'at': 2, 'utm_source': 'youtube', 'utm_medium': 'referral', 'referrer_host': 'youtube.com', 'channel': 'youtube'}
+    assert internal is None
+    assert direct == {'at': 4, 'direct': True, 'utm_source': '(direct)', 'utm_medium': '(none)', 'channel': 'direct'}
+    assert first_kept['first']['utm_source'] == 'tradingview' and first_kept['last']['utm_source'] == 'youtube'
 
 
 def test_form_params_carry_first_and_latest_touch(tmp_path):

@@ -86,6 +86,11 @@ class Config:
     discord_url: str = os.getenv('DISCORD_URL','')
     checkout_url: str = os.getenv('CHECKOUT_URL','')
     whop_hub_url: str = os.getenv('WHOP_HUB_URL','')
+    # Internal QA accounts, excluded from marketing reports (comma-separated).
+    marketing_exclude_memberships: str = os.getenv('MARKETING_EXCLUDE_MEMBERSHIPS','')
+    marketing_exclude_emails: str = os.getenv('MARKETING_EXCLUDE_EMAILS','')
+    # Optional: the site's own GA4 property, shown on the marketing dashboard as a link.
+    ga4_property_url: str = os.getenv('GA4_PROPERTY_URL','')
 
     def write_allowlist(self):
         """Set of (membership_id, casefolded email) pairs that may receive license writes."""

@@ -150,7 +150,7 @@ def test_welcome_page_points_to_activation_and_sells_nothing():
     # Shared legal footer, and kept out of search results.
     assert 'Risk disclosure' in embed
     assert '<meta name="robots" content="noindex">' in full
-    assert 'sut_purchase' in embed
+    assert 'checkout_return' in embed and "push({ event: 'sut_purchase'" not in embed   # a page load is not a verified purchase
 
 
 def test_sales_page_is_indexable_and_shares_footer():

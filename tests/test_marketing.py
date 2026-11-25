@@ -1,220 +1,198 @@
-"""Offline tests for the marketing team. No API key or network needed."""
-import datetime as dt
+"""Server-side marketing attribution and revenue (marketing.py, the webhook, the
+activation hand-off and the admin dashboard)."""
+import base64
+import hashlib
+import hmac
 import json
-from types import SimpleNamespace
+import time
 
 import pytest
+from fastapi.testclient import TestClient
 
-from marketing import agents, compliance, pipeline
-from marketing.models import (ContentBrief, ContentPack, Finding, KPIReport, ResearchReport, ReviewResult,
-                              WeeklyPlan)
+import acquisition
+from config import Config
+from store import connect
 
-RISK = compliance.RISK_LINE
-
-
-def _pack(brief_id='atr-stop', **over):
-    p = dict(brief_id=brief_id, youtube_title='ES open: placing an ATR stop on a trend day',
-             youtube_description='How I size the trade from ATR before the open.',
-             shorts_script='Watch the stop move with volatility.',
-             x_posts=['ES trend read before the open: up, strength 3 of 5.'],
-             email_subject='How I set every stop', email_body='Here is the ATR math I use.')
-    p.update(over)
-    return ContentPack(**p)
+PW = 'a-long-admin-password-for-tests'
+BASE = 'https://activate.example.com'
+SECRET = 'ws_marketing_test'
 
 
-def _brief(i, cta='free_indicator'):
-    return ContentBrief(id=f'b{i}', title=f'Brief {i}', pillar='process', angle='ATR sizing',
-                        record_this='Narrate the stop on the ES open', channels=['youtube', 'x'],
-                        call_to_action=cta)
+def cfg_for(tmp_path, **kw):
+    base = dict(db=str(tmp_path / 'm.db'), database_url='', require_database_url=False, admin_password=PW,
+                public_base_url=BASE, whop_webhook_secret=SECRET)
+    base.update(kw)
+    return Config(**base)
 
 
-class FakeClient:
-    """Stands in for anthropic.Anthropic(): returns canned objects by output type."""
-
-    def __init__(self, review=None, pause_first=False, refuse=None):
-        self.calls = []
-        self.review = review
-        self.pause_first = pause_first
-        self.refuse = refuse or set()
-        self.messages = SimpleNamespace(parse=self._parse)
-
-    def _parse(self, **kw):
-        self.calls.append(kw)
-        fmt = kw['output_format']
-        if fmt is ResearchReport and self.pause_first and len(kw['messages']) == 1:
-            return SimpleNamespace(stop_reason='pause_turn', parsed_output=None, content=['partial'])
-        if fmt in self.refuse:
-            return SimpleNamespace(stop_reason='refusal', parsed_output=None, content=[])
-        out = {
-            ResearchReport: lambda: ResearchReport(
-                competitor_moves=[Finding(summary='A vendor cut its ATR tool price.', source_url='https://x.test/a')],
-                audience_questions=['How do I size MES with ATR?'], trending_topics=['CPI'],
-                content_ideas=['ATR on CPI day']),
-            KPIReport: lambda: KPIReport(summary='Leads up 10%.', wins=['Shorts'], concerns=['Churn'],
-                                         recommendations=['More Shorts']),
-            WeeklyPlan: lambda: WeeklyPlan(theme='Volatility week', rationale='CPI is Wednesday.',
-                                           briefs=[_brief(i) for i in range(1, 8)]),
-            ContentPack: lambda: _pack(json.loads(kw['messages'][0]['content'].split('\n', 1)[1])['id']),
-            ReviewResult: lambda: self.review(kw) if self.review else ReviewResult(
-                approved=True, issues=[], revised=_pack(
-                    json.loads(kw['messages'][0]['content'].split('\n', 1)[1].split('\n\nThe automatic')[0])
-                    ['brief_id'])),
-        }[fmt]()
-        return SimpleNamespace(stop_reason='end_turn', parsed_output=out, content=[])
+def payment(pid='pay_1', mem='mem_a', status='paid', total='99.00', reason='subscription_create', updated='2026-11-20T10:00:00Z',
+            paid='2026-11-20T10:00:00Z', refunded='0.00', **extra):
+    p = {'id': pid, 'membership_id': mem, 'status': status, 'substatus': status, 'billing_reason': reason,
+         'currency': 'usd', 'total': {'amount': total, 'currency': 'usd'}, 'usd_total': {'amount': total, 'currency': 'usd'},
+         'refunded_amount': {'amount': refunded, 'currency': 'usd'}, 'paid_at': paid, 'created_at': paid,
+         'updated_at': updated, 'variant_id': 'plan_qSXeS0xoDapGU', 'product_id': 'prod_x', 'promo_code_id': None,
+         'checkout_origin': 'https://startuptrading.com', 'checkout_surface': 'embedded_checkout',
+         # Personal fields Whop sends that must never be stored:
+         'customer_email': 'buyer@example.com', 'customer_phone': '+15550000', 'ip_address': '203.0.113.9',
+         'user_agent': 'Mozilla', 'user': {'id': 'user_1', 'email': 'buyer@example.com'},
+         'billing_address': {'line1': '1 Main St'}, 'payment_instrument': {'last4': '4242'}}
+    p.update(extra)
+    return p
 
 
-# ---- compliance rules ------------------------------------------------------
+# --- Hand-off ------------------------------------------------------------------------
 
-@pytest.mark.parametrize('text,rule', [
-    ('This setup is so profitable', 'profit_claim'),
-    ('I made $2,400 this morning', 'money_made'),
-    ('This made me $500 today', 'money_made'),
-    ('Replace your salary with trading', 'income_claim'),
-    ('85% win rate on this setup', 'win_rate'),
-    ('A risk-free way to trade', 'guarantee'),
-    ('Jack is one of the best traders alive', 'superlative'),
-    ('A tool offered nowhere else', 'superlative'),
-    ('Backtested over 10 years', 'hypothetical'),
-    ('Only 3 spots left!', 'urgency'),
-    ('Buy now at 5120', 'trade_call'),
-    ('Look at that P&L', 'pnl'),
-])
-def test_banned_phrases_are_caught(text, rule):
-    assert rule in {h['rule'] for h in compliance.check_text(text)}
+def test_handoff_is_validated_and_never_personal():
+    got = acquisition.parse_handoff({'sut_fs': 'youtube', 'sut_fm': 'social', 'sut_fch': 'youtube', 'sut_fl': '/free-tools',
+                                   'sut_ft': '1764000000000', 'sut_ls': 'buyer@example.com', 'sut_lch': 'not_a_channel',
+                                   'sut_vid': 'zz', 'sut_aff': 'jack aff<script>', 'sut_fc': 'risk_lab'})
+    assert got == {'first_source': 'youtube', 'first_medium': 'social', 'first_channel': 'youtube',
+                   'first_landing': '/free-tools', 'first_at': 1764000000, 'first_campaign': 'risk_lab'}
+    assert acquisition.read_cookie(acquisition.cookie_value(got)) == got
+    assert acquisition.read_cookie('not json') == {} and acquisition.read_cookie('x' * 3000) == {}
 
 
-@pytest.mark.parametrize('text', [
-    'The indicator places your stop and profit target from ATR.',
-    'Membership is $99/month, cancel anytime.',
-    'Here is my read on the ES open. ' + RISK,
-    'Size every trade so the risk stays the same.',
-])
-def test_normal_trading_copy_passes(text):
-    assert compliance.check_text(text) == []
+def test_attribution_is_stored_once_per_membership(tmp_path):
+    cfg = cfg_for(tmp_path)
+    with connect(cfg) as db:
+        assert acquisition.record_attribution(db, 'mem_a', 1, {'first_channel': 'youtube', 'first_source': 'youtube'})
+        # A later sign-in from another source never overwrites the original acquisition.
+        assert not acquisition.record_attribution(db, 'mem_a', 1, {'first_channel': 'instagram', 'first_source': 'instagram'})
+        assert not acquisition.record_attribution(db, 'not_a_mem', 1, {'first_channel': 'youtube'})
+        row = dict(db.execute('SELECT * FROM customer_attribution').fetchone())
+    assert row['first_channel'] == 'youtube' and row['method'] == 'activation_link'
 
 
-def test_risk_line_added_once():
-    once = compliance.with_risk_line('Hello')
-    assert once.endswith(RISK)
-    assert compliance.with_risk_line(once) == once
-    assert compliance.with_risk_line('Hi', short=True).endswith(compliance.SHORT_RISK_LINE)
-    assert compliance.check_text(RISK + compliance.SHORT_RISK_LINE) == []
+def test_activation_page_keeps_the_handoff_in_a_cookie(tmp_path, monkeypatch):
+    import app
+    monkeypatch.setattr(app, 'cfg', cfg_for(tmp_path))
+    with TestClient(app.app, base_url=BASE) as c:
+        r = c.get('/?sut_fs=chatgpt&sut_fm=referral&sut_fch=ai_referral&sut_vid=a1b2c3d4e5f6a1b2c3d4e5f6')
+        assert r.status_code == 200
+        cookie = r.cookies.get(acquisition.ATTR_COOKIE)
+        assert acquisition.read_cookie(cookie)['first_channel'] == 'ai_referral'
+        assert 'httponly' in r.headers['set-cookie'].lower()
+        assert acquisition.ATTR_COOKIE not in c.get('/').headers.get('set-cookie', '')
 
 
-def test_brand_brief_itself_is_clean_except_the_rules_section():
-    brief = agents.brand_brief()
-    facts = brief.split('## Hard rules')[0]
-    assert compliance.check_text(facts) == []
+# --- Payments ------------------------------------------------------------------------
+
+def test_payment_rows_keep_no_personal_data():
+    row = acquisition.payment_row(payment())
+    assert row['total'] == 99.0 and row['membership_id'] == 'mem_a' and row['billing_reason'] == 'subscription_create'
+    blob = json.dumps(row)
+    for pii in ('buyer@example.com', '+15550000', '203.0.113.9', 'Mozilla', '1 Main St', '4242', 'user_1'):
+        assert pii not in blob
+    assert acquisition.payment_row({'id': 'nope'}) is None
 
 
-# ---- agents ----------------------------------------------------------------
-
-def test_every_call_uses_model_effort_and_cached_brief():
-    c = FakeClient()
-    pipeline.run(c, '/tmp/unused-out-dir-sut', today=dt.date(2026, 11, 23), max_briefs=1)
-    assert c.calls
-    for kw in c.calls:
-        assert kw['model'] == 'claude-opus-5-5'
-        assert kw['output_config']['effort'] in ('medium', 'high')
-        assert kw['system'][0]['cache_control'] == {'type': 'ephemeral'}
-        assert 'StartUpTrading brand brief' in kw['system'][0]['text']
-        assert 'thinking' not in kw and 'budget_tokens' not in json.dumps(kw, default=str)
-    research_call = c.calls[0]
-    assert research_call['tools'][0]['type'] == 'web_search_20260209'
+def test_payments_are_idempotent_and_order_safe(tmp_path):
+    cfg = cfg_for(tmp_path)
+    with connect(cfg) as db:
+        assert acquisition.record_payment(db, payment(updated='2026-11-20T10:00:00Z'), 'webhook:payment.succeeded')
+        assert acquisition.record_payment(db, payment(updated='2026-11-20T10:00:00Z'), 'webhook:payment.succeeded')  # retry
+        assert acquisition.record_payment(db, payment(updated='2026-11-21T10:00:00Z', refunded='99.00', substatus='refunded'), 'api_refresh')
+        # An older copy arriving late never replaces the newer one.
+        assert not acquisition.record_payment(db, payment(updated='2026-11-19T10:00:00Z'), 'webhook:payment.succeeded')
+        rows = db.execute('SELECT * FROM payments').fetchall()
+    assert len(rows) == 1 and rows[0]['refunded_amount'] == 99.0 and rows[0]['substatus'] == 'refunded'
 
 
-def test_research_resumes_after_pause_turn():
-    c = FakeClient(pause_first=True)
-    report = agents.research(c)
-    assert report.audience_questions
-    assert len(c.calls) == 2
-    second = c.calls[1]['messages']
-    assert [m['role'] for m in second] == ['user', 'assistant']
-    assert second[1]['content'] == ['partial']
+def signed(body, mid='msg_1'):
+    raw = json.dumps(body).encode()
+    ts = str(int(time.time()))
+    sig = base64.b64encode(hmac.new(SECRET.encode(), f'{mid}.{ts}.'.encode() + raw, hashlib.sha256).digest()).decode()
+    return raw, {'webhook-id': mid, 'webhook-timestamp': ts, 'webhook-signature': 'v1,' + sig, 'content-type': 'application/json'}
 
 
-def test_refusal_raises_agent_error():
-    with pytest.raises(agents.AgentError):
-        agents.research(FakeClient(refuse={ResearchReport}))
+def test_signed_payment_webhook_records_revenue_once(tmp_path, monkeypatch):
+    import app
+    cfg = cfg_for(tmp_path)
+    monkeypatch.setattr(app, 'cfg', cfg)
+    with TestClient(app.app, base_url=BASE) as c:
+        raw, heads = signed({'id': 'msg_1', 'type': 'payment.succeeded', 'data': payment()})
+        assert c.post('/webhooks/whop', content=raw, headers=heads).json() == {'received': True, 'duplicate': False}
+        assert c.post('/webhooks/whop', content=raw, headers=heads).json()['duplicate'] is True
+        bad_raw, bad_heads = signed({'id': 'msg_2', 'type': 'payment.succeeded', 'data': payment(pid='pay_forged')}, 'msg_2')
+        bad_heads['webhook-signature'] = 'v1,forged'
+        assert c.post('/webhooks/whop', content=bad_raw, headers=bad_heads).status_code == 401
+    with connect(cfg) as db:
+        assert [r['id'] for r in db.execute('SELECT id FROM payments')] == ['pay_1']
 
 
-# ---- pipeline --------------------------------------------------------------
+# --- Reporting -----------------------------------------------------------------------
 
-def test_run_writes_queue_and_adds_risk_lines(tmp_path):
-    out, result = pipeline.run(FakeClient(), tmp_path, today=dt.date(2026, 11, 23), max_briefs=5)
-    assert out == tmp_path / '2026-11-23'
-    assert len(result['items']) == 5  # capped even though the plan had 7
-    for item in result['items']:
-        assert item['status'] == pipeline.READY
-        p = item['pack']
-        assert compliance.has_risk_line(p['youtube_description'])
-        assert compliance.has_risk_line(p['email_body'])
-        assert all(compliance.has_risk_line(x) for x in p['x_posts'])
-    md = (out / 'queue.md').read_text()
-    assert 'Nothing has been posted' in md
-    assert '5 of 5 pieces are ready' in md
-    assert '- [ ] **Brief 1**: Narrate the stop on the ES open' in md
-    assert json.loads((out / 'queue.json').read_text())['theme'] == 'Volatility week'
-
-
-def test_phrase_hits_are_sent_to_reviewer_and_block_if_not_fixed(tmp_path):
-    seen = {}
-
-    def bad_review(kw):
-        seen['prompt'] = kw['messages'][0]['content']
-        # Reviewer "approves" but leaves a banned phrase in: the code must still hold it back.
-        return ReviewResult(approved=True, issues=['tightened'],
-                            revised=_pack(email_body='This made me $500 today.'))
-
-    c = FakeClient(review=bad_review)
-    c_write = c._parse
-
-    def parse(**kw):
-        r = c_write(**kw)
-        if kw['output_format'] is ContentPack:
-            r.parsed_output = _pack(youtube_title='The most profitable setup')
-        return r
-    c.messages = SimpleNamespace(parse=parse)
-
-    item = pipeline.produce(c, _brief(1))
-    assert 'profit_claim' in seen['prompt']
-    assert item['status'] == pipeline.NEEDS_CHANGES
-    assert 'email_body' in item['rule_hits']
+def seed(cfg):
+    with connect(cfg) as db:
+        members = [('mem_yt', 'eligible', 1, 'youtube'), ('mem_ig', 'eligible', 1, 'instagram'),
+                   ('mem_promo', 'eligible', 1, 'youtube'), ('mem_none', 'ineligible', 0, None),
+                   ('mem_qa', 'eligible', 1, 'youtube')]
+        for i, (mem, status, verified, ch) in enumerate(members, 1):
+            db.execute('INSERT INTO customers(id,membership_id,whop_user_id,buyer_email,nt_email,verified,status,updated_at) '
+                       'VALUES(?,?,?,?,?,?,?,?)', (i, mem, 'u', f'b{i}@example.com', f'nt{i}@example.com', verified, status, 1))
+            db.execute('INSERT INTO audit(at,customer_id,action,details) VALUES(?,?,?,?)', (1764000000 + i, i, 'seen', ''))
+            if ch:
+                acquisition.record_attribution(db, mem, i, {'first_channel': ch, 'first_source': ch, 'first_medium': 'social',
+                                                          'first_campaign': 'risk_lab', 'first_landing': '/free-tools',
+                                                          'last_channel': 'tradingview', 'last_source': 'tradingview'})
+        for i in (1, 2):
+            for pid in (2067, 2071):
+                db.execute("INSERT INTO licenses(customer_id,product_id,license_id,expiration,state,updated_at) VALUES(?,?,?,?,?,?)",
+                           (i, pid, 100 + pid, 'x', 'created', 1))
+        acquisition.record_payment(db, payment('pay_yt1', 'mem_yt'), 'w')
+        acquisition.record_payment(db, payment('pay_yt2', 'mem_yt', reason='subscription_cycle', paid='2026-12-20T10:00:00Z',
+                                             updated='2026-12-20T10:00:00Z'), 'w')
+        acquisition.record_payment(db, payment('pay_ig', 'mem_ig', total='495.00', refunded='495.00'), 'w')
+        acquisition.record_payment(db, payment('pay_promo', 'mem_promo', total='0.00'), 'w')
+        acquisition.record_payment(db, payment('pay_fail', 'mem_promo', status='failed', total='99.00'), 'w')
+        acquisition.record_payment(db, payment('pay_qa', 'mem_qa', total='99.00'), 'w')
 
 
-def test_reviewer_rejection_is_needs_changes():
-    c = FakeClient(review=lambda kw: ReviewResult(approved=False, issues=['claims results'], revised=_pack()))
-    assert pipeline.produce(c, _brief(1))['status'] == pipeline.NEEDS_CHANGES
+def test_report_counts_verified_revenue_by_channel(tmp_path):
+    cfg = cfg_for(tmp_path, marketing_exclude_memberships='mem_qa')
+    seed(cfg)
+    with connect(cfg) as db:
+        r = acquisition.report(cfg, db)
+    t = r['totals']
+    assert t['excluded'] == 1 and t['subscribers'] == 4
+    assert t['paying'] == 2 and t['promo_only'] == 1          # $0 promo is never a paying customer
+    assert t['revenue'] == 99 + 99 + 495 and t['refunds'] == 495 and t['net_revenue'] == 198
+    assert t['renewal_revenue'] == 99 and t['initial_revenue'] == 99 + 495
+    assert t['failed_payments'] == 1 and t['refunded_payments'] == 1
+    assert t['activated'] == 2 and t['activation_rate'] == 50.0
+    assert t['churned'] == 1 and t['attribution_rate'] == 75.0
+    assert t['mrr'] == 99                                     # the refunded annual payment adds nothing
+    ch = {x['channel']: x for x in r['channels']}
+    assert ch['youtube']['net_revenue'] == 198 and ch['youtube']['subscribers'] == 2 and ch['youtube']['ltv'] == 198
+    assert ch['instagram']['net_revenue'] == 0 and ch['unknown']['subscribers'] == 1
+    assert r['channels'][0]['channel'] == 'youtube'
 
 
-def test_writer_failure_marks_item_failed_and_run_continues(tmp_path):
-    c = FakeClient(refuse={ContentPack})
-    _, result = pipeline.run(c, tmp_path, today=dt.date(2026, 11, 23), max_briefs=2)
-    assert [i['status'] for i in result['items']] == [pipeline.FAILED, pipeline.FAILED]
-    assert 'Agent error' in result['items'][0]['issues'][0]
+def test_report_filters_and_latest_touch(tmp_path):
+    cfg = cfg_for(tmp_path, marketing_exclude_emails='nt5@example.com')
+    seed(cfg)
+    with connect(cfg) as db:
+        last = acquisition.report(cfg, db, basis='last')
+        yt = acquisition.report(cfg, db, channel='youtube')
+        dec = acquisition.report(cfg, db, start=1764000000 + 100, end=None)
+        paid = acquisition.report(cfg, db, traffic='paid')
+    assert {x['channel'] for x in last['channels']} == {'tradingview', 'unknown'}
+    assert yt['totals']['subscribers'] == 2 and yt['totals']['excluded'] == 1
+    assert dec['totals']['subscribers'] == 0          # nobody first seen after the start date
+    assert paid['totals']['subscribers'] == 0
 
 
-def test_metrics_folder_feeds_analyst(tmp_path):
-    m = tmp_path / 'metrics'
-    m.mkdir()
-    (m / 'week.csv').write_text('metric,value\nleads,120\n')
-    (m / 'ignore.bin').write_bytes(b'\x00')
-    c = FakeClient()
-    _, result = pipeline.run(c, tmp_path / 'out', metrics_dir=m, today=dt.date(2026, 11, 23), max_briefs=1)
-    assert result['kpis']['summary'] == 'Leads up 10%.'
-    analyst = [k for k in c.calls if k['output_format'] is KPIReport][0]
-    assert 'leads,120' in analyst['messages'][0]['content'] and 'ignore.bin' not in analyst['messages'][0]['content']
-
-
-def test_no_metrics_skips_analyst(tmp_path):
-    c = FakeClient()
-    _, result = pipeline.run(c, tmp_path, metrics_dir=tmp_path / 'missing', max_briefs=1)
-    assert result['kpis'] is None
-    assert not [k for k in c.calls if k['output_format'] is KPIReport]
-
-
-def test_cli_without_key_exits_2(monkeypatch, capsys):
-    from marketing.__main__ import main
-    monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
-    assert main([]) == 2
-    assert 'ANTHROPIC_API_KEY' in capsys.readouterr().err
+def test_dashboard_and_link_generator_need_admin(tmp_path, monkeypatch):
+    import app
+    cfg = cfg_for(tmp_path)
+    seed(cfg)
+    monkeypatch.setattr(app, 'cfg', cfg)
+    with TestClient(app.app, base_url=BASE) as c:
+        assert c.get('/admin/marketing').status_code == 401
+        html = c.get('/admin/marketing', auth=('admin', PW)).text
+        assert 'Marketing performance' in html and 'YouTube' in html and 'Verified' in html and 'GA4' in html
+        html = c.get('/admin/marketing?channel=youtube&basis=last&start=2025-01-01&end=bad', auth=('admin', PW)).text
+        assert 'Acquisition channels (latest touch)' in html
+        assert c.get('/admin/campaign-links').status_code == 401
+        assert 'Campaign link generator' in c.get('/admin/campaign-links', auth=('admin', PW)).text
+        assert c.get('/static/campaign-links.js').status_code == 200
