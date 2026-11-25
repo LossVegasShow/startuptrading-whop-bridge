@@ -1,0 +1,92 @@
+<div class="sut" id="top" data-page="setup">
+<!-- StartUpTrading install guide (GHL path /setup). INDICATOR_SETUP_URL in Render
+     points here, so the "your tools are ready" email links to this page.
+     Built by sales-site/build.py; edit src/, not dist/. Boxes with class "sut-ph"
+     are placeholders for Jack's download link and screenshots. -->
+
+<header class="sut-nav">
+  <div class="sut-wrap sut-nav-in">
+    <span class="sut-logo">
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
+      STARTUPTRADING
+    </span>
+    <nav class="sut-links sut-links-always" aria-label="Help">
+      <a href="{{activation_url}}">Activation status</a><a href="mailto:{{support_email}}">Support</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Install guide</p>
+    <h1>Set up your tools.<br><span class="sut-dim">About 5 minutes.</span></h1>
+    <p class="sut-lead">Your licenses are already on your NinjaTrader account. Now download the tools, import them into NinjaTrader&nbsp;8 and add them to a chart.</p>
+    <p class="sut-fine">Haven't activated yet? <a href="{{activation_url}}">Activate your trading tools first</a>.</p>
+  </div>
+</section>
+
+<section class="sut-section sut-welcome-steps">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">Step by step</p>
+      <h2>Four steps to your charts.</h2>
+    </div>
+
+    <ol class="sut-next">
+      <li class="is-current">
+        <span class="sut-next-n">01</span>
+        <div>
+          <h3>Check the basics</h3>
+          <p>NinjaTrader&nbsp;8 on a Windows computer, signed in with the NinjaTrader account whose email you confirmed during activation. Your licenses are tied to that account.</p>
+          <a class="sut-btn sut-btn-ghost" href="{{activation_url}}">Check my activation status <span class="sut-arrow" aria-hidden="true">→</span></a>
+        </div>
+      </li>
+      <li>
+        <span class="sut-next-n">02</span>
+        <div>
+          <h3>Download the tools</h3>
+          <p>Download the StartUpTrading tools file. Keep it as a .zip and don't unzip it: NinjaTrader imports the .zip directly.</p>
+          <!--if:setup_download_url--><a class="sut-btn" href="{{setup_download_url}}" target="_blank" rel="noopener">Download the tools <span class="sut-arrow" aria-hidden="true">→</span></a><!--endif:setup_download_url-->
+          <!--ifnot:setup_download_url--><div class="sut-ph sut-ph-text"><strong>Download link goes here</strong><small>Jack: add the download location for the tools file (setup_download_url in site.config.json).</small></div><!--endifnot:setup_download_url-->
+        </div>
+      </li>
+      <li>
+        <span class="sut-next-n">03</span>
+        <div>
+          <h3>Import into NinjaTrader</h3>
+          <p>In the NinjaTrader Control Center, open <b>Tools → Import → NinjaScript Add-On…</b>, choose the .zip you downloaded and click <b>OK</b>. When the import finishes, restart NinjaTrader.</p>
+          <div class="sut-ph sut-ph-text"><strong>Screenshot: the Import menu</strong><small>Optional: Control Center → Tools → Import → NinjaScript Add-On.</small></div>
+        </div>
+      </li>
+      <li>
+        <span class="sut-next-n">04</span>
+        <div>
+          <h3>Add them to a chart</h3>
+          <p>Open a chart, right-click it and choose <b>Indicators…</b>. Find <b>ATR Order Automation</b> and <b>Trend Scanner &amp; Market Selector</b>, add them and click <b>OK</b>.</p>
+          <div class="sut-ph sut-ph-text"><strong>Screenshot: both tools on a chart</strong><small>Jack: confirm where each tool appears in NinjaTrader and add a screenshot.</small></div>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="faq">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">Troubleshooting</p>
+      <h2>Something not right?</h2>
+      <p class="sut-lead">Still stuck? Email <a href="mailto:{{support_email}}">{{support_email}}</a> with the email on your NinjaTrader account.</p>
+    </div>
+    <div class="sut-faq">
+      <details><summary>A tool says it isn't licensed</summary><p>Restart NinjaTrader once. Then check you're signed in to NinjaTrader with the same email you confirmed during activation, and that <a href="{{activation_url}}">your activation status</a> shows your tools as active.</p></details>
+      <details><summary>I can't find a tool after importing</summary><p>Restart NinjaTrader, then look again in the chart's Indicators list. If it still isn't there, import the .zip again and contact support.</p></details>
+      <details><summary>The import shows an error</summary><p>Make sure you're importing the .zip itself (not an unzipped folder) and that NinjaTrader&nbsp;8 is up to date. Then try again, or contact support with a screenshot of the message.</p></details>
+      <details><summary>Can I use the tools on another computer?</summary><p>Yes. Install NinjaTrader&nbsp;8, sign in with the same NinjaTrader account and repeat steps 2–4. The licenses follow your account.</p></details>
+      <details><summary>I want to use a different NinjaTrader account</summary><p>Contact support first. We move your licenses safely, so don't buy a second membership.</p></details>
+      <details><summary>What about new tools?</summary><p>When Jack releases a new tool, it's licensed to your account automatically. You'll get the download and you import it the same way.</p></details>
+    </div>
+  </div>
+</section>
+
+<!--include:_footer.html-->
+</div>

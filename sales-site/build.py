@@ -10,6 +10,7 @@ for each page in PAGES:
 
   sales page:     dist/index.html   + dist/ghl-embed.html     (GHL path /)
   thank-you page: dist/welcome.html + dist/welcome-embed.html (GHL path /welcome)
+  install guide:  dist/setup.html   + dist/setup-embed.html   (GHL path /setup)
   calculator:     dist/calculator.html + dist/calculator-embed.html
                   (GHL path /futures-position-size-calculator)
 
@@ -44,6 +45,9 @@ PAGES = {
     'welcome': ('welcome.html', 'welcome.html', 'welcome-embed.html',
                 'Welcome to StartUpTrading',
                 'Your StartUpTrading membership: next steps to activate your indicators.'),
+    'setup': ('setup.html', 'setup.html', 'setup-embed.html',
+              'Install your StartUpTrading tools',
+              'How to download, import and add your StartUpTrading tools to NinjaTrader 8.'),
     'calculator': ('calculator.html', 'calculator.html', 'calculator-embed.html',
                    'Futures Position Size Calculator & Prop-Firm Risk Planner (Free)',
                    'Free futures position size calculator for ES, NQ, MES, MNQ, CL, GC and more. Size from ATR '
@@ -142,7 +146,7 @@ def render(cfg, name='sales'):
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
             f'<title>{html.escape(title)}</title>\n'
             f'<meta name="description" content="{html.escape(description.replace("{price_monthly}", cfg["price_monthly"]), quote=True)}">\n'
-            + ('<meta name="robots" content="noindex">\n' if name == 'welcome' else '') +
+            + ('<meta name="robots" content="noindex">\n' if name in ('welcome', 'setup') else '') +
             '<meta name="theme-color" content="#07090d">\n'
             '<style>html,body{margin:0;background:#07090d}</style>\n'
             f'</head>\n<body>\n{embed}</body>\n</html>\n')

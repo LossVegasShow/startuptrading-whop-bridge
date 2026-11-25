@@ -105,6 +105,19 @@ On the current home page (`/`) in GHL:
   "rejoin" link in the access-ended email and the "Become a member" button
   on the activation app's no-membership page.
 
+### 2e. Add the install guide (`/setup`)
+
+`INDICATOR_SETUP_URL` in Render is `https://startuptrading.com/setup`, so the
+"your tools are ready" email and the welcome page link here.
+
+1. In the same GHL site, **add a page** named "Setup" with path **`/setup`**.
+2. Build it like step 2, but paste **`dist/setup-embed.html`** into the Code element.
+3. **SEO:** title *Install your StartUpTrading tools*. Turn on the option to hide
+   the page from search engines (it's for members).
+4. Before launch, put Jack's download link in `site.config.json` as
+   `setup_download_url`, rebuild and paste again. Until then the page shows a
+   "Download link goes here" box. Replace the two screenshot boxes too.
+
 ### 2d. Add the free calculator page (`/futures-position-size-calculator`)
 
 A free position-size calculator and prop-firm risk planner. It works for traders on

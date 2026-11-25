@@ -241,8 +241,10 @@ so new buyers get reminders without a manual release.
 - [ ] Point the Home page's Join button to `/join`.
 - [ ] Remove TSMS & Fibs from any other page that lists what the membership
       includes (Home, Tools section). Separate one-time products can stay.
-- [ ] Create the `/setup` install page once Jack provides the installation steps,
-      and keep `INDICATOR_SETUP_URL` pointing to it.
+- [ ] Publish the `/setup` install guide (`sales-site/dist/setup-embed.html`,
+      `sales-site/SETUP.md` step 2e). Before launch, add Jack's download link
+      (`setup_download_url`) and screenshots, rebuild and paste again.
+      `INDICATOR_SETUP_URL` already points to it.
 
 ### Affiliate attribution (before announcing the affiliate program)
 Setup:
