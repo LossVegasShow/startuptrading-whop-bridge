@@ -258,7 +258,8 @@ def main():
         (DIST / full_name).write_text(full)
         print(f'{name}: wrote dist/{full_name} and dist/{embed_name} ({len(embed) // 1024} KB)')
     (DIST / 'affiliate-tracking.html').write_text(affiliate_snippet())
-    (DIST / 'site-tracking.html').write_text(site_tracking_snippet())
+    (DIST / 'site-tracking.html').write_text(site_tracking_snippet(cfg))
+    (DIST / 'site-tracking-body.html').write_text(site_tracking_body_snippet(cfg))
     print('tracking: wrote dist/site-tracking.html (GoHighLevel site-wide tracking code; replaces affiliate-tracking.html)')
 
 
@@ -454,11 +455,30 @@ def tv_cta_html(cfg):
             f'<a class="sut-btn sut-btn-ghost sut-btn-lg" href="{e(cfg["calculator_url"])}">Use the web calculator now</a>')
 
 
-def site_tracking_snippet():
-    """Site-wide GoHighLevel tracking code: affiliate capture plus attribution
-    and analytics events (sales-site/src/affiliate.js + tracking.js)."""
-    return ('<!-- StartUpTrading: affiliate attribution + analytics (sales-site/src/affiliate.js, tracking.js) -->\n'
+def site_tracking_snippet(cfg=None):
+    """Site-wide GoHighLevel tracking code (Settings -> Tracking code -> Header):
+    Google Tag Manager with Consent Mode defaults (../static/gtm.js, shared with the
+    activation app), then affiliate capture and attribution/analytics events
+    (src/affiliate.js + tracking.js). GTM is loaded here ONLY, never by page embeds,
+    so each page view is counted once."""
+    cfg = cfg if cfg is not None else json.loads((HERE / 'site.config.json').read_text())
+    gtm = cfg.get('gtm_container_id', '')
+    head = ''
+    if re.fullmatch(r'GTM-[A-Z0-9]{4,12}', gtm or ''):
+        head = ('<!-- Google Tag Manager with Consent Mode v2 defaults (static/gtm.js) -->\n<script>\n'
+                f"window.SUT_GTM_ID = '{gtm}';\n" + (HERE.parent / 'static' / 'gtm.js').read_text() + '</script>\n')
+    return (head + '<!-- StartUpTrading: affiliate attribution + analytics (sales-site/src/affiliate.js, tracking.js) -->\n'
             '<script>\n' + (SRC / 'affiliate.js').read_text() + '\n' + (SRC / 'tracking.js').read_text() + '</script>\n')
+
+
+def site_tracking_body_snippet(cfg=None):
+    """GTM's <noscript> fallback for GoHighLevel's body / footer tracking code."""
+    cfg = cfg if cfg is not None else json.loads((HERE / 'site.config.json').read_text())
+    gtm = cfg.get('gtm_container_id', '')
+    if not re.fullmatch(r'GTM-[A-Z0-9]{4,12}', gtm or ''):
+        return ''
+    return ('<!-- Google Tag Manager (noscript) -->\n<noscript><iframe src="https://www.googletagmanager.com/ns.html?id='
+            f'{gtm}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>\n')
 
 
 def affiliate_snippet():

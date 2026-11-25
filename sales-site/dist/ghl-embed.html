@@ -984,6 +984,14 @@ function sutAttribution(stored, touch, ownHost, now) {
   return o;
 }
 
+// GA4's client id from its _ga cookie ("GA1.1.<random>.<timestamp>"), or ''.
+// Lets the licensing app send verified server events (purchase, activation) to
+// the same GA4 user. Not personal data: a random number GA itself creates.
+function sutGaClientId(cookie) {
+  var m = /(?:^|;\s*)_ga=GA\d\.\d\.(\d{4,12}\.\d{6,12})(?:;|$)/.exec(cookie || '');
+  return m ? m[1] : '';
+}
+
 // The latest qualifying touch, falling back to the first (which may be direct or unknown).
 function sutLatest(attr) {
   return (attr && (attr.last || attr.first)) || null;
@@ -1015,12 +1023,12 @@ function sutFormParams(attr, affiliate, page) {
 // so a Whop membership can be tied to how its buyer found us. Short keys, no
 // personal data: the anonymous visitor id, first and latest touch, landing page,
 // affiliate code.
-function sutHandoff(attr, affiliate, vid) {
+function sutHandoff(attr, affiliate, vid, gcid) {
   var first = (attr && attr.first) || {}, last = sutLatest(attr) || {};
   var map = { fs: first.utm_source, fm: first.utm_medium, fc: first.utm_campaign, fx: first.utm_content,
     fch: first.channel, fl: first.landing, ft: first.at ? String(first.at) : '',
     ls: last.utm_source, lm: last.utm_medium, lc: last.utm_campaign, lx: last.utm_content, lch: last.channel,
-    aff: affiliate, vid: vid };
+    aff: affiliate, vid: vid, gcid: gcid };
   var out = {};
   for (var k in map) if (map[k]) out['sut_' + k] = String(map[k]).slice(0, 120);
   return out;
@@ -1062,6 +1070,8 @@ function sutSizerHeight(data, iframeId) {
     return c === 'denied' ? null : w.localStorage;
   };
   w.sutConsent = function (state) {
+    var v = state === 'denied' ? 'denied' : 'granted';
+    if (typeof w.gtag === 'function') w.gtag('consent', 'update', { analytics_storage: v });
     try {
       w.localStorage.setItem('sut_consent', state === 'denied' ? 'denied' : 'granted');
       if (state === 'denied') { w.localStorage.removeItem(SUT_ATTR_KEY); w.localStorage.removeItem(SUT_VID_KEY); }
@@ -1236,7 +1246,7 @@ function sutSizerHeight(data, iframeId) {
       });
     }
     // Links to the activation app carry the anonymous attribution (see sutHandoff).
-    var handoff = sutHandoff(attr, w.SUT_AFFILIATE, w.SUT_VISITOR);
+    var handoff = sutHandoff(attr, w.SUT_AFFILIATE, w.SUT_VISITOR, sutGaClientId(d.cookie));
     var acts = d.querySelectorAll('a[href]');
     for (var h = 0; h < acts.length; h++) {
       try {

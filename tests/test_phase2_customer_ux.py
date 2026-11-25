@@ -135,7 +135,9 @@ def test_customer_templates_have_no_inline_styles_or_scripts():
     for name in ('_base.html', 'index.html', 'onboarding.html', 'error.html'):
         text = (ROOT / 'templates' / name).read_text()
         assert not re.search(r'\sstyle="', text), name
-        assert '<script' not in text, name
+        # Only external scripts from /static (the CSP blocks inline ones), never inline code.
+        for tag in re.findall(r'<script[^>]*>.*?</script>', text, flags=re.S):
+            assert re.fullmatch(r'<script src="/static/[\w.-]+\.js"[^>]*></script>', tag), (name, tag)
 
 
 def test_emails_escape_user_content():
