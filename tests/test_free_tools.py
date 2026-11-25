@@ -62,15 +62,29 @@ def test_directory_renders_every_tool_and_filter():
 
 
 def test_tradingview_link_only_once_published():
-    embed = page('free_tools', tv_atr_script_url='')
-    assert 'tradingview.com' not in embed and 'Coming soon to TradingView' in embed
+    embed = page('free_tools', tv_atr_script_url='', tv_profile_url='')
+    assert 'tradingview.com' not in embed
     url = 'https://www.tradingview.com/script/abc123-ATR-Position-Size-Stop-Planner/'
     embed = page('free_tools', tv_atr_script_url=url)
     assert f'href="{url}"' in embed and 'data-outbound="tradingview"' in embed
 
 
+def test_published_script_is_live_everywhere():
+    # Published by Jack on TradingView (Nov 2026): the config, registry and script agree.
+    assert CFG['tv_atr_script_url'].startswith('https://www.tradingview.com/script/ZBt4abLo-')
+    assert CFG['tv_profile_url'] == 'https://www.tradingview.com/u/Jack_Gleason/'
+    planner = next(t for t in TOOLS['tools'] if t['id'] == 'atr-position-size-planner')
+    assert planner['status'] == 'available' and planner['status_label'] == 'Free on TradingView'
+    pine = (SITE.parent / 'growth' / 'tradingview' / 'atr-position-size-planner.pine').read_text()
+    assert '// (c) Jack_Gleason' in pine and '{TradingView username}' not in pine
+    for name in ('free_tools', 'tv_atr'):
+        embed = page(name)
+        assert f'href="{CFG["tv_atr_script_url"]}"' in embed and 'Coming soon' not in embed
+    assert 'Follow Jack on TradingView' in page('tv_atr')
+
+
 def test_companion_page():
-    embed = page('tv_atr', tv_atr_script_url='')
+    embed = page('tv_atr', tv_atr_script_url='', tv_profile_url='')
     assert 'tradingview.com' not in embed and 'sut-btn-disabled' in embed
     assert f'href="{CFG["calculator_url"]}"' in embed and f'href="{CFG["free_indicator_url"]}"' in embed
     for heading in ('The method', 'Worked examples', 'Install', 'Know the limits', 'Related free resources'):
@@ -187,7 +201,7 @@ def test_structured_data_for_new_pages():
     d = {g['@type']: g for g in ld(page('free_tools'))['@graph']}
     assert {'CollectionPage', 'BreadcrumbList', 'Organization'} <= set(d)
     assert [i['name'] for i in d['CollectionPage']['mainEntity']['itemListElement']] == [t['name'] for t in TOOLS['tools']]
-    d = {g['@type']: g for g in ld(page('tv_atr'))['@graph']}
+    d = {g['@type']: g for g in ld(page('tv_atr', tv_atr_script_url=''))['@graph']}
     assert d['SoftwareApplication']['offers']['price'] == '0' and 'downloadUrl' not in d['SoftwareApplication']
     d = {g['@type']: g for g in ld(page('tv_atr', tv_atr_script_url='https://www.tradingview.com/script/x/'))['@graph']}
     assert d['SoftwareApplication']['downloadUrl'] == 'https://www.tradingview.com/script/x/'

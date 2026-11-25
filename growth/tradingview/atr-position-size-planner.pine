@@ -1,6 +1,6 @@
 // This Pine Script code is subject to the terms of the Mozilla Public License 2.0
 // at https://mozilla.org/MPL/2.0/
-// (c) {TradingView username}
+// (c) Jack_Gleason
 // Risk first. Stop second. Size last.
 //@version=6
 indicator("Futures Position Size Calculator - ATR & Prop Firm Risk",
