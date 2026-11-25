@@ -1,0 +1,117 @@
+<div class="sut" id="top" data-page="tv_atr" data-tool-id="atr-position-size-planner">
+<!-- Companion page for the free TradingView script (GHL path /tradingview/atr-position-size-planner).
+     The "Open on TradingView" link appears only once tv_atr_script_url is set in site.config.json.
+     Screenshot boxes (class "sut-ph") are placeholders. Built by sales-site/build.py; edit src/, not dist/. -->
+
+{{nav}}
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Free · TradingView indicator</p>
+    <h1>ATR Position Size<br><span class="sut-dim">&amp; Stop Planner.</span></h1>
+    <p class="sut-lead">Set your dollar risk. ATR places the stop. The panel shows how many futures contracts fit, rounded down, on any TradingView chart.</p>
+    <div class="sut-cta-row">{{tv_cta}}</div>
+    <p class="sut-fine">Free and open-source on TradingView. No email or sign-up needed.</p>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">The method</p>
+      <h2>Risk first. Stop second. Size last.</h2>
+      <p class="sut-lead">Most traders pick a size, then squeeze the stop to fit it. The planner works the other way round.</p>
+    </div>
+    <ol class="sut-steps">
+      <li><span>STEP 01</span><h3>Choose your dollar risk</h3><p>The most you're willing to lose if the trade is wrong. It's the only number you choose.</p></li>
+      <li><span>STEP 02</span><h3>Let ATR set the stop</h3><p>The stop sits a multiple of ATR from price (default 1.5 × ATR&nbsp;14), rounded up to a whole tick so it's never tighter than planned.</p></li>
+      <li><span>STEP 03</span><h3>Let the stop set the size</h3><p>Contracts = risk ÷ (stop in points × dollars per point), rounded down so the real risk never exceeds your limit.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">Worked examples</p>
+      <h2>Same risk. Different markets.</h2>
+      <p class="sut-lead">Illustrations of the arithmetic, not live market data or a trade recommendation.</p>
+    </div>
+    <div class="sut-calc-how">
+      <p><b>ES with $500 of risk.</b> ATR(14) reads 4.00 points. 1.5 × ATR = a 6.00-point stop (24 ticks). ES is $50 a point, so one contract risks $300. $500 ÷ $300 = 1.66, rounded down to <b>1 contract</b>, with $300 actual risk.</p>
+      <p><b>NQ with $500 of risk.</b> ATR(14) reads 20 points, so the stop is 30 points. NQ is $20 a point: $600 for one contract. That's more than $500, so the planner shows <b>0</b>: skip the trade or use the micro.</p>
+      <p><b>MNQ, same stop.</b> MNQ is $2 a point: $60 per contract. $500 ÷ $60 = 8.3, rounded down to <b>8 contracts</b>, with $480 actual risk.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">On your chart</p>
+      <h2>What the planner shows.</h2>
+    </div>
+    <div class="sut-room">
+      <ul class="sut-list">
+        <li><b>ATR</b><span>The current ATR for your length setting.</span></li>
+        <li><b>Stop</b><span>Distance in points and ticks, plus optional long and short stop levels on the chart.</span></li>
+        <li><b>$ per point</b><span>Taken from the chart symbol, or typed in yourself.</span></li>
+        <li><b>Risk per contract</b><span>Stop in points × dollars per point.</span></li>
+        <li><b>Contracts</b><span>Rounded down. Shows 0 with "skip, or use the micro" when one contract is too much.</span></li>
+        <li><b>Actual risk</b><span>Contracts × risk per contract: never more than you set.</span></li>
+      </ul>
+      <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Screenshot: the planner on an ES chart</strong><small>Panel top right, stop levels drawn. Add once the script is published.</small></div></figure>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt" id="install">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">Install</p>
+      <h2>Add it in under a minute.</h2>
+      <p class="sut-lead">A free TradingView account is enough. Works on the web, desktop and mobile apps.</p>
+    </div>
+    <ol class="sut-next">
+      <li class="is-current"><span class="sut-next-n">01</span><div><h3>Open a futures chart</h3><p>For example ES1!, NQ1!, MES1! or CL1! on TradingView.</p></div></li>
+      <li><span class="sut-next-n">02</span><div><h3>Find the script</h3><p>Click <b>Indicators</b> at the top of the chart, search for <b>ATR Position Size &amp; Stop Planner</b>, and click it to add it. Star it to keep it in Favorites.</p></div></li>
+      <li><span class="sut-next-n">03</span><div><h3>Set your numbers</h3><p>Open the indicator's settings (gear icon): risk per trade, ATR length and stop multiple. Leave "Dollars per point" at 0 to use the symbol's own value.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sut-section" id="limits">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">Know the limits</p>
+      <h2>What it doesn't do.</h2>
+    </div>
+    <div class="sut-faq">
+      <details><summary>It isn't a signal</summary><p>The planner sizes a trade you've already decided to consider. It doesn't say when, where or which way to trade.</p></details>
+      <details><summary>ATR changes while a bar is forming</summary><p>On the live bar, ATR (and so the stop and size) can change until the bar closes. Plan from a closed bar if you want fixed numbers.</p></details>
+      <details><summary>The point value depends on the symbol</summary><p>It uses TradingView's point value for the chart symbol. For non-futures symbols, CFDs or anything unusual, type the dollars per point in yourself and check it against your broker's contract specs.</p></details>
+      <details><summary>Costs and slippage aren't included</summary><p>Commissions, fees and slippage add to the real loss. Gaps and fast markets can fill a stop well beyond its level.</p></details>
+      <details><summary>Rounding</summary><p>Stops round up to a whole tick and contracts round down, which keeps actual risk at or below your limit. Very small risk amounts can therefore show 0.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">Related free resources</p>
+      <h2>Keep going.</h2>
+    </div>
+    <ul class="sut-related">
+      <li><a href="{{calculator_url}}"><b>Futures Position Size Calculator</b><span>The same math in your browser, plus a prop-firm risk planner.</span></a></li>
+      <li><a href="{{free_indicator_url}}"><b>{{free_indicator_name}}</b><span>Jack's free ATR indicator for NinjaTrader&nbsp;8.</span></a></li>
+      <li><a href="{{free_tools_url}}"><b>All free tools</b><span>Everything in one place, by platform.</span></a></li>
+    </ul>
+    {{membership_note}}
+  </div>
+</section>
+
+{{subscribe}}
+
+<!--include:_footer.html-->
+</div>

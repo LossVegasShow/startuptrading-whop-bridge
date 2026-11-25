@@ -369,3 +369,40 @@
   .sut .sut-calc-row { grid-template-columns: 1fr; }
   .sut .sut-calc-card { padding: 20px; }
 }
+
+/* ── Free tools directory, related links, optional sign-up ───────────────── */
+.sut-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.sut .sut-filter { font: 500 13.5px var(--sans); color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.sut .sut-filter:hover { color: var(--text); }
+.sut .sut-filter[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); }
+.sut-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.sut-tool { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+.sut-tool[hidden] { display: none; }
+.sut-tool-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 500 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.sut-tool-platform { color: var(--muted); }
+.sut-tool-status { padding: 2px 8px; border-radius: 999px; }
+.sut-tool-status.is-live { color: var(--up); background: rgba(61,220,151,.1); }
+.sut-tool-status.is-soon { color: var(--accent-2); background: var(--accent-soft); }
+.sut-tool h3 { margin: 16px 0 8px; font-size: 20px; }
+.sut-tool p { color: var(--text-2); font-size: 15px; flex: 1; }
+.sut-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 18px; }
+.sut .sut-tool-ext { font-size: 14px; }
+.sut-tool-empty { color: var(--text-2); padding: 28px; border: 1px dashed var(--line-2); border-radius: 14px; grid-column: 1 / -1; }
+.sut-tool-empty[hidden] { display: none; }
+.sut .sut-btn-disabled { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line-2); cursor: default; }
+.sut-related { list-style: none; margin: 0 0 32px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.sut .sut-related a { display: block; height: 100%; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-decoration: none; }
+.sut .sut-related a:hover { border-color: var(--line-2); }
+.sut-related b { display: block; color: var(--text); font-weight: 600; }
+.sut-related span { display: block; color: var(--text-2); font-size: 14.5px; margin-top: 6px; }
+.sut-member-note { margin-top: 8px; }
+.sut-sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.sut-sub-form { width: 100%; min-height: 460px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+@media (max-width: 980px) {
+  .sut-tools, .sut-related { grid-template-columns: 1fr 1fr; }
+  .sut-sub { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 640px) {
+  .sut-tools, .sut-related { grid-template-columns: 1fr; }
+}

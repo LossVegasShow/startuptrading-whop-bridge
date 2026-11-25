@@ -3,18 +3,7 @@
      Placeholder frames (class "sut-ph") must be replaced with real assets before launch.
      See sales-site/COPY_REVIEW.md for every claim that needs Jack's sign-off. -->
 
-<header class="sut-nav">
-  <div class="sut-wrap sut-nav-in">
-    <a class="sut-logo" href="#top" aria-label="StartUpTrading home">
-      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
-      STARTUPTRADING
-    </a>
-    <nav class="sut-links" aria-label="Sections">
-      <a href="#indicators">Tools</a><a href="#room">Community</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
-    </nav>
-    <a class="sut-btn sut-btn-sm" href="{{cta_href}}"{{cta_attr}}>Join · ${{price_monthly}}/mo</a>
-  </div>
-</header>
+{{nav}}
 
 <section class="sut-hero">
   <div class="sut-wrap sut-hero-grid">
@@ -23,7 +12,7 @@
       <h1>Jack's tools.<br>Your charts.<br><span class="sut-dim">Always evolving.</span></h1>
       <p class="sut-lead">Real NinjaTrader&nbsp;8 tools Jack built to trade futures in his own account. Every new tool he releases is added to your membership and licensed to you automatically. Plus the trade room and his masterclasses.</p>
       <div class="sut-cta-row">
-        <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}}>Join for ${{price_monthly}}/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}} data-member-cta="hero">Join for ${{price_monthly}}/month <span class="sut-arrow" aria-hidden="true">→</span></a>
         <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See what's included</a>
       </div>
       <ul class="sut-assure">
@@ -276,7 +265,7 @@
   <div class="sut-wrap sut-final-in">
     <h2>Trade with Jack's tools.</h2>
     <p class="sut-lead">${{price_monthly}}/month or ${{price_annual}}/year. Every new tool included. Cancel anytime.</p>
-    <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}}>Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}} data-member-cta="final">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
     <p class="sut-fine">Already a member? <a href="{{activation_url}}">Activate your trading tools</a>.<!--if:free_indicator_url--> Not ready? <a href="{{free_url_final}}" data-free="final">Start with the free {{free_indicator_name}}</a>.<!--endif:free_indicator_url--></p>
     <p class="sut-fine">Futures trading involves substantial risk of loss. Our tools and education are designed to support your trading process, not to replace your own judgement. STARTUPTRADING · Every move shapes your future.</p>
   </div>

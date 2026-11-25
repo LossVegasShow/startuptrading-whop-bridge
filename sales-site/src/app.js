@@ -106,4 +106,26 @@
 
   var year = document.querySelector('.sut [data-year]');
   if (year) year.textContent = new Date().getFullYear();
+
+  // Free tools directory: category filters (all cards stay visible without JS).
+  var filterBar = document.querySelector('.sut .sut-filters');
+  if (filterBar) {
+    filterBar.hidden = false;
+    var cards = document.querySelectorAll('.sut .sut-tool');
+    var empties = document.querySelectorAll('.sut [data-empty-for]');
+    filterBar.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('[data-filter]');
+      if (!btn) return;
+      var key = btn.getAttribute('data-filter');
+      var shown = 0;
+      Array.prototype.forEach.call(filterBar.querySelectorAll('[data-filter]'), function (b) {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      Array.prototype.forEach.call(cards, function (c) {
+        var hit = key === 'all' || (' ' + c.getAttribute('data-categories') + ' ').indexOf(' ' + key + ' ') >= 0;
+        c.hidden = !hit; if (hit) shown++;
+      });
+      Array.prototype.forEach.call(empties, function (p) { p.hidden = !(shown === 0 && p.getAttribute('data-empty-for') === key); });
+    });
+  }
 })();

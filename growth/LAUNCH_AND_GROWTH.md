@@ -51,6 +51,10 @@ Must be true before Gate 1 (details in `PRODUCTION_LICENSING.md`):
    page. Set the title and description from section "SEO" below. Point the domain
    at this website with Home as the default page.
 2. Set `/join` to **hide from search engines** (same content as the homepage).
+   In `sales-site/site.config.json`, set `membership_open` to `"true"` and
+   `sales_page_url` to `https://startuptrading.com/`. Rebuild and re-paste the free
+   pages, so their nav and "See the membership" links go live
+   (`growth/FREE_TOOLS_LIBRARY.md`).
 3. **Post-switch checks** (private window):
 
    | # | URL / action | Expect | Pass |

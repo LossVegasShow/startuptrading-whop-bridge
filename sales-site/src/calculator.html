@@ -1,20 +1,10 @@
-<div class="sut" id="top" data-page="calculator">
+<div class="sut" id="top" data-page="calculator" data-tool-id="futures-position-size-calculator">
 <!-- Free futures position-size calculator + prop-firm risk planner
      (GHL path /futures-position-size-calculator). Built by sales-site/build.py;
      edit src/, not dist/. Works without NinjaTrader, so it reaches traders on
      any platform and points them to the free indicator. -->
 
-<header class="sut-nav">
-  <div class="sut-wrap sut-nav-in">
-    <span class="sut-logo">
-      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>
-      STARTUPTRADING
-    </span>
-    <nav class="sut-links sut-links-always" aria-label="More">
-      <a href="{{free_url_calc}}" data-free>Free ATR indicator</a>
-    </nav>
-  </div>
-</header>
+{{nav}}
 
 <section class="sut-hero sut-calc-hero">
   <div class="sut-wrap">
@@ -27,7 +17,7 @@
 <section class="sut-section sut-calc">
   <div class="sut-wrap sut-calc-grid">
 
-    <form class="sut-calc-card" id="sut-size" autocomplete="off" onsubmit="return false">
+    <form class="sut-calc-card" id="sut-size" autocomplete="off" onsubmit="return false" data-tool-use>
       <h2 class="sut-calc-h">Position size</h2>
       <label>Contract
         <select name="contract" id="sut-contract"></select>
@@ -48,7 +38,7 @@
       <output class="sut-calc-out" id="sut-size-out" aria-live="polite"></output>
     </form>
 
-    <form class="sut-calc-card" id="sut-prop" autocomplete="off" onsubmit="return false">
+    <form class="sut-calc-card" id="sut-prop" autocomplete="off" onsubmit="return false" data-tool-use>
       <h2 class="sut-calc-h">Prop-firm risk planner</h2>
       <p class="sut-fine">Enter your own firm's numbers. Rules differ between firms and change often, so check yours.</p>
       <div class="sut-calc-row">
@@ -68,8 +58,8 @@
         <p>Jack's free ATR indicator for NinjaTrader shows the ATR and the size for every trade, live. No card needed.</p>
       </div>
       <div class="sut-cta-row">
-        <a class="sut-btn" href="{{free_url_calc}}" data-free>Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a>
-        <a class="sut-btn sut-btn-ghost" href="{{join_url}}">See the membership</a>
+        <a class="sut-btn" href="{{free_url_calc}}" data-free>Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a><!--if:membership_open-->
+        <a class="sut-btn sut-btn-ghost" href="{{join_url}}">See the membership</a><!--endif:membership_open-->
       </div>
     </div>
   </div>
@@ -97,6 +87,23 @@
     <p class="sut-fine">CME Group contract specifications. Check your broker's specs and fees before trading.</p>
   </div>
 </section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">More free tools</p>
+      <h2>Take the same math to your charts.</h2>
+    </div>
+    <ul class="sut-related">
+      <li><a href="{{tv_atr_page_url}}"><b>ATR Position Size &amp; Stop Planner</b><span>The same sizing, live on a TradingView chart.</span></a></li>
+      <li><a href="{{free_indicator_url}}"><b>{{free_indicator_name}}</b><span>Jack's free ATR indicator for NinjaTrader&nbsp;8.</span></a></li>
+      <li><a href="{{free_tools_url}}"><b>All free tools</b><span>Everything in one place, by platform.</span></a></li>
+    </ul>
+    {{membership_note}}
+  </div>
+</section>
+
+{{subscribe}}
 
 <!--include:_footer.html-->
 
