@@ -14,8 +14,8 @@ Audited 25 Nov 2026 against the repository, the live site and the live app.
 | Piece | State found | Notes |
 |---|---|---|
 | Site attribution script (`sales-site/src/tracking.js`, in `site-tracking.html` and every page embed) | **Live** on every page | First/last touch in browser storage, `dataLayer` events, Form 7 hidden fields |
-| Google Tag Manager | **Not installed** | No `GTM-` container on any page |
-| Google Analytics 4 | **Not installed** | No `G-` measurement ID. Every `dataLayer` event so far went nowhere |
+| Google Tag Manager | Was not installed → **GTM-NXZL43PP** now in the site-wide header code and the activation app | Container: `growth/gtm/` |
+| Google Analytics 4 | Was not installed → **G-S0PT1NK0FK** via GTM (browser) and Measurement Protocol (verified server events) | Data API connector for the dashboard |
 | Meta pixel | Not installed | — |
 | Google Search Console | Verified, sitemap submitted | Organic search queries only |
 | Form 7 (GoHighLevel) | Live on 3 free pages, 12 hidden fields filled | Confirmed by your test contact |
@@ -126,86 +126,81 @@ needs your approval and a test purchase first.
 
 ## 5. Event specification
 
-All events are pushed to `dataLayer` by `tracking.js` (browser) with
-`first_channel`, `last_channel`, `first_touch`, `last_touch` and `affiliate`
-attached. No emails, names, license keys or credentials are ever pushed.
+Browser events are pushed to `dataLayer` by `tracking.js` and sent to GA4 by the
+GTM container (`growth/gtm/startuptrading-gtm-container.json`). Verified outcomes
+are sent to GA4 **by the licensing app** (Measurement Protocol), never by the
+browser. No emails, names, affiliate codes, license data or credentials are sent to
+GA4. Page URLs keep only `utm_*`/click IDs, and `/activate/<token>` is masked.
 
-| Activity | dataLayer event | GA4 event (set in GTM) | Parameters | Fires | Dedupe |
+| Activity | dataLayer event | GA4 event | Parameters | Fires | Dedupe |
 |---|---|---|---|---|---|
+| Page view | `sut_attribution` (trigger) | `page_view` (Google tag) | page_location (cleaned), user properties `first_channel`, `last_channel` | Once per page load; on activate.startuptrading.com on page load | Google tag set to once per load |
 | Free tool page opened | `free_tool_view` | `free_tool_view` | `tool_id` | Page load | Once per page |
 | Calculator used | `tool_use` | `tool_use` | `tool_id` | First input | Once per tool per page |
-| Calculation completed | `calculation_complete` | `calculation_complete` | `tool_id`, `calculator` (`position_size`, `prop_firm`) | First result after the visitor changes an input (not the page's first render) | Once per calculator per page |
-| Free tool selected (directory) | `free_tool_select` | `select_content` | `content_type=free_tool`, `content_id=tool_id` | Card link click | Per click |
-| TradingView indicator link | `outbound_click` (`destination=tradingview`) | `tradingview_click` | `tool_id` | Click | Per click |
-| Email signup completed | `email_subscribe` | `generate_lead` (key event) | `source_page`, `interest`, `tool_id`, `form_id` | GoHighLevel's own **successful-submission** message from our iframe, never a click | Once per form per page |
-| Membership offer clicked | `checkout_intent` | `select_promotion` | `promotion_name=membership`, `creative_slot=placement` | Click | Per click |
-| Checkout initiated | `checkout_view` | `begin_checkout` (key event) | — | The embedded Whop checkout scrolls into view (Whop exposes no "started typing" event) | Once per page |
-| Returned from checkout (unverified) | `checkout_return` | `checkout_return` | — | `/welcome` load | Once per browser session |
-| Product download initiated | `file_download` | `file_download` | `file_name`, `file_extension`, `link_url` | Download button click on `/setup` | Per click |
-| Subscription created, renewal, cancellation, failed payment, refund | — (server) | — (phase 2: Measurement Protocol) | — | Whop signed webhooks → `/admin/marketing` | Webhook id + payment id |
-| NinjaTrader account linked, indicators licensed, activation completed | — (server) | — | — | Licensing app → `/admin/marketing`, CRM `activation_status` | Engine is idempotent |
+| Calculation completed | `calculation_complete` | `calculation_complete` | `tool_id`, `calculator` | First result after the visitor changes an input | Once per calculator per page |
+| Free tool selected | `free_tool_select` | `select_content` | `content_type=free_tool`, `content_id` | Directory card click | Per click |
+| TradingView link clicked | `outbound_click` (destination `tradingview`) | `tradingview_click` | `tool_id` | Click | Per click |
+| Email signup completed | `email_subscribe` | **`generate_lead`** (key event) | `source_page`, `interest`, `tool_id`, `form_id` | GoHighLevel's successful-submission message from our iframe, never a click | Once per form per page |
+| Membership CTA clicked | `checkout_intent` | `select_promotion` | `promotion_id=membership`, `creative_slot` = placement | Click | Per click |
+| Checkout initiated | `checkout_view` | **`begin_checkout`** (key event) | — | Embedded Whop checkout scrolls into view | Once per page |
+| Back from checkout (unverified) | `checkout_return` | `checkout_return` | — | `/welcome` load | Once per browser session |
+| Product download | `file_download` | `file_download` | `file_name`, `file_extension`, `link_url` | `/setup` download click | Per click |
+| **Subscription payment** (initial and renewals) | — | **`purchase`** (key event; server) | `transaction_id` (Whop `pay_…`), `value`, `currency`, `coupon` (promo id), `purchase_type`, `acquisition_channel`, `items` | Verified Whop `payment.*` webhook, paid and above $0, not QA | `ga_events_sent` per payment; GA4 also dedupes `transaction_id` |
+| Refund | — | `refund` (server) | `transaction_id`, `value` | Refund seen on the payment | Once per refunded amount |
+| NinjaTrader linked | — | `ninjatrader_linked` (server) | `acquisition_channel` | Member verified their NinjaTrader email | Once per membership |
+| Indicators licensed / activation complete | — | `activation_complete` (server) | `acquisition_channel` | Both indicators licensed | Once per membership |
+| Subscription cancelled | — | `subscription_cancel` (server) | `acquisition_channel` | Activated member's membership ended | Once per membership |
 
-Server-side outcomes stay out of GA4 in phase 1 on purpose: the browser can't
-verify them, and Whop and the licensing app are the source of truth.
+**Joining server events to the visitor:** at Whop sign-in the activation app reads
+GA4's own `_ga` cookie (shared across `*.startuptrading.com`), with the `/welcome`
+hand-off as a fallback, and stores the client id per membership (`ga_clients`). A
+buyer whose client id never arrives is still counted after 72 hours under a stable
+anonymous id (GA4 then shows it as unattributed). Nothing is invented.
 
-## 6. GA4 and Google Tag Manager setup (you)
+## 6. GA4 and Google Tag Manager: install and publish (you)
 
-1. **Create GA4**: analytics.google.com → Admin → Create property "StartUpTrading" →
-   Web stream `https://startuptrading.com`. Copy the **Measurement ID** (`G-…`).
-   - In the stream: Enhanced measurement **on**, but turn **off** "Form interactions"
-     (it would count clicks as submissions).
-   - Admin → Data settings → Data retention → **14 months**.
-   - Admin → Data streams → Configure tag settings → **List unwanted referrals**: add
-     `gohighlevel.com`, `leadconnectorhq.com`, `msgsndr.com`, `whop.com`,
-     `stripe.com`, `paypal.com`.
-   - Same screen → **Configure your domains**: `startuptrading.com`,
-     `activate.startuptrading.com` (cross-domain).
-2. **Create GTM**: tagmanager.google.com → container "startuptrading.com" (Web). Copy
-   the two snippets.
-3. **Install GTM site-wide** in GoHighLevel: Settings → Tracking code → **Header**:
-   paste GTM's `<script>` snippet **above** the existing StartUpTrading
-   `site-tracking.html` code. Body: paste GTM's `<noscript>` snippet. Do this in
-   every website/funnel serving startuptrading.com.
-4. **In GTM**, create:
-   - **Variables** (Data Layer Variable): `first_channel`, `last_channel`, `tool_id`,
-     `source_page`, `interest`, `form_id`, `placement`, `calculator`, `file_name`,
-     `file_extension`, `link_url`, `affiliate`.
-   - **Variable "GA4 event name"** (Lookup Table on `{{Event}}`):
-     | Input | Output |
-     |---|---|
-     | `email_subscribe` | `generate_lead` |
-     | `checkout_intent` | `select_promotion` |
-     | `checkout_view` | `begin_checkout` |
-     | `free_tool_select` | `select_content` |
-     | `outbound_click` | `tradingview_click` |
-     | default | `{{Event}}` |
-   - **Tag "GA4 – Google tag"**: Google tag, ID = your `G-…`. Shared event settings
-     → user properties `first_channel` = `{{first_channel}}`, `last_channel` =
-     `{{last_channel}}`. Trigger: **Initialization – All Pages**.
-   - **Tag "GA4 – SUT events"**: GA4 Event, Measurement ID `G-…`, Event Name
-     `{{GA4 event name}}`. Parameters: `tool_id`, `source_page`, `interest`,
-     `form_id`, `calculator`, `file_name`, `file_extension`, `link_url`,
-     `affiliate`, and `creative_slot` = `{{placement}}`. Trigger: Custom Event, event
-     name matches RegEx
-     `^(free_tool_view|tool_use|calculation_complete|free_tool_select|outbound_click|email_subscribe|checkout_intent|checkout_view|checkout_return|file_download)$`.
-     Don't include `sut_attribution`: it's for variables only.
-   - **Consent:** in the container settings, enable Consent Overview. If you add a
-     consent banner, use one with Google Consent Mode v2 (for example CookieYes or
-     Cookiebot from the GTM gallery). On "decline" it should also run
-     `window.sutConsent('denied')`, which stops `tracking.js` storing anything (the
-     Form 7 embed already respects recognised banners).
-   - **Preview**, run tests T1–T8 (section 9), then **Submit → Publish**.
-5. **In GA4** (after the first data arrives):
-   - Admin → Custom definitions → event-scoped dimensions: `tool_id`, `source_page`,
-     `interest`, `calculator`, `affiliate`.
-   - User-scoped: `first_channel`, `last_channel`.
-   - Admin → Events → mark **`generate_lead`** and **`begin_checkout`** as key events.
-6. Optional: set `GA4_PROPERTY_URL` in Render to your GA4 property's home URL, so
-   the dashboard links to it.
+Production IDs: GA4 **G-S0PT1NK0FK** (stream 16417615246), GTM **GTM-NXZL43PP**.
 
-**Built-in GA4 reports cover:** unique visitors (Users), sessions, landing pages,
-channels (Traffic acquisition; use `first_channel` for our taxonomy), new vs
-returning, engagement, devices, countries, and campaigns.
+**6.1 GA4 property settings** (analytics.google.com → Admin):
+1. Data streams → *startuptrading.com* → **Enhanced measurement** (gear):
+   - **on:** page views, scrolls, outbound clicks, site search, video engagement and file downloads;
+   - **off:** "Page changes based on browser history events" (it would duplicate page views);
+   - **off:** "Form interactions" (it counts clicks as submissions).
+2. Same stream → Configure tag settings:
+   - **Configure your domains:** add `startuptrading.com` and `activate.startuptrading.com`.
+   - **List unwanted referrals:** add `gohighlevel.com`, `leadconnectorhq.com`, `msgsndr.com`, `whop.com`, `stripe.com`, `paypal.com`.
+3. Same stream → **Measurement Protocol API secrets** → Create → nickname "licensing app" → copy the secret (step 6.4).
+4. Admin → Data settings → Data retention → **14 months**. Data collection: leave **Google signals off**.
+5. Admin → Custom definitions → Create custom dimension:
+   - **Event scope:** `tool_id`, `source_page`, `interest`, `calculator`, `purchase_type`, `acquisition_channel`.
+   - **User scope:** `first_channel`, `last_channel`.
+6. Admin → Events (after the first events arrive): mark **`generate_lead`**, **`begin_checkout`**, **`purchase`** and **`activation_complete`** as key events.
+
+**6.2 Import the container** (tagmanager.google.com → GTM-NXZL43PP):
+1. Admin → **Import container** → choose `growth/gtm/startuptrading-gtm-container.json` → workspace **Default Workspace** → **Merge** → **Overwrite conflicting tags, triggers and variables** → Confirm.
+2. Check: **5 tags**, **6 triggers** and **16 variables** were imported, plus the built-in Page URL, Page Hostname, Page Path, Referrer and Event.
+3. Admin → Container settings → enable **Consent Overview**. The tags use Google's built-in consent checks; the site sets Consent Mode v2 defaults before GTM loads (`static/gtm.js`).
+4. Don't publish yet: test first (section 9).
+
+**6.3 Install on GoHighLevel** (Settings → Tracking code, in **every** website/funnel serving startuptrading.com):
+- **Header tracking code:** replace everything with `sales-site/dist/site-tracking.html`. It contains the Consent Mode defaults, GTM-NXZL43PP, affiliate capture and attribution. Don't paste Google's own GTM snippet as well (that would load GTM twice).
+- **Body / footer tracking code:** `sales-site/dist/site-tracking-body.html` (GTM's noscript fallback).
+- Don't add GA4 or GTM anywhere else (page code elements, funnel settings, GHL's "Google Analytics" integration). GA4 must come **only** from GTM, or page views double.
+
+**6.4 Render** (startuptrading-whop-bridge → Environment):
+
+| Variable | Value |
+|---|---|
+| `GTM_CONTAINER_ID` | `GTM-NXZL43PP` (GTM on the activation app's customer pages; never on /admin) |
+| `GA4_MEASUREMENT_ID` | `G-S0PT1NK0FK` |
+| `GA4_API_SECRET` | the Measurement Protocol secret from 6.1 step 3 |
+| `GA4_PROPERTY_ID` | the numeric property ID (GA4 Admin → Property details) |
+| `GA4_SERVICE_ACCOUNT_JSON` | see 8.1 (for the dashboard) |
+| `GA4_PROPERTY_URL` | optional: your GA4 home URL, linked from the dashboard |
+
+**6.5 Publish:** after section 9 passes in Preview, go to GTM → **Submit** → Version name "v1 GA4 + SUT events" → **Publish**.
+
+**Consent:** there's no banner yet. Default: analytics allowed except in the EEA, UK and Switzerland, where it's denied until consent (Google then uses cookieless pings); ad storage is denied everywhere. When you add a Consent Mode v2 banner (CookieYes or Cookiebot from GTM's template gallery), have its accept and decline also call `window.sutConsent('granted'|'denied')`.
 
 ## 7. GoHighLevel CRM (you)
 
@@ -300,103 +295,85 @@ email.
 
 ## 8. Marketing dashboard
 
-**Built (phase 1):** `https://activate.startuptrading.com/admin/marketing` (admin
-sign-in). It's in the existing app, so there's no new hosting and no new login. Every
-number is labelled:
-- **Verified:** subscribers, paying subscribers, net revenue, initial and renewal
-  revenue, refunds, failed payments, realised LTV, activation and NinjaTrader link
-  rates, churn, attribution coverage, and QA exclusions.
-- Breakdowns by channel (first or latest touch), landing page and the verified half of
-  the funnel.
-- **Estimate:** MRR.
-- **Unavailable (not copied in):** visitors, leads, spend, CAC and ROAS, which are
-  shown as GA4, GoHighLevel or "No spend data".
-- **Filters:** date range, first or latest touch, channel, campaign, landing page,
-  affiliate, organic or paid.
+`https://activate.startuptrading.com/admin/marketing` (admin sign-in), in the
+existing app. A status line shows which sources are connected, and every number is
+labelled:
 
-**Phase 2 (when you want the full funnel in one place):**
-1. **Visitors and engagement:** GA4 Data API with a service account (read-only Viewer on
-   the property). Daily pull of users, sessions and key events by `first_channel` and
-   landing page into a `ga4_daily` table.
-2. **Leads:** GoHighLevel API (`contacts` with the `free-tools-lead` tag, by original
-   channel), daily.
-3. **Spend:** a small "spend" form on the dashboard (channel, month, amount) for CAC and
-   ROAS. Ad-platform APIs later, if spend grows.
-4. **Coverage:** Whop checkout-configuration metadata (section 4).
-5. **Purchases in GA4:** Measurement Protocol `purchase` from the webhook, using the GA
-   client id passed in the handoff.
+| Source | What it supplies | Needs |
+|---|---|---|
+| Whop + licensing (**verified**, connected) | Subscribers, paying, revenue (initial/renewal), refunds, failed payments, LTV, activation, churn, by first/latest channel, landing page, campaign, affiliate | Nothing more |
+| GA4 Data API (**connected when configured**) | Visitors (new/returning), sessions, leads (`generate_lead`) by first channel, landing pages, devices, countries, funnel event counts; lead→subscriber and visitor→subscriber rates (labelled *Mixed sources*) | `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT_JSON` (8.1) |
+| GA4 Measurement Protocol (server events) | `purchase`, `refund`, `ninjatrader_linked`, `activation_complete`, `subscription_cancel` in GA4 | `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` |
+| Spend | CAC and ROAS | Not available yet (phase 2: a spend form) |
 
-## 9. Testing protocol
+GA4 data is cached for 6 hours. If GA4 fails or isn't configured, those columns read
+"—" with the reason; nothing is estimated in their place.
 
-Do every browser test in a **fresh private window**. Inspect: GTM Preview (events
-and parameters), DevTools → Application → Local Storage → `sut_attr` (first and
-last), Form 7 contact fields in GoHighLevel, `/admin/marketing`, and the
-membership's Snapshot in `/admin`. "Same window" means continue without closing it.
+**8.1 Create the read-only Google credentials (you):**
+1. console.cloud.google.com → create (or pick) a project → APIs & Services → Library → enable **Google Analytics Data API**.
+2. IAM & Admin → Service accounts → Create, named "startuptrading-dashboard", with **no project roles**.
+3. Open it → Keys → Add key → JSON → download.
+4. GA4 → Admin → Property access management → **+** → add the service account's email (`…@….iam.gserviceaccount.com`) with role **Viewer**. Leave "Notify" off.
+5. Render → `GA4_SERVICE_ACCOUNT_JSON` = the whole JSON file contents, or its base64. Set it as a Render **secret** environment variable, never in GitHub. Also set `GA4_PROPERTY_ID`.
+6. Delete the downloaded file from your computer once it's saved in Render.
 
-| # | Scenario | Steps | Expected |
-|---|---|---|---|
-| T1 | Direct visit | Type `startuptrading.com/free-tools` | first: `(direct)`, channel `direct`; no last |
-| T2 | Google | Search Google, click our result | first `google` / `organic`, channel `google_organic` |
-| T3 | Instagram UTM | Open a generator link for Instagram | first `instagram` / `social`, campaign as set |
-| T4 | YouTube UTM | Generator link for YouTube | channel `youtube`, content kept |
-| T5 | TradingView | Click our link from the TradingView profile | channel `tradingview` |
-| T6 | ChatGPT | Click a startuptrading.com link in ChatGPT | channel `ai_referral` (the original contaminated case) |
-| T7 | Affiliate | `startuptrading.com/join?a=<real affiliate>` | channel `affiliate`; the Whop checkout is credited (PRODUCTION_LICENSING tests A1–A7) |
-| T8 | Navigation | From T4, visit the calculator, then `/free-tools`, then the TradingView page | first and last stay `youtube`; each page sends `free_tool_view` once |
-| T9 | GoHighLevel referrer | Open any page from inside the GoHighLevel dashboard | first/last **not** changed to `gohighlevel` |
-| T10 | Form 7 submission | Submit on the calculator (same window as T4) | GTM: exactly one `email_subscribe` / `generate_lead`; contact: `first_channel=youtube`, Original channel `youtube`, tag `source-youtube`, `free-tools-lead`, one welcome email |
-| T11 | Returning visitor | Close the window, reopen the same browser (not private), type the URL | first and last unchanged |
-| T12 | Repeat submission | Submit Form 7 again from a new private window with an Instagram link and the same email | Form fields update to `instagram`; **Original channel stays `youtube`**; no second welcome email |
-| T13 | Whop checkout | From the T4 window, Join → checkout loads | `checkout_intent` then `begin_checkout`; affiliate kept if set |
-| T14 | Successful subscription | Complete with a 100%-off code; land on `/welcome` | `checkout_return` once. In `/admin`: the new membership; its payment row (if Whop sends one for $0) is **not** revenue |
-| T15 | Activation with attribution | On `/welcome` click Activate → Whop sign-in → link NinjaTrader | Snapshot audit shows `attribution_captured`; `/admin/marketing` counts the subscriber under `youtube` with capture rate > 0 |
-| T16 | Duplicate webhook | Whop → Developer → Webhooks → the delivery → **Replay** (keeps the same webhook-id) | `/admin` shows it as a duplicate; revenue unchanged |
-| T17 | Paid payment | One real low-price purchase (or a refunded real one) | Revenue appears under the right channel; after a refund and the next refresh (≤12 h), net revenue drops |
-| T18 | Cancellation | End the test membership | Churned +1 for its channel; CRM `former-subscriber` |
-| T19 | QA exclusion | Add the test membership to `MARKETING_EXCLUDE_MEMBERSHIPS`, redeploy | It disappears from every number; "QA memberships excluded" +1 |
-| T20 | Mobile and desktop | Repeat T3 and T10 on a phone (Safari) and desktop Chrome | Same results; the form fits the screen |
-| T21 | Consent declined | In the console run `sutConsent('denied')`, reload with a UTM link | `sut_attr` not stored; events still carry this page's source only |
-| T22 | Consent accepted | `sutConsent('granted')`, reload | Stored again |
+## 9. Live testing checklist (GTM Preview, Tag Assistant, GA4 DebugView)
 
-Automated: `tests/test_attribution.py` covers 41 scenarios in the real browser code,
-including every source above and the contaminated case. `tests/test_marketing.py`
-covers the handoff, the signed webhook, idempotency, PII exclusion, revenue rules,
-QA exclusion and filters. `tests/test_signup_browser.py` covers the real
-embedded-form behaviour.
+**Setup:** GTM → **Preview** → enter `https://startuptrading.com/free-tools?utm_source=qa&utm_medium=test&utm_campaign=gtm_check` → Tag Assistant opens the site in a debug window. In GA4 → Admin → **DebugView**, the debug device appears within a minute. Use a fresh browser profile with no ad blocker.
+
+| # | Test | In Tag Assistant | In GA4 DebugView / elsewhere | Pass |
+|---|---|---|---|---|
+| L1 | GTM loads once | Container GTM-NXZL43PP listed **once**; Consent shows defaults (ad_storage denied) | — | |
+| L2 | One page view per page | On `sut_attribution`: "GA4 - Google tag (page view)" fired **once**. Navigate to the calculator and the TradingView page: once on each | One `page_view` per page; `page_location` has only the utm_* parameters | |
+| L3 | Attribution | Variables: `DLV - first_channel` = `other_referral` (utm_source=qa) | User properties `first_channel` / `last_channel` set | |
+| L4 | GoHighLevel referrer ignored | Open the page from GoHighLevel's editor (View live page) | `last_channel` unchanged (not gohighlevel) | |
+| L5 | Calculator | Change the risk amount | `tool_use` then `calculation_complete` (calculator=position_size), each once | |
+| L6 | Free tool selected | On /free-tools click a card | `select_content` (content_id = tool id) | |
+| L7 | TradingView click | Click "Open on TradingView" | `tradingview_click` | |
+| L8 | Form 7 success only | Click "Keep Me Ahead" with an empty email | **No** `generate_lead` | |
+| L9 | Form 7 submission | Submit a real test address | Exactly **one** `generate_lead` with `source_page`; the GoHighLevel contact has `first_channel` / `last_channel` | |
+| L10 | Membership CTA | Click "Become a Member" | `select_promotion` (creative_slot = nav, hero…) | |
+| L11 | Checkout initiated | Scroll to the embedded checkout on /join | `begin_checkout` once | |
+| L12 | /welcome is not a purchase | Load `/welcome`, then reload | `checkout_return` once; **no** `purchase` | |
+| L13 | Activation app | Open `activate.startuptrading.com/?sut_fs=qa` | Same GTM container; page_view with `page_location` **without** `sut_` parameters; /admin pages show no GTM | |
+| L14 | Verified purchase | One real purchase above $0 (refund afterwards), then activate in the same browser | After the next sync (≤15 min): `purchase` in GA4 Realtime with `transaction_id` = Whop `pay_…`; `ninjatrader_linked` and `activation_complete` follow. DebugView doesn't show server events (use Realtime) | |
+| L15 | Duplicate webhook | Whop → Webhooks → Replay that payment's delivery | No second `purchase` (GA4 Realtime and `/admin/marketing`) | |
+| L16 | Refund | Refund it in Whop | `refund` in GA4 within about 12 h; net revenue drops on the dashboard | |
+| L17 | QA exclusion | Add the test membership to `MARKETING_EXCLUDE_MEMBERSHIPS` **before** L14 if you don't want it in GA4 | No server events for it | |
+| L18 | Consent | In the console: `sutConsent('denied')`, reload | Tag Assistant Consent tab: analytics_storage **denied**; `sut_attr` not stored. Then `sutConsent('granted')` | |
+| L19 | EEA default | GA4 DebugView with a VPN in Germany (optional) | Events arrive as cookieless pings (no client id persistence) | |
+| L20 | No personal data | Tag Assistant → each GA4 hit's parameters | No email, name or affiliate code anywhere | |
+| L21 | Mobile | Repeat L2, L5 and L9 on a phone (use GA4 Realtime) | Same results | |
+| L22 | Dashboard | `/admin/marketing` | Status line: GA4 reports **connected**, server events **on**; visitors and leads filled | |
+
+Then **Publish** (6.5). The automated tests cover the container structure, loading
+GTM once, consent defaults, PII exclusion, the GA client id join, server events
+(once each, QA excluded, nothing for $0), the GA4 Data API connector and the
+dashboard: `tests/test_ga4.py`, `test_attribution.py`, `test_marketing.py`.
 
 ## 10. Your checklist
 
 | # | Where | Action |
 |---|---|---|
-| 1 | GitHub | Make the repository private (still pending from the product release) |
-| 2 | GoHighLevel → Settings → Tracking code | Re-paste the new `site-tracking.html`, then the GTM snippets (section 6) |
-| 3 | GoHighLevel pages | Re-paste the embeds: `/free-tools`, calculator, TradingView page, `/welcome`, `/setup` (and `/join` + Home if they use `ghl-embed.html`) |
-| 4 | GA4 + GTM | Section 6 |
-| 5 | Form 7 | Add hidden fields `first_channel`, `last_channel` (7.1) and the four Original fields (7.2) |
-| 6 | GoHighLevel workflows | 7.3 and 7.4 |
-| 7 | Render → Environment | `MARKETING_EXCLUDE_MEMBERSHIPS` = your test memberships (comma-separated, e.g. `mem_T1AdJRcFkJNNSk,mem_XN7y9ppQsdx2np`); `MARKETING_EXCLUDE_EMAILS` = QA emails; optional `GA4_PROPERTY_URL`; `GHL_API_KEY`, `GHL_LOCATION_ID`, `GHL_CUSTOM_FIELDS_JSON` if CRM sync isn't on yet |
-| 8 | Whop → Developer → Webhooks | Make sure the webhook is subscribed to **payment.succeeded, payment.failed, payment.created, payment.pending** (and the membership events already in use). The API key needs **`payment:basic:read`** for the refund refresh |
-| 9 | Testing | Section 9 |
+| 1 | GA4 | 6.1: enhanced measurement settings, domains, unwanted referrals, **API secret**, retention, custom dimensions, key events |
+| 2 | GTM | 6.2: import the container, enable Consent Overview (don't publish yet) |
+| 3 | GoHighLevel → Settings → Tracking code | 6.3: header = `site-tracking.html`, body = `site-tracking-body.html`, in every website/funnel |
+| 4 | GoHighLevel pages | Re-paste the embeds: `/free-tools`, calculator, TradingView page, `/welcome`, `/join` (`ghl-embed.html`). `/setup` waits for the product download links |
+| 5 | Render | 6.4 + 8.1: `GTM_CONTAINER_ID`, `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`, `GA4_PROPERTY_ID`, `GA4_SERVICE_ACCOUNT_JSON`; `MARKETING_EXCLUDE_MEMBERSHIPS` / `_EMAILS` |
+| 6 | Google Cloud + GA4 | 8.1: service account with Viewer on the property |
+| 7 | Whop | Webhook subscribed to **payment.succeeded, payment.failed, payment.created, payment.pending** (+ the membership events); API key has **payment:basic:read** |
+| 8 | GoHighLevel → Form 7 and workflows | Section 7 (hidden fields `first_channel`, `last_channel`; Original fields; workflow; subscriber workflow; `GHL_CUSTOM_FIELDS_JSON` keys `acquisition_first_channel`, `acquisition_last_channel`) |
+| 9 | Testing | Section 9, then publish GTM |
+| 10 | GoHighLevel Media | Upload the two product zips; send me the links for `products.json`. Never upload them to GitHub |
 
 ## 11. Blockers and limitations
 
-- **GA4/GTM not installed**: no anonymous visitor data exists until you do section 6.
-  Nothing can be backfilled.
-- **Repository still public**: holds back the product-release push (and these files).
-- **Attribution coverage**: buyers who purchase on Whop's store page, or activate on
-  another device, show as Unknown until phase 2 (checkout metadata).
-- **Whop permissions**: payment webhooks need `webhook_receive:payments`; the refund
-  refresh needs `payment:basic:read`. Affiliate details on a membership need
-  `affiliate:basic:read`, and are never included in webhooks.
-- **Whop `billing_reason` values** aren't listed in the public docs, so initial vs
-  renewal is determined by payment order instead.
-- **No refund webhook** at Whop: refunds appear after the next refresh (up to about
-  12 hours).
-- **Spend data** doesn't exist yet: CAC and ROAS are shown as unavailable.
-- **Consent**: there's no consent banner. If you market to the EU or UK, add a Consent
-  Mode v2 banner before turning on GA4 there.
-- **Safari/ITP**: browser storage set by scripts can be capped at 7 days in Safari, so
-  long gaps can lose first-touch data in Safari. GA4 has the same limit.
-- **Live state, unchanged by this work**: licensing for all members and
-  `membership_open` were already on. Reminders are still held, and no campaigns or
-  emails were sent.
+- **Nothing collected before GTM is published.** No historical visitor data exists.
+- **Server events need `GA4_API_SECRET`**, and the dashboard's GA4 columns need the service account (8.1).
+- **Unattributed buyers:** anyone who buys on Whop's store page or activates on another device is counted after 72 h but unattributed. Phase 2 (Whop checkout metadata) would fix this, but it changes the checkout and needs your approval.
+- **Whop:** payment webhooks need `webhook_receive:payments`; the refund refresh needs `payment:basic:read`. There's no refund webhook (refunds are seen within about 12 h), and `billing_reason` values aren't documented, so initial vs renewal is decided by payment order.
+- **Consent:** no banner yet, so EEA, UK and Swiss visitors are measured with cookieless pings only, until a Consent Mode v2 banner is added.
+- **Safari/ITP** can cap script-set storage at 7 days, so long gaps can lose first-touch data (GA4 has the same limit).
+- **No spend data:** CAC and ROAS are unavailable.
+- **Product files** are hosted outside GitHub (the repository is public). The `/setup` buttons stay placeholders until both `download_url`s are set.
+- **Settings in Render outside the code:** check `/health`. If it reports `"mode":"all_members"`, unrestricted licensing is on in Render; set `LICENSE_ALL_MEMBERS=false` to keep it off (see `PRODUCTION_LICENSING.md`). `membership_open` is off in the site build, reminders are held, and no campaigns or emails were sent.

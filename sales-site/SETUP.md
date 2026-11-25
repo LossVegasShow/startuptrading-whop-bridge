@@ -114,9 +114,11 @@ On the current home page (`/`) in GHL:
 2. Build it like step 2, but paste **`dist/setup-embed.html`** into the Code element.
 3. **SEO:** title *Install your StartUpTrading tools*. Turn on the option to hide
    the page from search engines (it's for members).
-4. Before launch, put Jack's download link in `site.config.json` as
-   `setup_download_url`, rebuild and paste again. Until then the page shows a
-   "Download link goes here" box. Replace the two screenshot boxes too.
+4. The download buttons come from `products.json` at the repo root, one per product,
+   using its `download_url`. The files are proprietary and never committed (the repo is
+   public): upload them to GoHighLevel Media and paste each link into `download_url`. To
+   ship a new version, upload it, update `download_url` and `sha256`, then rebuild and
+   paste again. Replace the two screenshot boxes when Jack has them.
 
 ### 2d. Add the free calculator page (`/futures-position-size-calculator`)
 

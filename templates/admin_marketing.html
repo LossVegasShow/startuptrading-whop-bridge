@@ -31,11 +31,17 @@
 </form>
 
 {% set t = data.totals %}
+<p class="notice mk-status"><b>Data sources:</b>
+  Whop + licensing: <b>connected</b> (verified). ·
+  GA4 reports: {% if ga %}<b>connected</b>{% if ga.errors %} (partial: {{ ga.errors|join(', ') }}){% endif %}, cached up to 6 h{% else %}<b>not connected</b>: {{ ga_error }}{% endif %}. ·
+  GA4 server events (purchase, activation): {% if ga_mp %}<b>on</b>{% else %}<b>off</b> (set GA4_MEASUREMENT_ID and GA4_API_SECRET){% endif %}.</p>
 <section class="card">
   <h2>Executive overview</h2>
   <div class="mk-grid">
-    <div><span class="mk-tag na">GA4</span><b>—</b><span>Website visitors</span></div>
-    <div><span class="mk-tag na">GoHighLevel</span><b>—</b><span>New leads (Form 7)</span></div>
+    <div><span class="mk-tag {{ 'ok' if ga else 'na' }}">GA4</span><b>{{ '{:,.0f}'.format(ga.totals.users) if ga else '—' }}</b><span>Website visitors{% if ga %} ({{ '{:,.0f}'.format(ga.totals.new_users) }} new, {{ '{:,.0f}'.format(ga.returning_users) }} returning){% endif %}</span></div>
+    <div><span class="mk-tag {{ 'ok' if ga else 'na' }}">GA4</span><b>{{ '{:,.0f}'.format(ga.leads) if ga else '—' }}</b><span>New leads (successful Form 7 submissions)</span></div>
+    <div><span class="mk-tag {{ 'est' if ga else 'na' }}">{{ 'Mixed sources' if ga else 'GA4' }}</span><b>{{ '%.1f%%'|format(100 * t.subscribers / ga.leads) if ga and ga.leads else '—' }}</b><span>Lead-to-subscriber (subscribers ÷ GA4 leads)</span></div>
+    <div><span class="mk-tag {{ 'est' if ga else 'na' }}">{{ 'Mixed sources' if ga else 'GA4' }}</span><b>{{ '%.2f%%'|format(100 * t.subscribers / ga.totals.users) if ga and ga.totals.users else '—' }}</b><span>Visitor-to-subscriber (subscribers ÷ GA4 visitors)</span></div>
     <div><span class="mk-tag ok">Verified</span><b>{{ t.subscribers }}</b><span>Subscribers (memberships seen)</span></div>
     <div><span class="mk-tag ok">Verified</span><b>{{ t.paying }}</b><span>Paying subscribers</span></div>
     <div><span class="mk-tag ok">Verified</span><b>${{ '%.2f'|format(t.net_revenue) }}</b><span>Net revenue (paid − refunds)</span></div>
@@ -48,19 +54,23 @@
     <div><span class="mk-tag ok">Verified</span><b>{{ t.excluded }}</b><span>QA memberships excluded</span></div>
   </div>
   <p class="muted">Revenue: initial ${{ '%.2f'|format(t.initial_revenue) }} · renewals ${{ '%.2f'|format(t.renewal_revenue) }} · refunds ${{ '%.2f'|format(t.refunds) }} ({{ t.refunded_payments }} payments) · failed payment attempts {{ t.failed_payments }} · free or promo-only members {{ t.promo_only }} (never counted as revenue).
-    Lead-to-subscriber and visitor-to-subscriber rates need GA4 and GoHighLevel counts: see growth/MARKETING_ANALYTICS.md, phase 2.</p>
+    {% if ga %}GA4 sessions {{ '{:,.0f}'.format(ga.totals.sessions) }} ({{ '{:,.0f}'.format(ga.totals.engaged_sessions) }} engaged). Devices: {% for k, v in ga.devices.items() %}{{ k }} {{ '{:,.0f}'.format(v) }}{{ ', ' if not loop.last }}{% endfor %}. Top countries: {% for k, v in ga.countries %}{{ k }} {{ '{:,.0f}'.format(v) }}{{ ', ' if not loop.last }}{% endfor %}.{% endif %}
+    "Mixed sources" rates divide verified subscribers by GA4 counts for the same dates; GA4 undercounts visitors who decline consent.</p>
 </section>
 
 <section class="card">
   <h2>Acquisition channels ({{ 'first' if f.basis == 'first' else 'latest' }} touch)</h2>
   {% if data.channels %}
   <div class="scroll"><table>
-    <tr><th>Channel</th><th>Subscribers</th><th>Paying</th><th>Activated</th><th>Activation</th><th>Net revenue</th><th>LTV</th><th>Churned</th><th>Visitors · Leads · Spend</th></tr>
-    {% for r in data.channels %}<tr><td>{{ r.label }}</td><td>{{ r.subscribers }}</td><td>{{ r.paying }}</td><td>{{ r.activated }}</td>
+    <tr><th>Channel</th><th>Visitors (GA4)</th><th>Leads (GA4)</th><th>Subscribers</th><th>Lead → sub</th><th>Paying</th><th>Activated</th><th>Activation</th><th>Net revenue</th><th>LTV</th><th>Churned</th><th>Spend · CAC · ROAS</th></tr>
+    {% for r in data.channels %}{% set g = ga.channels.get(r.channel) if ga else none %}<tr><td>{{ r.label }}</td>
+      <td>{{ '{:,.0f}'.format(g.users) if g else '—' }}</td><td>{{ '{:,.0f}'.format(g.leads) if g else '—' }}</td><td>{{ r.subscribers }}</td>
+      <td>{{ '%.1f%%'|format(100 * r.subscribers / g.leads) if g and g.leads else '—' }}</td><td>{{ r.paying }}</td><td>{{ r.activated }}</td>
       <td>{{ '%s%%'|format(r.activation_rate) if r.activation_rate is not none else '—' }}</td><td>${{ '%.2f'|format(r.net_revenue) }}</td>
-      <td>{{ '$%.2f'|format(r.ltv) if r.ltv is not none else '—' }}</td><td>{{ r.churned }}</td><td class="muted">GA4 · GHL · —</td></tr>{% endfor %}
+      <td>{{ '$%.2f'|format(r.ltv) if r.ltv is not none else '—' }}</td><td>{{ r.churned }}</td><td class="muted">No spend data</td></tr>{% endfor %}
   </table></div>
   {% else %}<p>No subscribers match these filters yet.</p>{% endif %}
+  {% if ga and ga.channels %}<p class="muted">GA4 visitors by first channel (all, including those who never subscribed): {% for k, v in ga.channels.items() %}{{ channels.get(k, k) }} {{ '{:,.0f}'.format(v.users) }}{{ ' · ' if not loop.last }}{% endfor %}.</p>{% endif %}
   <p class="muted">"Unknown" = no acquisition data reached the activation app (bought on Whop directly, another browser, or storage blocked). It is never guessed.</p>
 </section>
 
@@ -70,20 +80,25 @@
   <div class="scroll"><table><tr><th>Landing page</th><th>Subscribers</th><th>Paying</th><th>Activated</th><th>Net revenue</th></tr>
     {% for r in data.landing_rows %}<tr><td>{{ r.landing }}</td><td>{{ r.subscribers }}</td><td>{{ r.paying }}</td><td>{{ r.activated }}</td><td>${{ '%.2f'|format(r.net_revenue) }}</td></tr>{% endfor %}
   </table></div>{% else %}<p>No data yet.</p>{% endif %}
+  {% if ga and ga.landing %}<h3>Landing pages in GA4 (all visitors)</h3>
+  <div class="scroll"><table><tr><th>Landing page</th><th>Sessions</th><th>Users</th><th>Key events</th></tr>
+    {% for r in ga.landing %}<tr><td>{{ r.page }}</td><td>{{ '{:,.0f}'.format(r.sessions) }}</td><td>{{ '{:,.0f}'.format(r.users) }}</td><td>{{ '{:,.0f}'.format(r.key_events) }}</td></tr>{% endfor %}
+  </table></div>{% endif %}
 </section>
 
 <section class="card">
   <h2>Customer funnel</h2>
   <div class="scroll"><table><tr><th>Stage</th><th>Count</th><th>Source</th></tr>
-    <tr><td>Website visitor</td><td>—</td><td>GA4: Reports → Acquisition</td></tr>
-    <tr><td>Free tool engagement</td><td>—</td><td>GA4 events <code>tool_use</code>, <code>calculation_complete</code></td></tr>
-    <tr><td>Email signup</td><td>—</td><td>GA4 <code>generate_lead</code> / GoHighLevel Form 7</td></tr>
-    <tr><td>Membership offer click</td><td>—</td><td>GA4 <code>select_promotion</code></td></tr>
-    <tr><td>Checkout initiated</td><td>—</td><td>GA4 <code>begin_checkout</code></td></tr>
+    <tr><td>Website visitor</td><td>{{ '{:,.0f}'.format(ga.totals.users) if ga else '—' }}</td><td>GA4 users</td></tr>
+    <tr><td>Free tool engagement</td><td>{{ '{:,.0f}'.format(ga.funnel.get('tool_use', 0)) if ga else '—' }}</td><td>GA4 <code>tool_use</code> (calculations completed: {{ '{:,.0f}'.format(ga.funnel.get('calculation_complete', 0)) if ga else '—' }})</td></tr>
+    <tr><td>TradingView indicator clicks</td><td>{{ '{:,.0f}'.format(ga.funnel.get('tradingview_click', 0)) if ga else '—' }}</td><td>GA4 <code>tradingview_click</code></td></tr>
+    <tr><td>Email signup</td><td>{{ '{:,.0f}'.format(ga.funnel.get('generate_lead', 0)) if ga else '—' }}</td><td>GA4 <code>generate_lead</code> (successful Form 7 submissions)</td></tr>
+    <tr><td>Membership offer click</td><td>{{ '{:,.0f}'.format(ga.funnel.get('select_promotion', 0)) if ga else '—' }}</td><td>GA4 <code>select_promotion</code></td></tr>
+    <tr><td>Checkout initiated</td><td>{{ '{:,.0f}'.format(ga.funnel.get('begin_checkout', 0)) if ga else '—' }}</td><td>GA4 <code>begin_checkout</code> (embedded checkout viewed)</td></tr>
     <tr><td>Subscription created</td><td>{{ t.subscribers }}</td><td>Verified (Whop)</td></tr>
     <tr><td>NinjaTrader linked</td><td>{{ t.linked }}</td><td>Verified (activation)</td></tr>
     <tr><td>Indicators licensed / customer activated</td><td>{{ t.activated }}</td><td>Verified (NinjaTrader licensing)</td></tr>
-    <tr><td>Product downloaded</td><td>—</td><td>GA4 <code>file_download</code></td></tr>
+    <tr><td>Product downloaded</td><td>{{ '{:,.0f}'.format(ga.funnel.get('file_download', 0)) if ga else '—' }}</td><td>GA4 <code>file_download</code></td></tr>
   </table></div>
 </section>
 {% endblock %}

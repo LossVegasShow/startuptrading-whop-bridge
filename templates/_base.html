@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#07090d">
 <title>{% block title %}Activate your indicators{% endblock %} · StartUpTrading</title>
 <link rel="stylesheet" href="/static/site.css">
+{% if analytics_gtm %}<script src="/static/gtm.js" data-gtm="{{ analytics_gtm }}"></script>{% endif %}
 </head>
 <body>
 <div class="shell{% block shell_class %}{% endblock %}">

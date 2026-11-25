@@ -3,6 +3,7 @@ Works with a Whop link and verified buyer email; embedded Whop SSO adapter is NO
 """
 import asyncio,hashlib,hmac,json,os,secrets, smtplib,ssl,time,base64
 import datetime as dt
+import re
 from urllib.parse import urlencode
 import httpx
 from email.message import EmailMessage
@@ -10,7 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from fastapi import FastAPI, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse,RedirectResponse,JSONResponse
+from fastapi.responses import FileResponse,HTMLResponse,RedirectResponse,JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from config import Config,INDICATORS,EVENTS,PLANS
@@ -31,6 +32,7 @@ import customer_errors
 import email_templates
 import controls
 import acquisition
+import ga4_data
 
 cfg=Config(); engine=Engine(cfg)
 ROOT=Path(__file__).parent
@@ -126,7 +128,10 @@ def site_links():
             'affiliate':cfg.affiliate_url or 'https://ninjatrader.com/'}
 
 def page(request,template,status_code=200,**kw):
-    return templates.TemplateResponse(request,template,{'site':site_links(),**kw},status_code=status_code)
+    # GTM only on customer-facing pages: never on admin pages.
+    gtm=cfg.gtm_container_id if re.fullmatch(r'GTM-[A-Z0-9]{4,12}',cfg.gtm_container_id or '') and \
+        not request.url.path.startswith('/admin') else ''
+    return templates.TemplateResponse(request,template,{'site':site_links(),'analytics_gtm':gtm,**kw},status_code=status_code)
 
 def render_error(request,key,status):
     title,body,action=customer_errors.MESSAGES[key]
@@ -161,6 +166,8 @@ async def event_worker():
                 lifecycle_emails.schedule_reminders(db)
             await process_pending(cfg)
             try:await acquisition.refresh_payments(cfg,connect)
+            except Exception:pass
+            try:await acquisition.ga_sync(cfg,connect)
             except Exception:pass
             with connect(cfg) as db:issues=attention.find_issues(db,cfg)
             await alerts.notify(cfg,lambda:connect(cfg),issues)
@@ -208,7 +215,12 @@ async def secure_headers(request,call_next):
     resp=await call_next(request)
     resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='same-origin'
     resp.headers['X-Content-Type-Options']='nosniff';resp.headers['X-Frame-Options']='DENY'
-    resp.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # Google Tag Manager / GA4 hosts are allowed only when a container is configured.
+    g=bool(cfg.gtm_container_id) and not request.url.path.startswith('/admin')
+    gs=' https://www.googletagmanager.com' if g else ''
+    gc=' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com' if g else ''
+    resp.headers['Content-Security-Policy']=(f"default-src 'self'; img-src 'self' data:{gs}{' https://*.google-analytics.com' if g else ''}; "
+        f"style-src 'self'; script-src 'self'{gs}; connect-src 'self'{gc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
     resp.headers['Permissions-Policy']='camera=(), microphone=(), geolocation=(), payment=()'
     if cfg.public_base_url.startswith('https://'):
         # Tell browsers to only ever use HTTPS for this host (not subdomains).
@@ -551,8 +563,12 @@ async def oauth_callback(request:Request,code:str='',state:str='',error:str=''):
             cid=cur.lastrowid
         request_crm_sync(db,cid)
         # How this buyer found us, if the activation link carried it. Never overwrites.
-        if acquisition.record_attribution(db,membership_id,cid,acquisition.read_cookie(request.cookies.get(acquisition.ATTR_COOKIE))):
+        handoff=acquisition.read_cookie(request.cookies.get(acquisition.ATTR_COOKIE))
+        if acquisition.record_attribution(db,membership_id,cid,handoff):
             audit(db,cid,'attribution_captured','activation link')
+        # The buyer's GA4 client id, so verified server events join their GA4 journey.
+        gcid=acquisition.ga_client_from_cookie(request.cookies.get('_ga')) or handoff.get('ga_client_id','')
+        acquisition.record_ga_client(db,membership_id,gcid,'ga_cookie' if request.cookies.get('_ga') else 'handoff')
         # Whop states the email is verified; otherwise the existing buyer-email code remains required.
         if person.get('email_verified') is True and not row:
             audit(db,cid,'whop_verified_identity','OAuth userinfo and eligible membership')
@@ -819,7 +835,7 @@ def _day(v,default=None):
     except ValueError:return default
 
 @app.get('/admin/marketing',response_class=HTMLResponse)
-def admin_marketing(request:Request,start:str='',end:str='',basis:str='first',channel:str='',campaign:str='',
+async def admin_marketing(request:Request,start:str='',end:str='',basis:str='first',channel:str='',campaign:str='',
                     landing:str='',affiliate:str='',traffic:str=''):
     require_admin(request,cfg.admin_password,cfg.public_base_url)
     basis='last' if basis=='last' else 'first'
@@ -828,9 +844,16 @@ def admin_marketing(request:Request,start:str='',end:str='',basis:str='first',ch
         data=acquisition.report(cfg,db,start=s0,end=(e0+86400 if e0 else None),basis=basis,
                               channel=channel if channel in acquisition.CHANNELS else '',campaign=campaign[:120],
                               landing=landing[:120],affiliate=affiliate[:64],traffic=traffic if traffic in ('paid','organic') else '')
-    return page(request,'admin_marketing.html',data=data,channels=acquisition.CHANNELS,
+    # GA4 (visitors, leads, funnel): only when connected, cached; never estimated.
+    ga=None;ga_error='GA4 Data API not configured (GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_JSON)'
+    if ga4_data.configured(cfg):
+        try:ga=await ga4_data.cached(cfg,connect,start if s0 else '30daysAgo',end if e0 else 'today');ga_error=''
+        except ga4_data.GA4Unavailable as exc:ga_error=str(exc)[:200]
+        except Exception as exc:ga_error='GA4 request failed: '+type(exc).__name__
+    return page(request,'admin_marketing.html',data=data,channels=acquisition.CHANNELS,ga=ga,ga_error=ga_error,
                 f={'start':start,'end':end,'basis':basis,'channel':channel,'campaign':campaign,'landing':landing,
-                   'affiliate':affiliate,'traffic':traffic},ga4=cfg.ga4_property_url)
+                   'affiliate':affiliate,'traffic':traffic},ga4=cfg.ga4_property_url,
+                ga_mp=bool(cfg.ga4_measurement_id and cfg.ga4_api_secret))
 
 @app.get('/admin/campaign-links',response_class=HTMLResponse)
 def admin_campaign_links(request:Request):

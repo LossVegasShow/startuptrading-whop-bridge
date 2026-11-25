@@ -1,0 +1,31 @@
+{
+  "_comment": "Single source of truth for what the membership delivers. Read by config.py (licensing) and sales-site/build.py (/setup). NinjaTrader product IDs are the vendor-portal IDs. The product files are proprietary and are NEVER committed (this repository is public): host them outside GitHub (for example GoHighLevel Media) and put each link in download_url. sha256 lets anyone verify the hosted file.",
+  "products": [
+    {
+      "id": 2067,
+      "name": "ATR Order Automation",
+      "ninjatrader_name": "SUT ATR Orders",
+      "ninjatrader_location": "Strategies, StartupTrading folder",
+      "file": "SUT_ATR_Orders_2026.zip",
+      "sha256": "3b4bd91241e91b9c2c7b47b60f0c0517881e0e5fffe5781df4cf02c1a642fe18",
+      "exported_with": "NinjaTrader 8.1.8.1",
+      "download_url": ""
+    },
+    {
+      "id": 2071,
+      "name": "Trend Scanner & Market Selector",
+      "ninjatrader_name": "StartupTrading Scanner",
+      "ninjatrader_location": "Indicators, StartupTrading folder",
+      "file": "StartupTrading_Tools_Scanner_2026.zip",
+      "sha256": "23c080c0ee037ca91fee7aa8325e0daa7cad6e5aef6ff2399f3af09e81a3d780",
+      "exported_with": "NinjaTrader 8.1.8.4",
+      "download_url": ""
+    }
+  ],
+  "retired": [
+    {
+      "id": 2205,
+      "name": "TSMS & Fibs"
+    }
+  ]
+}

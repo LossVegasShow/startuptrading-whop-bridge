@@ -260,10 +260,9 @@ def test_setup_page_is_the_indicator_setup_url_and_sells_nothing():
 
 
 def test_setup_download_placeholder_until_a_link_is_set():
-    _, embed, _ = setup_page(setup_download_url='')
-    assert 'Download link goes here' in embed and 'Download the tools <span' not in embed
-    _, embed, _ = setup_page(setup_download_url='https://example.com/sut-tools.zip')
-    assert 'href="https://example.com/sut-tools.zip"' in embed and 'Download link goes here' not in embed
+    _, embed, _ = setup_page()
+    # No download_url in products.json yet: placeholders, never a dead link.
+    assert 'Download link goes here' in embed and 'data-download=' not in embed
 
 
 def test_setup_copy_passes_marketing_compliance():

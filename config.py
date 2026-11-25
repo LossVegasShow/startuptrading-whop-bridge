@@ -8,12 +8,18 @@ PLANS = {
     'plan_qSXeS0xoDapGU': 'Monthly · $99',
     'plan_B84PWLvXemyFX': 'Annual · $495'
 }
-# The NinjaTrader indicators the membership licenses. The membership also
+# What the membership delivers comes from products.json (the single source of
+# truth, also used by the /setup page). The membership also
 # includes the Discord and the masterclass, which Whop grants directly.
-INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner & Market Selector'}
+import json as _json
+_REGISTRY = _json.loads((Path(__file__).resolve().parent / 'products.json').read_text())
+# Product id -> its entry: name, NinjaTrader name and location, file, sha256.
+PRODUCTS = {int(p['id']): p for p in _REGISTRY['products']}
+# The NinjaTrader products the membership licenses: id -> customer-facing name.
+INDICATORS = {pid: p['name'] for pid, p in PRODUCTS.items()}
 # No longer part of the membership. Licenses the bridge itself issued for these
 # are switched off on the next sync; licenses it didn't issue are never touched.
-RETIRED_INDICATORS = {2205:'TSMS & Fibs'}
+RETIRED_INDICATORS = {int(p['id']): p['name'] for p in _REGISTRY['retired']}
 EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_period_end_changed','membership.updated','payment.succeeded','payment.failed'}
 
 @dataclass
@@ -91,6 +97,15 @@ class Config:
     marketing_exclude_emails: str = os.getenv('MARKETING_EXCLUDE_EMAILS','')
     # Optional: the site's own GA4 property, shown on the marketing dashboard as a link.
     ga4_property_url: str = os.getenv('GA4_PROPERTY_URL','')
+    # Google Tag Manager on the activation app's customer pages (never /admin).
+    gtm_container_id: str = os.getenv('GTM_CONTAINER_ID','').strip()
+    # GA4 Measurement Protocol: verified server events (purchase, refund, activation).
+    ga4_measurement_id: str = os.getenv('GA4_MEASUREMENT_ID','').strip()
+    ga4_api_secret: str = os.getenv('GA4_API_SECRET','').strip()
+    # GA4 Data API for the marketing dashboard: numeric property ID + a service
+    # account (JSON, raw or base64) with Viewer access on the property.
+    ga4_property_id: str = os.getenv('GA4_PROPERTY_ID','').strip()
+    ga4_service_account_json: str = os.getenv('GA4_SERVICE_ACCOUNT_JSON','')
 
     def write_allowlist(self):
         """Set of (membership_id, casefolded email) pairs that may receive license writes."""

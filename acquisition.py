@@ -41,7 +41,10 @@ PAID_MEDIUMS = {'cpc', 'ppc', 'paid', 'paidsearch', 'paid_search', 'paidsocial',
 HANDOFF = {'vid': 'visitor_id', 'fs': 'first_source', 'fm': 'first_medium', 'fc': 'first_campaign',
            'fx': 'first_content', 'fch': 'first_channel', 'fl': 'first_landing', 'ft': 'first_at',
            'ls': 'last_source', 'lm': 'last_medium', 'lc': 'last_campaign', 'lx': 'last_content',
-           'lch': 'last_channel', 'aff': 'affiliate'}
+           'lch': 'last_channel', 'aff': 'affiliate', 'gcid': 'ga_client_id'}
+# Columns of customer_attribution (ga_client_id lives in ga_clients).
+ATTR_COLS = [c for c in HANDOFF.values() if c != 'ga_client_id']
+GA_CLIENT = re.compile(r'\d{4,12}\.\d{6,12}')
 _SAFE = re.compile(r'^[A-Za-z0-9 _.,:/()+\-%]{1,120}$')
 
 ATTR_COOKIE = 'sut_attr'
@@ -55,6 +58,8 @@ def parse_handoff(params):
         if not v or not _SAFE.match(v) or '@' in v:
             continue
         if col == 'visitor_id' and not re.fullmatch(r'[a-f0-9]{16,32}', v):
+            continue
+        if col == 'ga_client_id' and not GA_CLIENT.fullmatch(v):
             continue
         if col.endswith('_channel') and v not in CHANNELS:
             continue
@@ -86,11 +91,28 @@ def record_attribution(db, membership_id, customer_id, data, method='activation_
     attribution captured for a membership is its original acquisition."""
     if not data or not str(membership_id).startswith('mem_'):
         return False
-    cols = [c for c in HANDOFF.values() if c in data]
+    cols = [c for c in ATTR_COLS if c in data]
+    if not cols:
+        return False
     vals = [data[c] for c in cols]
     sql = (f"INSERT INTO customer_attribution(membership_id,customer_id,{','.join(cols)},method,captured_at) "
            f"VALUES(?,?,{','.join('?' * len(cols))},?,?) ON CONFLICT(membership_id) DO NOTHING")
     cur = db.execute(sql, (membership_id, customer_id, *vals, method, now or int(time.time())))
+    return cur.rowcount == 1
+
+
+def ga_client_from_cookie(raw):
+    """GA4's client id from the _ga cookie (shared across *.startuptrading.com)."""
+    m = re.fullmatch(r'GA\d\.\d\.(\d{4,12}\.\d{6,12})', str(raw or '').strip())
+    return m.group(1) if m else ''
+
+
+def record_ga_client(db, membership_id, client_id, source, now=None):
+    """The GA4 client id for a membership, kept once (the buyer's browser at activation)."""
+    if not client_id or not GA_CLIENT.fullmatch(client_id) or not str(membership_id).startswith('mem_'):
+        return False
+    cur = db.execute('INSERT INTO ga_clients(membership_id,client_id,source,captured_at) VALUES(?,?,?,?) '
+                     'ON CONFLICT(membership_id) DO NOTHING', (membership_id, client_id, source[:30], now or int(time.time())))
     return cur.rowcount == 1
 
 
@@ -309,3 +331,118 @@ def report(cfg, db, start=None, end=None, basis='first', channel='', campaign=''
                                 {a.get('last_campaign') for a in attribution.values() if a.get('last_campaign')}),
             'landings': sorted({a.get('first_landing') for a in attribution.values() if a.get('first_landing')}),
             'affiliates': sorted({a.get('affiliate') for a in attribution.values() if a.get('affiliate')})}
+
+
+# --- GA4 Measurement Protocol: verified server events --------------------------------
+# Purchases, refunds and activation milestones are sent from here, never from the
+# browser, so a page reload or a shared /welcome link can't create a conversion.
+# Each event is sent once (ga_events_sent), without personal data, and never for
+# QA memberships. A buyer whose GA4 client id never reached us is still counted,
+# after 72 hours, under a stable anonymous id (GA4 then reports it as unattributed).
+
+MP_URL = 'https://www.google-analytics.com/mp/collect'
+
+
+def _excluded_memberships(cfg, customers):
+    excl_mem, excl_email = _csv(cfg.marketing_exclude_memberships), _csv(cfg.marketing_exclude_emails)
+    out = {m for m in excl_mem if m.startswith('mem_')}
+    for c in customers:
+        if c['membership_id'].lower() in excl_mem or (c['buyer_email'] or '').lower() in excl_email \
+                or (c['nt_email'] or '').lower() in excl_email:
+            out.add(c['membership_id'])
+    return out
+
+
+def _anon_client(mem):
+    import hashlib
+    h = int(hashlib.sha256(('sut:' + mem).encode()).hexdigest()[:15], 16)
+    return f'{h % 10**10}.{1700000000 + h % 10**8}'
+
+
+def pending_ga_events(cfg, db, now=None):
+    """[(event_key, client_id, event, timestamp)] not yet sent."""
+    now = now or int(time.time())
+    from config import PLANS
+    sent = {r['event_key'] for r in db.execute('SELECT event_key FROM ga_events_sent')}
+    customers = [dict(r) for r in db.execute('SELECT id,membership_id,buyer_email,nt_email,verified,status FROM customers')]
+    excluded = _excluded_memberships(cfg, customers)
+    clients = {r['membership_id']: r['client_id'] for r in db.execute('SELECT membership_id,client_id FROM ga_clients')}
+    channel = {r['membership_id']: r['first_channel'] for r in db.execute('SELECT membership_id,first_channel FROM customer_attribution')}
+    out = []
+
+    def client_for(mem, since):
+        if mem in clients:
+            return clients[mem]
+        return _anon_client(mem) if since and now - since > 72 * 3600 else None
+
+    by_mem = {}
+    for p in db.execute("SELECT * FROM payments WHERE status='paid' AND total>0 AND membership_id IS NOT NULL"):
+        by_mem.setdefault(p['membership_id'], []).append(dict(p))
+    for mem, pays in by_mem.items():
+        if mem in excluded:
+            continue
+        for n, p in enumerate(sorted(pays, key=lambda p: p['paid_at'] or p['created_at'] or '')):
+            paid_ts = _ts(p['paid_at'] or p['created_at'])
+            client = client_for(mem, paid_ts or p['received_at'])
+            if not client:
+                continue
+            value = p['usd_total'] if p['usd_total'] is not None else p['total']
+            currency = 'USD' if p['usd_total'] is not None else str(p['currency'] or 'usd').upper()
+            ts = paid_ts if paid_ts and now - paid_ts < 71 * 3600 else None
+            key = 'purchase:' + p['id']
+            if key not in sent:
+                out.append((key, client, {'name': 'purchase', 'params': {
+                    'transaction_id': p['id'], 'value': value, 'currency': currency, 'affiliation': 'whop',
+                    'coupon': p['promo_code_id'] or '', 'purchase_type': 'renewal' if n else 'initial',
+                    'acquisition_channel': channel.get(mem) or 'unknown', 'engagement_time_msec': 1,
+                    'items': [{'item_id': p['plan_id'] or 'membership', 'item_name': PLANS.get(p['plan_id'], 'StartUpTrading membership'),
+                               'price': value, 'quantity': 1}]}}, ts))
+            refunded = p['refunded_amount'] or 0
+            key = f'refund:{p["id"]}:{refunded:.2f}'
+            if refunded > 0 and key not in sent:
+                out.append((key, client, {'name': 'refund', 'params': {
+                    'transaction_id': p['id'], 'value': refunded, 'currency': currency, 'engagement_time_msec': 1}}, None))
+    licensed = {}
+    for r in db.execute('SELECT customer_id, product_id, license_id, state FROM licenses'):
+        if int(r['product_id']) in INDICATORS and (r['license_id'] or r['state'] == 'owned_separately') \
+                and r['state'] not in ('expired', 'already_expired', 'absent'):
+            licensed.setdefault(r['customer_id'], set()).add(int(r['product_id']))
+    for c in customers:
+        mem = c['membership_id']
+        if mem in excluded or c['status'] == 'transferred' or mem not in clients:
+            continue
+        base = {'acquisition_channel': channel.get(mem) or 'unknown', 'engagement_time_msec': 1}
+        if c['verified'] and 'linked:' + mem not in sent:
+            out.append(('linked:' + mem, clients[mem], {'name': 'ninjatrader_linked', 'params': dict(base)}, None))
+        if licensed.get(c['id']) == set(INDICATORS) and 'activated:' + mem not in sent:
+            out.append(('activated:' + mem, clients[mem], {'name': 'activation_complete', 'params': dict(base)}, None))
+        if c['status'] == 'ineligible' and c['verified'] and 'cancel:' + mem not in sent:
+            out.append(('cancel:' + mem, clients[mem], {'name': 'subscription_cancel', 'params': dict(base)}, None))
+    return out
+
+
+async def ga_sync(cfg, connect, now=None, post=None, limit=50):
+    """Send pending verified events to GA4. Needs GA4_MEASUREMENT_ID + GA4_API_SECRET."""
+    if not (cfg.ga4_measurement_id and cfg.ga4_api_secret):
+        return 0
+    with connect(cfg) as db:
+        events = pending_ga_events(cfg, db, now)[:limit]
+    if not events:
+        return 0
+    url = f'{MP_URL}?measurement_id={quote(cfg.ga4_measurement_id)}&api_secret={quote(cfg.ga4_api_secret)}'
+    sent = 0
+    async with httpx.AsyncClient(timeout=10) as client:
+        for key, client_id, event, ts in events:
+            body = {'client_id': client_id, 'non_personalized_ads': True, 'events': [event]}
+            if ts:
+                body['timestamp_micros'] = int(ts) * 1_000_000
+            try:
+                r = await (post(url, body) if post else client.post(url, json=body))
+            except httpx.HTTPError:
+                break
+            if 200 <= r.status_code < 300:
+                with connect(cfg) as db:
+                    db.execute('INSERT INTO ga_events_sent(event_key,sent_at) VALUES(?,?) ON CONFLICT(event_key) DO NOTHING',
+                               (key, int(time.time())))
+                sent += 1
+    return sent

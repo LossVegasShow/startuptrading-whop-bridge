@@ -430,12 +430,27 @@
   .sut-sub-form:not([data-sut-sized]) { min-height: 600px; }
 }
 
+/* /setup: product downloads (from products.json) */
+.sut-downloads { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.sut-downloads li { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.sut-downloads b { color: var(--text); font-weight: 600; }
+.sut-downloads span { grid-column: 1; color: var(--muted); font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 2; grid-row: 1 / span 2; }
+.sut-list-plain { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); }
+.sut-list-plain li { margin: 6px 0; }
+@media (max-width: 640px) {
+  .sut-downloads li { grid-template-columns: 1fr; }
+  .sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 1; grid-row: auto; justify-self: stretch; margin-top: 8px; }
+  .sut .sut-downloads .sut-btn { white-space: normal; max-width: 100%; text-align: center; justify-content: center; }
+}
+
 </style>
 <div class="sut" id="top" data-page="setup">
 <!-- StartUpTrading install guide (GHL path /setup). INDICATOR_SETUP_URL in Render
      points here, so the "your tools are ready" email links to this page.
      Built by sales-site/build.py; edit src/, not dist/. Boxes with class "sut-ph"
-     are placeholders for Jack's download link and screenshots. -->
+     are placeholders for screenshots. Products, files and NinjaTrader names come
+     from ../products.json. -->
 
 <header class="sut-nav">
   <div class="sut-wrap sut-nav-in">
@@ -470,7 +485,7 @@
         <span class="sut-next-n">01</span>
         <div>
           <h3>Check the basics</h3>
-          <p>NinjaTrader&nbsp;8 on a Windows computer, signed in with the NinjaTrader account whose email you confirmed during activation. Your licenses are tied to that account.</p>
+          <p>NinjaTrader&nbsp;8 (version 8.1.8 or later) on a Windows computer, signed in with the NinjaTrader account whose email you confirmed during activation. Your licenses are tied to that account.</p>
           <a class="sut-btn sut-btn-ghost" href="https://activate.startuptrading.com/">Check my activation status <span class="sut-arrow" aria-hidden="true">→</span></a>
         </div>
       </li>
@@ -478,16 +493,15 @@
         <span class="sut-next-n">02</span>
         <div>
           <h3>Download the tools</h3>
-          <p>Download the StartUpTrading tools file. Keep it as a .zip and don't unzip it: NinjaTrader imports the .zip directly.</p>
-          
-          <div class="sut-ph sut-ph-text"><strong>Download link goes here</strong><small>Jack: add the download location for the tools file (setup_download_url in site.config.json).</small></div>
+          <p>Download both files. Keep them as .zip files and don't unzip them: NinjaTrader imports the .zip directly.</p>
+          <ul class="sut-downloads"><li><b>ATR Order Automation</b><span>SUT_ATR_Orders_2026.zip</span><div class="sut-ph sut-ph-text"><strong>Download link goes here</strong><small>Set download_url for this product in products.json.</small></div></li><li><b>Trend Scanner &amp; Market Selector</b><span>StartupTrading_Tools_Scanner_2026.zip</span><div class="sut-ph sut-ph-text"><strong>Download link goes here</strong><small>Set download_url for this product in products.json.</small></div></li></ul>
         </div>
       </li>
       <li>
         <span class="sut-next-n">03</span>
         <div>
           <h3>Import into NinjaTrader</h3>
-          <p>In the NinjaTrader Control Center, open <b>Tools → Import → NinjaScript Add-On…</b>, choose the .zip you downloaded and click <b>OK</b>. When the import finishes, restart NinjaTrader.</p>
+          <p>In the NinjaTrader Control Center, open <b>Tools → Import → NinjaScript Add-On…</b>, choose the first .zip and click <b>OK</b>. Repeat for the second file, then restart NinjaTrader.</p>
           <div class="sut-ph sut-ph-text"><strong>Screenshot: the Import menu</strong><small>Optional: Control Center → Tools → Import → NinjaScript Add-On.</small></div>
         </div>
       </li>
@@ -495,7 +509,8 @@
         <span class="sut-next-n">04</span>
         <div>
           <h3>Add them to a chart</h3>
-          <p>Open a chart, right-click it and choose <b>Indicators…</b>. Find <b>ATR Order Automation</b> and <b>Trend Scanner &amp; Market Selector</b>, add them and click <b>OK</b>.</p>
+          <p>Open a chart (for example ES or NQ), then:</p>
+          <ul class="sut-list-plain"><li><b>ATR Order Automation</b>: right-click the chart, choose <b>Strategies…</b>, open the <b>StartupTrading</b> folder and add <b>SUT ATR Orders</b>.</li><li><b>Trend Scanner &amp; Market Selector</b>: right-click the chart, choose <b>Indicators…</b>, open the <b>StartupTrading</b> folder and add <b>StartupTrading Scanner</b>.</li></ul>
           <div class="sut-ph sut-ph-text"><strong>Screenshot: both tools on a chart</strong><small>Jack: confirm where each tool appears in NinjaTrader and add a screenshot.</small></div>
         </div>
       </li>
@@ -512,7 +527,7 @@
     </div>
     <div class="sut-faq">
       <details><summary>A tool says it isn't licensed</summary><p>Restart NinjaTrader once. Then check you're signed in to NinjaTrader with the same email you confirmed during activation, and that <a href="https://activate.startuptrading.com/">your activation status</a> shows your tools as active.</p></details>
-      <details><summary>I can't find a tool after importing</summary><p>Restart NinjaTrader, then look again in the chart's Indicators list. If it still isn't there, import the .zip again and contact support.</p></details>
+      <details><summary>I can't find a tool after importing</summary><p>Restart NinjaTrader, then look in the <b>StartupTrading</b> folder: ATR Order Automation is under the chart's <b>Strategies</b> list and the Trend Scanner under <b>Indicators</b>. If it still isn't there, import the .zip again and contact support.</p></details>
       <details><summary>The import shows an error</summary><p>Make sure you're importing the .zip itself (not an unzipped folder) and that NinjaTrader&nbsp;8 is up to date. Then try again, or contact support with a screenshot of the message.</p></details>
       <details><summary>Can I use the tools on another computer?</summary><p>Yes. Install NinjaTrader&nbsp;8, sign in with the same NinjaTrader account and repeat steps 2–4. The licenses follow your account.</p></details>
       <details><summary>I want to use a different NinjaTrader account</summary><p>Contact support first. We move your licenses safely, so don't buy a second membership.</p></details>
@@ -779,6 +794,14 @@ function sutAttribution(stored, touch, ownHost, now) {
   return o;
 }
 
+// GA4's client id from its _ga cookie ("GA1.1.<random>.<timestamp>"), or ''.
+// Lets the licensing app send verified server events (purchase, activation) to
+// the same GA4 user. Not personal data: a random number GA itself creates.
+function sutGaClientId(cookie) {
+  var m = /(?:^|;\s*)_ga=GA\d\.\d\.(\d{4,12}\.\d{6,12})(?:;|$)/.exec(cookie || '');
+  return m ? m[1] : '';
+}
+
 // The latest qualifying touch, falling back to the first (which may be direct or unknown).
 function sutLatest(attr) {
   return (attr && (attr.last || attr.first)) || null;
@@ -810,12 +833,12 @@ function sutFormParams(attr, affiliate, page) {
 // so a Whop membership can be tied to how its buyer found us. Short keys, no
 // personal data: the anonymous visitor id, first and latest touch, landing page,
 // affiliate code.
-function sutHandoff(attr, affiliate, vid) {
+function sutHandoff(attr, affiliate, vid, gcid) {
   var first = (attr && attr.first) || {}, last = sutLatest(attr) || {};
   var map = { fs: first.utm_source, fm: first.utm_medium, fc: first.utm_campaign, fx: first.utm_content,
     fch: first.channel, fl: first.landing, ft: first.at ? String(first.at) : '',
     ls: last.utm_source, lm: last.utm_medium, lc: last.utm_campaign, lx: last.utm_content, lch: last.channel,
-    aff: affiliate, vid: vid };
+    aff: affiliate, vid: vid, gcid: gcid };
   var out = {};
   for (var k in map) if (map[k]) out['sut_' + k] = String(map[k]).slice(0, 120);
   return out;
@@ -857,6 +880,8 @@ function sutSizerHeight(data, iframeId) {
     return c === 'denied' ? null : w.localStorage;
   };
   w.sutConsent = function (state) {
+    var v = state === 'denied' ? 'denied' : 'granted';
+    if (typeof w.gtag === 'function') w.gtag('consent', 'update', { analytics_storage: v });
     try {
       w.localStorage.setItem('sut_consent', state === 'denied' ? 'denied' : 'granted');
       if (state === 'denied') { w.localStorage.removeItem(SUT_ATTR_KEY); w.localStorage.removeItem(SUT_VID_KEY); }
@@ -1031,7 +1056,7 @@ function sutSizerHeight(data, iframeId) {
       });
     }
     // Links to the activation app carry the anonymous attribution (see sutHandoff).
-    var handoff = sutHandoff(attr, w.SUT_AFFILIATE, w.SUT_VISITOR);
+    var handoff = sutHandoff(attr, w.SUT_AFFILIATE, w.SUT_VISITOR, sutGaClientId(d.cookie));
     var acts = d.querySelectorAll('a[href]');
     for (var h = 0; h < acts.length; h++) {
       try {
