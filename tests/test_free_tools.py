@@ -130,16 +130,55 @@ def test_no_internal_links_to_unknown_pages():
 
 # --- Optional sign-up ---------------------------------------------------------------
 
+FORM = 'https://api.leadconnectorhq.com/widget/form/TEST123'
+
+
 def test_signup_absent_until_configured_and_never_required():
     for name in ('free_tools', 'tv_atr', 'calculator'):
         assert 'id="subscribe"' not in page(name, ghl_subscribe_form_url=''), name
-    form = 'https://api.leadconnectorhq.com/widget/form/TEST123'
-    embed = page('tv_atr', ghl_subscribe_form_url=form)
-    assert f'src="{form}?source_page=tv_atr&amp;interest=tradingview"' in embed
-    assert 'never need an email' in embed and 'Unsubscribe anytime' in embed
+        # A URL that isn't a GHL form embed is ignored rather than rendered broken.
+        assert 'id="subscribe"' not in page(name, ghl_subscribe_form_url='https://example.com/x'), name
     # The calculator works without the form: its inputs are outside the sign-up section.
-    calc = page('calculator', ghl_subscribe_form_url=form)
+    calc = page('calculator', ghl_subscribe_form_url=FORM)
     assert calc.index('id="sut-size"') < calc.index('id="subscribe"')
+
+
+@pytest.mark.parametrize('name,interest,tool', [
+    ('free_tools', 'free-tools', 'free-tools-directory'),
+    ('tv_atr', 'tradingview', 'atr-position-size-planner'),
+    ('calculator', 'calculators', 'futures-position-size-calculator'),
+])
+def test_signup_embed_is_ghl_inline_form_with_attribution_hooks(name, interest, tool):
+    embed = page(name, ghl_subscribe_form_url=FORM)
+    section = re.search(r'<section[^>]*id="subscribe".*?</section>', embed, re.S).group(0)
+    iframe = re.search(r'<iframe[^>]*>', section).group(0)
+    # No src in the HTML: tracking.js adds the attribution parameters, then sets it once.
+    assert ' src=' not in iframe and f'data-sut-src="{FORM}"' in iframe
+    for attr in (f'data-source-page="{name}"', f'data-interest="{interest}"', f'data-tool-id="{tool}"',
+                 'id="inline-TEST123"', 'data-form-id="TEST123"', 'data-layout-iframe-id="inline-TEST123"',
+                 'data-cookie-consent="true"', 'data-cookie-consent-provider="auto"', 'data-ghl-form'):
+        assert attr in iframe, attr
+    # Lazy loading stops GoHighLevel's embed from ever showing the form.
+    assert 'loading="lazy"' not in iframe
+    # The form has its own headline and description: no second headline here.
+    assert '<h2' not in section and '<h3' not in section
+    assert 'works without an email' in section and 'Optional' in section
+    # Usable without JavaScript.
+    assert '<noscript>' in section and f'{FORM}?source_page={name}' in section
+    # GoHighLevel's script is loaded by tracking.js, never twice from the markup.
+    assert 'form_embed.js"></script>' not in embed
+
+
+def test_resource_template_gets_the_form():
+    b = load_build()
+    b.PAGES['resource_demo'] = ('_resource-template.html', 'x.html', 'x-embed.html', 'Demo resource', 'Demo.')
+    try:
+        cfg = dict(CFG, ghl_subscribe_form_url=FORM)
+        embed = b.render(cfg, 'resource_demo')[0]
+    finally:
+        del b.PAGES['resource_demo']
+    assert 'id="subscribe"' in embed and 'data-interest="education"' in embed
+    assert 'data-tool-id="RESOURCE_ID"' in embed
 
 
 # --- SEO ------------------------------------------------------------------------------
@@ -207,6 +246,37 @@ def test_attribution_first_and_last_touch(tmp_path):
     assert ref == {'at': 2, 'utm_source': 'youtube.com', 'utm_medium': 'referral'}
     assert internal is None and direct is None
     assert first_kept['first']['utm_source'] == 'tradingview' and first_kept['last']['utm_source'] == 'youtube.com'
+
+
+def test_form_params_carry_first_and_latest_touch(tmp_path):
+    params, empty = node_eval(tmp_path, """[
+      sutFormParams({first:{utm_source:'youtube',utm_medium:'social',utm_campaign:'risk_lab',utm_content:'s25',at:1},
+                     last:{utm_source:'tradingview',utm_medium:'social',at:2}}, 'jackaff',
+                    {source_page:'tv_atr', interest:'tradingview', tool_id:'atr-position-size-planner'}),
+      sutFormParams({}, '', {source_page:'calculator'})
+    ]""")
+    assert params == {
+        'source_page': 'tv_atr', 'interest': 'tradingview', 'tool_id': 'atr-position-size-planner',
+        'affiliate': 'jackaff',
+        'first_utm_source': 'youtube', 'first_utm_medium': 'social', 'first_utm_campaign': 'risk_lab',
+        'first_utm_content': 's25', 'last_utm_source': 'tradingview', 'last_utm_medium': 'social'}
+    # Standard utm_* keys are never overwritten: GoHighLevel's own attribution reads those.
+    assert not any(k.startswith('utm_') for k in params)
+    assert empty == {'source_page': 'calculator'}
+
+
+def test_only_ghl_success_message_counts_as_a_signup(tmp_path):
+    results = node_eval(tmp_path, """[
+      sutFormSubmitted(['set-sticky-contacts', 'embedded_iframe_inline-X', 'inline-X', 'loc', 'fp'], 'inline-X'),
+      sutFormSubmitted(['set-sticky-contacts', '_ud', '{}', 'loc', 'fp'], 'inline-X'),
+      sutFormSubmitted(['set-sticky-contacts', 'embedded_iframe_inline-Y', 'inline-Y'], 'inline-X'),
+      sutFormSubmitted(['iframeLoaded'], 'inline-X'),
+      sutFormSubmitted(['fetch-query-params', '', 'loc'], 'inline-X'),
+      sutFormSubmitted('[iFrameSizer]inline-X:519:390:init', 'inline-X'),
+      sutFormSubmitted({0: 'set-sticky-contacts', 1: 'embedded_iframe_inline-X'}, 'inline-X'),
+      sutFormSubmitted(['set-sticky-contacts', 'embedded_iframe_'], '')
+    ]""")
+    assert results == [True, False, False, False, False, False, False, False]
 
 
 # --- Flagship positioning: SEO spec (titles, descriptions, H1s, canonicals, author) ----

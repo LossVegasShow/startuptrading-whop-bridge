@@ -399,14 +399,20 @@
 .sut-related b { display: block; color: var(--text); font-weight: 600; }
 .sut-related span { display: block; color: var(--text-2); font-size: 14.5px; margin-top: 6px; }
 .sut-member-note { margin-top: 8px; }
-.sut-sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
-.sut-sub-form { width: 100%; min-height: 460px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.sut-sub { max-width: 720px; }
+.sut .sut-sub-note { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 16px; color: var(--text-2); font-size: 15px; }
+.sut-sub-note .sut-eyebrow { margin: 0; }
+/* The form draws its own dark card (styled in GoHighLevel to match: see
+   growth/FREE_TOOLS_LIBRARY.md section 4). This only reserves its space while it
+   loads; form_embed.js then sets the exact height. */
+.sut-sub-frame { position: relative; }
+.sut-sub-form { display: block; width: 100%; height: 540px; min-height: 519px; border: 0; background: transparent; }
 @media (max-width: 980px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr 1fr; }
-  .sut-sub { grid-template-columns: 1fr; gap: 24px; }
 }
 @media (max-width: 640px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr; }
+  .sut-sub-form { height: 660px; min-height: 600px; }
 }
 
 </style>
@@ -418,7 +424,7 @@
   <div class="sut-wrap sut-nav-in">
     <a class="sut-logo" href="https://startuptrading.com/" aria-label="StartUpTrading home"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>STARTUPTRADING</a>
     <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/free-tools">Free Tools</a></nav>
-    
+    <a class="sut-btn sut-btn-sm" href="#subscribe">Get updates</a>
   </div>
 </header>
 
@@ -433,7 +439,7 @@
 <section class="sut-section sut-tools-section">
   <div class="sut-wrap">
     <div class="sut-filters" role="group" aria-label="Filter tools" hidden><button type="button" class="sut-filter" data-filter="all" aria-pressed="true">All tools</button><button type="button" class="sut-filter" data-filter="tradingview" aria-pressed="false">TradingView</button><button type="button" class="sut-filter" data-filter="ninjatrader" aria-pressed="false">NinjaTrader</button><button type="button" class="sut-filter" data-filter="calculators" aria-pressed="false">Calculators</button><button type="button" class="sut-filter" data-filter="education" aria-pressed="false">Education</button></div>
-    <div class="sut-tools"><article class="sut-tool" data-categories="tradingview calculators" data-tool-id="atr-position-size-planner"><div class="sut-tool-top"><span class="sut-tool-platform">TradingView</span><span class="sut-tool-status is-soon">Coming soon to TradingView</span></div><h3>Futures Risk Planner for TradingView</h3><p>ATR position sizing, prop firm drawdown planning and a standard-vs-micro comparison, right on your TradingView chart.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/tradingview/atr-position-size-planner">See how it works <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="calculators" data-tool-id="futures-position-size-calculator"><div class="sut-tool-top"><span class="sut-tool-platform">Web: any browser</span><span class="sut-tool-status is-live">Free · no sign-up</span></div><h3>Futures Position Size Calculator</h3><p>Contracts for ES, NQ, MES, MNQ, CL, GC and more from your risk and stop, plus a prop-firm risk planner.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/futures-position-size-calculator">Open the calculator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="ninjatrader" data-tool-id="atr-expansion-bar"><div class="sut-tool-top"><span class="sut-tool-platform">NinjaTrader 8</span><span class="sut-tool-status is-live">Free download</span></div><h3>ATR Expansion Bar Indicator</h3><p>The ATR Expansion Bar and risk calculator Jack runs on his own NinjaTrader charts to size every trade.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/indicators">Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><p class="sut-tool-empty" data-empty-for="education" hidden>Education resources are on the way. Check back soon.</p></div>
+    <div class="sut-tools"><article class="sut-tool" data-categories="tradingview calculators" data-tool-id="atr-position-size-planner"><div class="sut-tool-top"><span class="sut-tool-platform">TradingView</span><span class="sut-tool-status is-soon">Coming soon to TradingView</span></div><h3>Futures Risk Planner for TradingView</h3><p>ATR position sizing, prop firm drawdown planning and a standard-vs-micro comparison, right on your TradingView chart.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/tradingview/atr-position-size-planner">See how it works <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="calculators" data-tool-id="futures-position-size-calculator"><div class="sut-tool-top"><span class="sut-tool-platform">Web: any browser</span><span class="sut-tool-status is-live">Free · no sign-up</span></div><h3>Futures Position Size Calculator</h3><p>Contracts for ES, NQ, MES, MNQ, CL, GC and more from your risk and stop, plus a prop-firm risk planner.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/futures-position-size-calculator">Open the calculator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><article class="sut-tool" data-categories="ninjatrader" data-tool-id="atr-expansion-bar"><div class="sut-tool-top"><span class="sut-tool-platform">NinjaTrader 8</span><span class="sut-tool-status is-live">Free download</span></div><h3>ATR Expansion Bar Indicator</h3><p>The ATR Expansion Bar and risk calculator Jack runs on his own NinjaTrader charts to size every trade.</p><div class="sut-tool-actions"><a class="sut-btn sut-btn-ghost" href="https://startuptrading.com/indicators">Get the free indicator <span class="sut-arrow" aria-hidden="true">→</span></a></div></article><p class="sut-tool-empty" data-empty-for="education" hidden>Education resources are on the way. <a href="#subscribe">Get notified</a> when they land.</p></div>
   </div>
 </section>
 
@@ -453,11 +459,11 @@
 
 <section class="sut-section">
   <div class="sut-wrap">
-    <aside class="sut-free sut-member-note"><div class="sut-free-copy"><p class="sut-eyebrow muted">Trade on NinjaTrader?</p><h3>The membership does this for you.</h3><p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, alongside the Trend Scanner &amp; Market Selector, Jack's trade room and masterclasses. Every new tool is included.</p><p class="sut-fine">Opening soon.</p></div></aside>
+    <aside class="sut-free sut-member-note"><div class="sut-free-copy"><p class="sut-eyebrow muted">Trade on NinjaTrader?</p><h3>The membership does this for you.</h3><p>ATR Order Automation sets the position size and places the stop and target in NinjaTrader 8 as you enter, alongside the Trend Scanner &amp; Market Selector, Jack's trade room and masterclasses. Every new tool is included.</p><a class="sut-btn sut-btn-ghost" href="#subscribe">Get notified when it opens</a></div></aside>
   </div>
 </section>
 
-
+<section class="sut-section sut-alt sut-sub-section" id="subscribe" aria-label="Optional email updates"><div class="sut-wrap sut-sub"><p class="sut-sub-note"><span class="sut-eyebrow">Optional</span> Everything on this page works without an email.</p><div class="sut-sub-frame"><iframe class="sut-sub-form" data-ghl-form data-sut-src="https://api.leadconnectorhq.com/widget/form/sBZe4CvOR4NBkd0oioTZ" data-source-page="free_tools" data-interest="free-tools" data-tool-id="free-tools-directory" id="inline-sBZe4CvOR4NBkd0oioTZ" data-layout="{'id':'INLINE'}" data-trigger-type="alwaysShow" data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value="" data-deactivation-type="neverDeactivate" data-deactivation-value="" data-form-name="Free tools updates" data-height="519" data-layout-iframe-id="inline-sBZe4CvOR4NBkd0oioTZ" data-form-id="sBZe4CvOR4NBkd0oioTZ" data-cookie-consent="true" data-cookie-consent-provider="auto" title="Optional email updates"></iframe><noscript><a class="sut-btn sut-btn-ghost" href="https://api.leadconnectorhq.com/widget/form/sBZe4CvOR4NBkd0oioTZ?source_page=free_tools&amp;interest=free-tools" target="_blank" rel="noopener">Open the sign-up form</a></noscript></div></div></section>
 
 <footer class="sut-foot">
   <div class="sut-wrap">
@@ -564,11 +570,17 @@ function sutAffDecorate(href, code, siteHost) {
      free_tool_view    a free tool's page was opened         {tool_id}
      tool_use          a free tool was used (first input)     {tool_id}
      outbound_click    a TradingView script link was clicked  {destination, tool_id}
-     email_subscribe   the optional sign-up form was submitted (GHL redirect ?subscribed=1)
+     email_subscribe   the optional GoHighLevel sign-up form was submitted successfully
+                       (GHL's own success message from the form, not a button click)
+                       {source_page, interest, tool_id, form_id}
      checkout_intent   a Become a Member / Join button was clicked {placement}
      checkout_view     the on-page Whop checkout scrolled into view
      sut_purchase      the /welcome page loaded after checkout (sent by app.js)
-   Every event carries first_touch / last_touch so sales can be traced to a source. */
+   Every event carries first_touch / last_touch so sales can be traced to a source.
+
+   This file can be on a page twice (the site-wide header code and a page embed).
+   Every event and listener is guarded, so each fires once per page whichever copy
+   runs first. */
 /*track-core*/
 var SUT_ATTR_KEY = 'sut_attr';
 var SUT_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
@@ -603,11 +615,43 @@ function sutAttribution(stored, touch) {
   }
   return o;
 }
+
+// The sign-up form's query parameters (= the form's hidden-field query keys).
+// First and latest touch use their own keys, so GoHighLevel's built-in
+// attribution (from the page URL's own utm_*) is left untouched.
+var SUT_FORM_UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+function sutFormParams(attr, affiliate, page) {
+  var p = {
+    source_page: page.source_page || '',
+    interest: page.interest || '',
+    tool_id: page.tool_id || '',
+    affiliate: affiliate || ''
+  };
+  var first = (attr && attr.first) || {}, last = (attr && attr.last) || {};
+  SUT_FORM_UTM.forEach(function (k) {
+    p['first_' + k] = first[k] || '';
+    p['last_' + k] = last[k] || '';
+  });
+  var out = {};
+  for (var k in p) if (p[k]) out[k] = String(p[k]).slice(0, 100);
+  return out;
+}
+
+// Is this window message GoHighLevel's "lead collected" notice for one of our
+// form iframes? The form posts it once, after the submission succeeds:
+// ["set-sticky-contacts", "embedded_iframe_<iframe id>", "<iframe id>", locationId, fingerprint]
+function sutFormSubmitted(data, iframeId) {
+  return Object.prototype.toString.call(data) === '[object Array]' && data[0] === 'set-sticky-contacts' &&
+    !!iframeId && data[1] === 'embedded_iframe_' + iframeId;
+}
 /*end-track-core*/
 
 (function () {
   var w = window, d = document;
   w.dataLayer = w.dataLayer || [];
+  // Shared across both copies of this file on a page: what has already happened.
+  var once = w.__sutOnce = w.__sutOnce || {};
+  var first = function (key) { if (once[key]) return false; once[key] = true; return true; };
   var stored = null;
   try { stored = w.localStorage.getItem(SUT_ATTR_KEY); } catch (e) { /* storage blocked */ }
   var attr = sutAttribution(stored, sutTouch(w.location.search, d.referrer, w.location.hostname, Date.now()));
@@ -619,37 +663,100 @@ function sutAttribution(stored, touch) {
     for (var j in (data || {})) o[j] = data[j];
     w.dataLayer.push(o);
   };
-  w.SUT_TRACK = push;
-  push('sut_attribution');
+  if (!w.SUT_TRACK) w.SUT_TRACK = push;
+  if (first('attribution')) push('sut_attribution');
+
+  // The optional GoHighLevel sign-up form: add the attribution parameters, load it once,
+  // and count a sign-up only when the form reports a successful submission.
+  var wireForms = function () {
+    var frames = d.querySelectorAll('iframe[data-ghl-form][data-sut-src]');
+    var any = false;
+    for (var f = 0; f < frames.length; f++) {
+      var fr = frames[f];
+      if (fr.getAttribute('data-sut-wired')) continue;
+      fr.setAttribute('data-sut-wired', '1');
+      any = true;
+      start(fr);
+    }
+    if (any && first('ghl_form_listener')) listen();
+  };
+  // Load a form only when the reader scrolls near it, so the free tools above it load first.
+  var start = function (fr) {
+    if (!w.IntersectionObserver) return load(fr);
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(fr); }
+    }, { rootMargin: '800px 0px' });
+    io.observe(fr.parentNode || fr);
+  };
+  var load = function (fr) {
+    try {
+      var src = new URL(fr.getAttribute('data-sut-src'));
+      var params = sutFormParams(attr, w.SUT_AFFILIATE, {
+        source_page: fr.getAttribute('data-source-page'),
+        interest: fr.getAttribute('data-interest'),
+        tool_id: fr.getAttribute('data-tool-id')
+      });
+      for (var k in params) src.searchParams.set(k, params[k]);
+      fr.src = src.toString();
+    } catch (e) { fr.src = fr.getAttribute('data-sut-src'); }
+    if (first('ghl_form_embed') && !d.querySelector('script[src*="/js/form_embed.js"]')) {
+      var sc = d.createElement('script');
+      sc.src = 'https://link.msgsndr.com/js/form_embed.js';
+      sc.async = true;
+      d.body.appendChild(sc);
+    }
+  };
+  var listen = function () {
+    w.addEventListener('message', function (ev) {
+      var frs = d.querySelectorAll('iframe[data-ghl-form]');
+      for (var i = 0; i < frs.length; i++) {
+        // Only our own form iframe, and only its success message.
+        if (ev.source !== frs[i].contentWindow || !sutFormSubmitted(ev.data, frs[i].id)) continue;
+        // One event per form per page view, however many messages arrive.
+        if (first('email_subscribe:' + frs[i].id)) {
+          push('email_subscribe', {
+            source_page: frs[i].getAttribute('data-source-page') || '',
+            interest: frs[i].getAttribute('data-interest') || '',
+            tool_id: frs[i].getAttribute('data-tool-id') || '',
+            form_id: frs[i].getAttribute('data-form-id') || ''
+          });
+        }
+        return;
+      }
+    });
+  };
 
   var ready = function () {
     // Free tool page views and first use.
     var root = d.querySelector('.sut[data-tool-id]');
     if (root) {
       var tool = root.getAttribute('data-tool-id');
-      push('free_tool_view', { tool_id: tool });
-      var used = false;
+      if (first('free_tool_view:' + tool)) push('free_tool_view', { tool_id: tool });
       var forms = root.querySelectorAll('[data-tool-use]');
       for (var i = 0; i < forms.length; i++) {
+        if (forms[i].getAttribute('data-sut-use-bound')) continue;
+        forms[i].setAttribute('data-sut-use-bound', '1');
         forms[i].addEventListener('input', function () {
-          if (!used) { used = true; push('tool_use', { tool_id: tool }); }
+          if (first('tool_use:' + tool)) push('tool_use', { tool_id: tool });
         });
       }
     }
     // Outbound TradingView clicks, and Become a Member / Join clicks.
-    d.addEventListener('click', function (ev) {
-      var a = ev.target.closest ? ev.target.closest('a') : null;
-      if (!a) return;
-      if (a.hasAttribute('data-outbound')) {
-        push('outbound_click', { destination: a.getAttribute('data-outbound'), tool_id: a.getAttribute('data-tool-id') || '' });
-      }
-      if (a.hasAttribute('data-member-cta')) {
-        push('checkout_intent', { placement: a.getAttribute('data-member-cta') });
-      }
-    }, true);
+    if (first('click_listener')) {
+      d.addEventListener('click', function (ev) {
+        var a = ev.target.closest ? ev.target.closest('a') : null;
+        if (!a) return;
+        if (a.hasAttribute('data-outbound')) {
+          push('outbound_click', { destination: a.getAttribute('data-outbound'), tool_id: a.getAttribute('data-tool-id') || '' });
+        }
+        if (a.hasAttribute('data-member-cta')) {
+          push('checkout_intent', { placement: a.getAttribute('data-member-cta') });
+        }
+      }, true);
+    }
     // The embedded checkout coming into view.
     var checkout = d.getElementById('checkout');
-    if (checkout && w.IntersectionObserver) {
+    if (checkout && w.IntersectionObserver && first('checkout_observer')) {
       var seen = false;
       new IntersectionObserver(function (entries, obs) {
         if (!seen && entries.some(function (e) { return e.isIntersecting; })) {
@@ -657,21 +764,7 @@ function sutAttribution(stored, touch) {
         }
       }, { threshold: 0.4 }).observe(checkout);
     }
-    // Optional sign-up: GoHighLevel redirects back with ?subscribed=1.
-    if (new URLSearchParams(w.location.search).get('subscribed') === '1') {
-      push('email_subscribe', { source_page: (d.querySelector('.sut') || {}).getAttribute ? d.querySelector('.sut').getAttribute('data-page') : '' });
-    }
-    // Pass the source to the sign-up form so the CRM records it (GHL hidden fields).
-    var frames = d.querySelectorAll('iframe[data-ghl-form]');
-    for (var f = 0; f < frames.length; f++) {
-      try {
-        var src = new URL(frames[f].src);
-        var t = attr.first || {};
-        SUT_UTM_KEYS.forEach(function (k) { if (t[k] && !src.searchParams.has(k)) src.searchParams.set(k, t[k]); });
-        if (w.SUT_AFFILIATE) src.searchParams.set('affiliate', w.SUT_AFFILIATE);
-        frames[f].src = src.toString();
-      } catch (e) { /* keep the static src */ }
-    }
+    wireForms();
   };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', ready); else ready();
 })();

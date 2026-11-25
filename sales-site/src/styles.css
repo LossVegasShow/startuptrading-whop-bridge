@@ -397,12 +397,18 @@
 .sut-related b { display: block; color: var(--text); font-weight: 600; }
 .sut-related span { display: block; color: var(--text-2); font-size: 14.5px; margin-top: 6px; }
 .sut-member-note { margin-top: 8px; }
-.sut-sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
-.sut-sub-form { width: 100%; min-height: 460px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.sut-sub { max-width: 720px; }
+.sut .sut-sub-note { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 16px; color: var(--text-2); font-size: 15px; }
+.sut-sub-note .sut-eyebrow { margin: 0; }
+/* The form draws its own dark card (styled in GoHighLevel to match: see
+   growth/FREE_TOOLS_LIBRARY.md section 4). This only reserves its space while it
+   loads; form_embed.js then sets the exact height. */
+.sut-sub-frame { position: relative; }
+.sut-sub-form { display: block; width: 100%; height: 540px; min-height: 519px; border: 0; background: transparent; }
 @media (max-width: 980px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr 1fr; }
-  .sut-sub { grid-template-columns: 1fr; gap: 24px; }
 }
 @media (max-width: 640px) {
   .sut-tools, .sut-related { grid-template-columns: 1fr; }
+  .sut-sub-form { height: 660px; min-height: 600px; }
 }

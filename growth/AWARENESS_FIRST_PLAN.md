@@ -159,7 +159,7 @@ StartUpTrading. Each item below turns a viewer into someone Jack can reach again
 
 | # | Action | Where | Status |
 |---|---|---|---|
-| H1 | **Switch on the email list.** Create the GHL form and workflow (`FREE_TOOLS_LIBRARY.md` §4) and set `ghl_subscribe_form_url`. The optional sign-up then appears on every free page | GHL + config | To do (highest priority) |
+| H1 | **Switch on the email list.** Create the GHL form and workflow (`FREE_TOOLS_LIBRARY.md` §4) and set `ghl_subscribe_form_url`. The optional sign-up then appears on every free page | GHL + config | Form live on the free pages; add its hidden fields and fix its settings (`FREE_TOOLS_LIBRARY.md` §4.1–4.2) |
 | H2 | **A weekly email, "The Opening Bell with Jack":** the week's volatility context, one lesson, one new clip or tool. It's the recurring reason to subscribe | GHL email | To do |
 | H3 | **A "Start here" page (`/start`)** for link-in-bio: Jack's photo, one line, then Free tools · Weekly email · YouTube · TradingView. Every social bio links here with platform UTMs | New GHL page (I can build it the same way as the others) | Proposed |
 | H4 | **A pinned comment and description template on every video:** one free-tool link matched to the topic, with `utm_source=youtube&utm_campaign=<series>`. End screen → the series playlist plus subscribe | YouTube | To do |

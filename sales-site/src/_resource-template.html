@@ -1,0 +1,53 @@
+<div class="sut" id="top" data-page="RESOURCE_KEY" data-tool-id="RESOURCE_ID">
+<!-- Starter template for a new free educational resource (a lesson, guide or tool page).
+     To use it:
+       1. Copy this file to src/<your-page>.html and replace RESOURCE_KEY (the PAGES key,
+          e.g. "atr_guide") and RESOURCE_ID (a stable id for analytics, e.g. "atr-guide").
+       2. Add the page to PAGES in build.py (template, output names, title, description).
+       3. Optionally add its interest tag to SUBSCRIBE_INTEREST in build.py
+          (otherwise sign-ups from it are tagged "education").
+     {{subscribe}} adds the optional GoHighLevel sign-up with full attribution, and only
+     once ghl_subscribe_form_url is set. Keep it below the content: email is never needed.
+     Built by sales-site/build.py; edit src/, not dist/. -->
+
+{{nav}}
+
+<section class="sut-hero sut-welcome">
+  <div class="sut-wrap sut-welcome-in">
+    <p class="sut-eyebrow"><span class="sut-live"></span>Free lesson</p>
+    <h1>Resource title<br><span class="sut-dim">in plain words.</span></h1>
+    <p class="sut-lead">One sentence on what the reader learns or can do here. No sign-up needed.</p>
+  </div>
+</section>
+
+<section class="sut-section">
+  <div class="sut-wrap sut-faq-grid">
+    <div>
+      <p class="sut-eyebrow">Section label</p>
+      <h2>Section heading.</h2>
+    </div>
+    <div class="sut-calc-how">
+      <p>Body copy.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sut-section sut-alt">
+  <div class="sut-wrap">
+    <div class="sut-head">
+      <p class="sut-eyebrow">Related free resources</p>
+      <h2>Keep going.</h2>
+    </div>
+    <ul class="sut-related">
+      <li><a href="{{calculator_url}}"><b>Futures Position Size Calculator</b><span>Size a trade from risk in your browser.</span></a></li>
+      <li><a href="{{tv_atr_page_url}}"><b>Futures Risk Planner for TradingView</b><span>The same method on your chart.</span></a></li>
+      <li><a href="{{free_tools_url}}"><b>All free tools</b><span>Everything in one place, by platform.</span></a></li>
+    </ul>
+    {{membership_note}}
+  </div>
+</section>
+
+{{subscribe}}
+
+<!--include:_footer.html-->
+</div>
