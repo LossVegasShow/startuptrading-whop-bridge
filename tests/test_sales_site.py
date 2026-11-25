@@ -235,3 +235,41 @@ console.log(JSON.stringify([
     assert zero is None and unknown is None and prop_bad is None
     assert prop == {'perTrade': 250, 'dailyStop': 750}
     assert prop_daily == {'perTrade': 200, 'dailyStop': 400}
+
+
+# --- Install guide (/setup) ----------------------------------------------------------
+
+def setup_page(**overrides):
+    cfg = json.loads((SITE / 'site.config.json').read_text())
+    cfg.update(overrides)
+    return cfg, *load_build().render(cfg, 'setup')
+
+
+def test_setup_page_is_the_indicator_setup_url_and_sells_nothing():
+    cfg, embed, full = setup_page()
+    assert cfg['setup_url'] == 'https://startuptrading.com/setup'
+    assert '<meta name="robots" content="noindex">' in full
+    assert '<div data-whop-checkout-plan-id=' not in embed and 'js.whop.com' not in embed
+    assert cfg['activation_url'] in embed and f'mailto:{cfg["support_email"]}' in embed
+    for tool in ('ATR Order Automation', 'Trend Scanner &amp; Market Selector'):
+        assert tool in embed
+    assert 'TSMS' not in embed and '{{' not in embed
+
+
+def test_setup_download_placeholder_until_a_link_is_set():
+    _, embed, _ = setup_page(setup_download_url='')
+    assert 'Download link goes here' in embed and 'Download the tools <span' not in embed
+    _, embed, _ = setup_page(setup_download_url='https://example.com/sut-tools.zip')
+    assert 'href="https://example.com/sut-tools.zip"' in embed and 'Download link goes here' not in embed
+
+
+def test_setup_copy_passes_marketing_compliance():
+    from marketing import compliance
+    _, embed, _ = setup_page()
+    text = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', embed.split('<footer')[0], flags=re.S)
+    assert compliance.check_text(text) == []
+
+
+def test_welcome_links_to_the_install_guide():
+    cfg, embed, _ = welcome()
+    assert f'href="{cfg["setup_url"]}"' in embed
