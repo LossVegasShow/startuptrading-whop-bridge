@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-19
 
-Goal: a visitor can buy the $99/month membership, activate all three NinjaTrader
+Goal: a visitor can buy the $99/month membership, activate both NinjaTrader
 indicators on their own in a few minutes, and lose access automatically when the
 membership ends. The sales site should look modern and credible, not templated.
 
@@ -261,9 +261,16 @@ licenses succeed. **It doesn't need a rebuild.**
       Both the membership and NinjaTrader codes are fixed and tested.
 - [ ] **(Jack / you)** Test Whop membership, test NinjaTrader account, vendor
       answers (`LIFECYCLE_TEST.md` sections 0 and 5), then run the test.
-- [ ] Rollout: one test account → `LICENSE_WRITE_ALLOWLIST` with 5–10
-      friendly members → everyone (the last step needs a reviewed
-      "all members" mode, not built yet).
+- [x] Single-account lifecycle test run on 24–25 Nov 2026 (results in
+      `LIFECYCLE_TEST.md` section 4; the NinjaTrader Desktop revocation check is
+      pending confirmation).
+- [x] Production controls: `LICENSE_ALL_MEMBERS` (off by default), circuit
+      breaker, emergency stop and separate reminder release, documented in
+      `PRODUCTION_LICENSING.md`.
+- [x] TSMS & Fibs (2205) removed from the membership; the bridge's own 2205
+      licenses are retired on the next sync.
+- [ ] **(You/Jack)** Launch checklist in `PRODUCTION_LICENSING.md` section 7, then
+      switch on all members (section 4).
 
 ### Phase 4: Sales site and copy ✅ page built, ⏳ needs assets, sign-off and DNS
 - [x] Sales page in `sales-site/`: one source, built into a paste-ready

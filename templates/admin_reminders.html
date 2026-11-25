@@ -1,0 +1,35 @@
+{% extends "_base.html" %}
+{% block title %}Activation reminders{% endblock %}
+{% block brand_sub %}Operations{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span class="eyebrow">Operations</span>
+  <h1>Activation reminders</h1>
+  <p class="lead">Emails asking paying members who haven't activated yet to connect NinjaTrader. Nothing here is sent until you
+    approve it. A reminder sends only when it is approved, its scheduled time has come, and licensing is open for that member
+    (licensing mode now: <b>{{ mode }}</b>).{% if auto %} <b>ACTIVATION_REMINDERS_AUTO is on:</b> reminders send without approval.{% endif %}</p>
+</div>
+{% if held %}
+<form method="post" action="/admin/reminders/release">
+<div class="scroll"><table>
+  <tr><th></th><th>Membership</th><th>Recipient</th><th>Reminder</th><th>Scheduled</th><th>Licensing open</th><th>Status</th></tr>
+  {% for h in held %}
+  <tr>
+    <td>{% if not h.approved %}<input type="checkbox" name="item" value="{{ h.customer_id }}:{{ h.kind }}">{% endif %}</td>
+    <td>{{ h.membership_id }}</td><td>{{ h.email }}</td>
+    <td>{{ 'First (24 h)' if h.kind == 'activation_reminder_1' else 'Second (72 h)' }}</td>
+    <td>{{ 'Due now' if h.due_now else (((h.due_at - now) / 3600)|round(1)) ~ ' h from now' }}</td>
+    <td>{{ 'Yes' if h.licensing_open else 'No: held until licensing opens' }}</td>
+    <td>{{ 'Approved' if h.approved else 'Waiting for approval' }}</td>
+  </tr>
+  {% endfor %}
+</table></div>
+<label>To release the ticked reminders, type SEND followed by how many you ticked (for example: SEND 3)</label>
+<input name="confirm" required autocomplete="off" placeholder="SEND 3">
+<div><button style="margin-top:12px">Release ticked reminders</button></div>
+</form>
+{% else %}
+<div class="done-row"><span><span class="check">✓</span>No reminders are waiting.</span></div>
+{% endif %}
+<p class="hint field"><a href="/admin">← Back to the dashboard</a></p>
+{% endblock %}

@@ -19,7 +19,7 @@ import time
 import httpx
 
 import email_templates
-from store import connect, customer
+from store import connect, customer, audit
 
 REMINDER_DELAYS = {'activation_reminder_1': 24 * 3600, 'activation_reminder_2': 72 * 3600}
 KINDS = tuple(REMINDER_DELAYS) + ('access_ending', 'access_ended')
@@ -119,7 +119,54 @@ def licensing_open_for(cfg, c):
     """
     if not cfg.license_writes or not c:
         return False
+    if cfg.license_all_members:
+        return True
     return c.get('membership_id') in {m for m, _ in cfg.write_allowlist()}
+
+
+def approved(db, cid, kind):
+    return db.execute('SELECT 1 FROM reminder_approvals WHERE customer_id=? AND kind=?', (cid, kind)).fetchone() is not None
+
+
+def reminder_released(db, cfg, c, kind):
+    """A reminder goes out only when licensing is open for the member AND an operator
+    approved it (or ACTIVATION_REMINDERS_AUTO is on). Turning on LICENSE_ALL_MEMBERS
+    alone never sends a reminder."""
+    if not licensing_open_for(cfg, c):
+        return False
+    return bool(getattr(cfg, 'activation_reminders_auto', False)) or approved(db, c['id'], kind)
+
+
+def held_reminders(db, cfg, now=None):
+    """Reminders waiting for release, for the approval page. Only ones that still apply."""
+    now = now or int(time.time())
+    out = []
+    for r in db.execute("""SELECT o.customer_id, o.kind, o.target_email, o.next_attempt_at, c.membership_id
+            FROM message_outbox o JOIN customers c ON c.id=o.customer_id
+            WHERE o.kind IN ('activation_reminder_1','activation_reminder_2') AND o.status IN ('pending','retry')
+            ORDER BY o.next_attempt_at, o.customer_id"""):
+        c = customer(db, r['customer_id'])
+        if not still_applies(r['kind'], c):
+            continue
+        out.append({'customer_id': r['customer_id'], 'kind': r['kind'], 'email': r['target_email'],
+                    'membership_id': r['membership_id'], 'due_at': r['next_attempt_at'], 'due_now': r['next_attempt_at'] <= now,
+                    'licensing_open': licensing_open_for(cfg, c), 'approved': approved(db, r['customer_id'], r['kind'])})
+    return out
+
+
+def approve(db, cfg, keys, batch, now=None):
+    """Approve exactly these (customer_id, kind) reminders, if they're still held. Returns the count."""
+    now = now or int(time.time())
+    allowed = {(h['customer_id'], h['kind']) for h in held_reminders(db, cfg, now) if not h['approved']}
+    n = 0
+    for key in keys:
+        if key in allowed:
+            db.execute('INSERT INTO reminder_approvals(customer_id,kind,approved_at,batch) VALUES(?,?,?,?) '
+                       'ON CONFLICT(customer_id,kind) DO NOTHING', (key[0], key[1], now, batch))
+            n += 1
+    if n:
+        audit(db, None, 'reminders_released', f'batch {batch}: {n} reminder(s)')
+    return n
 
 
 async def send(cfg, cid, kind, post=None):
@@ -133,7 +180,7 @@ async def send(cfg, cid, kind, post=None):
         if not row or row['status'] not in ('pending', 'retry') or row['next_attempt_at'] > now:
             return 'not_due'
         row = dict(row)
-        if kind in REMINDER_DELAYS and still_applies(kind, c) and not licensing_open_for(cfg, c):
+        if kind in REMINDER_DELAYS and still_applies(kind, c) and not reminder_released(db, cfg, c, kind):
             return 'held'
         if not still_applies(kind, c):
             _cancel(db, cid, (kind,), now)

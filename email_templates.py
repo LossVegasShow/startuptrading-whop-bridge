@@ -58,7 +58,7 @@ def activation_email(nt_email, indicator_names, setup_url, discord_url='', suppo
                if discord_url else '')
     body = f'''<p style="margin:0 0 6px;font:600 11.5px {MONO};letter-spacing:.08em;color:{OK}">&#10003; ACTIVATED</p>
 <h1 style="margin:0 0 14px;font:650 24px/1.25 {SANS};color:{TEXT}">Your indicators are ready.</h1>
-<p style="margin:0 0 20px;color:#b4bdca">All three StartUpTrading indicators are licensed to your NinjaTrader account
+<p style="margin:0 0 20px;color:#b4bdca">Your StartUpTrading indicators are licensed to your NinjaTrader account
 <strong style="color:{TEXT}">{escape(nt_email)}</strong>.</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BG};border:1px solid {LINE};border-radius:8px;border-collapse:separate">
 <tr><td colspan="2" style="padding:10px 14px;font:600 11px {MONO};letter-spacing:.06em;color:{MUTED}">YOUR INDICATORS</td></tr>
@@ -72,7 +72,7 @@ def activation_email(nt_email, indicator_names, setup_url, discord_url='', suppo
 color:#160b04;font:600 14.5px {SANS};text-decoration:none">Open install guide &rarr;</a>{discord}
 <p style="margin:26px 0 0;font-size:13.5px;color:{MUTED}">Access stays active while your Whop membership is active.
 Please contact support before buying a second subscription if anything looks wrong.</p>'''
-    return _shell('All three indicators are licensed to your NinjaTrader account.', body, support_email)
+    return _shell('Your indicators are licensed to your NinjaTrader account.', body, support_email)
 
 
 def _button(url, label):
@@ -91,7 +91,7 @@ def reminder_email(first, activation_url, support_email=''):
     """Activation reminder (24 h, then 72 h). Returns (text, html)."""
     if first:
         title = 'Your indicators are waiting'
-        lines = ['Thanks for joining StartUpTrading. Your three NinjaTrader indicators are ready to be licensed, '
+        lines = ['Thanks for joining StartUpTrading. Your NinjaTrader indicators are ready to be licensed, '
                  'and it takes about three minutes.',
                  'Sign in with the Whop account you used to join, then confirm the email on your NinjaTrader '
                  'account with a 6-digit code. No NinjaTrader account yet? You can create a free one during setup.']
@@ -109,8 +109,8 @@ def reminder_email(first, activation_url, support_email=''):
 
 def ending_email(when, hub_url='', support_email=''):
     """Cancelled, still paid up. Returns (text, html)."""
-    lines = [f'Your StartUpTrading membership is set to end on {when}. Until then you keep full access to all '
-             'three indicators and the Discord.',
+    lines = [f'Your StartUpTrading membership is set to end on {when}. Until then you keep full access to your '
+             'indicators, the Discord and the masterclass.',
              'After that date the indicators switch off automatically in NinjaTrader. If you change your mind, '
              'you can keep your membership from your Whop account, and nothing changes.']
     text = '\n\n'.join([f'Your access ends on {when}'] + lines +

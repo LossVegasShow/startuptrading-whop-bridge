@@ -4,20 +4,32 @@ Writes are restricted to ONE test membership and ONE verified email (never produ
 import datetime as dt
 import secrets
 import time
-from config import INDICATORS
+from config import INDICATORS, RETIRED_INDICATORS
 from clients import membership_entitlement, membership_plan_id, WhopClient, NinjaClient, IntegrationError, parse_utc
 from store import connect, audit, customer, request_crm_sync, queue_activation_email
 import lifecycle_emails
+import controls
 
 class Engine:
     def __init__(self,cfg):
         self.cfg=cfg; self.whop=WhopClient(cfg); self.nt=NinjaClient(cfg)
 
     def allowed(self,c):
-        # Writes need the global switch AND an exact membership + verified-email
-        # match on the allowlist (ALLOWED_TEST_* pair plus LICENSE_WRITE_ALLOWLIST).
-        if not (self.cfg.license_writes and c.get('verified') and c.get('nt_email')):return False
-        return (c['membership_id'],c['nt_email'].casefold()) in self.cfg.write_allowlist()
+        # Writes need the global switch, a verified NinjaTrader email, AND either
+        # LICENSE_ALL_MEMBERS or an exact membership + email pair on the allowlist.
+        # The circuit breaker is checked separately, immediately before each write.
+        return controls.in_scope(self.cfg,c)
+
+    async def _write(self,kind,cid,pid,call):
+        """Every NinjaTrader write goes through here: breaker check, then the call, then the log."""
+        controls.guard(self.cfg,kind)
+        try:
+            result=await call()
+        except Exception:
+            controls.record(self.cfg,controls.FAILURE,cid,pid)
+            raise
+        controls.record(self.cfg,kind,cid,pid)
+        return result
 
     def acquire(self,cid,owner):
         now=int(time.time())
@@ -71,6 +83,11 @@ class Engine:
             return {'status':'awaiting_verification' if entitlement else 'ineligible','writes':0}
         if not self.allowed(c):
             return {'status':state,'writes':0,'mode':'observe_only'}
+        with connect(self.cfg) as db:
+            paused=controls.breaker(db)
+        if paused:
+            # Nothing is written, granted OR revoked, until an operator resumes writes.
+            return {'status':state,'writes':0,'mode':'paused','reason':paused.get('reason')}
         if not all([self.cfg.nt_username,self.cfg.nt_password,self.cfg.nt_cid,self.cfg.nt_sec]):
             raise IntegrationError('NinjaTrader vendor credentials not configured')
         changes=[]; failures=[]
@@ -83,6 +100,7 @@ class Engine:
                 matches=[r for r in remote if str(r.get('email','')).casefold()==c['nt_email'].casefold()]
                 if len(matches)>1:raise IntegrationError('Duplicate licenses: manual review required')
                 matched=matches[0] if matches else None
+                adopted=False
                 if record and record.get('license_id') is not None:
                     if not matched or int(matched['id'])!=int(record['license_id']):
                         raise IntegrationError('Owned license missing or changed; manual review required')
@@ -98,6 +116,7 @@ class Engine:
                         with connect(self.cfg) as db:
                             audit(db,cid,'ninjatrader_adopted_expired',f'{pid}/{matched.get("id")} expired {matched.get("expirationDateUTC")}')
                         selected=matched
+                        adopted=True
                     elif matched:
                         # A license the bridge didn't create, e.g. a one-time purchase on
                         # startuptrading.com. Never modify or revoke it. If it's lifetime or
@@ -124,14 +143,15 @@ class Engine:
                         if old is None: raise IntegrationError('Missing/lifetime expiration: manual review')
                         new=parse_utc(desired)
                         if abs((old-new).total_seconds())>60:
-                            await self.nt.update(pid,selected['id'],c['nt_email'],desired)
+                            await self._write(controls.GRANT if adopted else controls.RENEW,cid,pid,
+                                              lambda:self.nt.update(pid,selected['id'],c['nt_email'],desired))
                             action='renewed'
                         else:action='unchanged'
                         lid=int(selected['id'])
                     else:
                         # On timeout, the next attempt detects the untracked remote license and
                         # REFUSES creation rather than risking duplicate issuance.
-                        lid=await self.nt.create(pid,c['nt_email'],desired)
+                        lid=await self._write(controls.GRANT,cid,pid,lambda:self.nt.create(pid,c['nt_email'],desired))
                         action='created'
                 else:
                     if not selected:
@@ -141,7 +161,7 @@ class Engine:
                     now=dt.datetime.now(dt.timezone.utc)
                     if old>now:
                         desired=(now-dt.timedelta(minutes=2)).isoformat().replace('+00:00','Z')
-                        await self.nt.update(pid,selected['id'],c['nt_email'],desired)
+                        await self._write(controls.REVOKE,cid,pid,lambda:self.nt.update(pid,selected['id'],c['nt_email'],desired))
                         action='expired'
                     else:
                         desired=selected['expirationDateUTC'];action='already_expired'
@@ -160,7 +180,34 @@ class Engine:
                     audit(db,cid,'sync_error',f'{pid}: {str(exc)[:170]}')
                 changes.append({'product_id':pid,'action':'error'})
                 failures.append(pid)
-        result={'status':state,'writes':sum(x['action'] in ('created','renewed','expired') for x in changes),
+        for pid in RETIRED_INDICATORS:
+            record=owned.get(pid)
+            # Only licenses the bridge itself issued; owned-separately rows have no license_id.
+            if not record or record.get('license_id') is None or record.get('state')=='retired':
+                continue
+            try:
+                remote=await self.nt.licenses(pid)
+                matched=[r for r in remote if int(r.get('id') or 0)==int(record['license_id'])]
+                if not matched or str(matched[0].get('email','')).casefold()!=c['nt_email'].casefold():
+                    raise IntegrationError('Retired product license missing or changed; manual review required')
+                old=parse_utc(matched[0].get('expirationDateUTC'))
+                if old is None:raise IntegrationError('Missing/lifetime expiration: manual review')
+                now=dt.datetime.now(dt.timezone.utc)
+                desired=matched[0]['expirationDateUTC']
+                if old>now:
+                    desired=(now-dt.timedelta(minutes=2)).isoformat().replace('+00:00','Z')
+                    await self._write(controls.REVOKE,cid,pid,lambda:self.nt.update(pid,matched[0]['id'],c['nt_email'],desired))
+                with connect(self.cfg) as db:
+                    db.execute("UPDATE licenses SET expiration=?,state='retired',updated_at=? WHERE customer_id=? AND product_id=?",
+                               (desired,int(time.time()),cid,pid))
+                    audit(db,cid,'ninjatrader_retired',f'{pid}/{record["license_id"]} ({RETIRED_INDICATORS[pid]} is no longer in the membership)')
+                changes.append({'product_id':pid,'action':'retired'})
+            except Exception as exc:
+                with connect(self.cfg) as db:
+                    audit(db,cid,'sync_error',f'{pid}: {str(exc)[:170]}')
+                changes.append({'product_id':pid,'action':'error'})
+                failures.append(pid)
+        result={'status':state,'writes':sum(x['action'] in ('created','renewed','expired','retired') for x in changes),
                 'products':changes,'partial_failure':bool(failures)}
         if not failures and entitlement:
             with connect(self.cfg) as db:

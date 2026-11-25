@@ -22,14 +22,15 @@ the next run. Anything NOT in this file must not be stated as fact.
 
 - StartUpTrading membership: $99/month, or $495/year (about $41.25/month).
   Cancel anytime; access continues to the end of the paid period.
-- Includes three NinjaTrader 8 indicators, licensed automatically to the
+- Includes two NinjaTrader 8 indicators, licensed automatically to the
   member's NinjaTrader account in about 3 minutes:
   - ATR Order Automation: sizes each trade from ATR and places the stop and
     target automatically.
   - Trend Scanner & Market Selector: daily trend strength and direction for
     every market on the watchlist.
-  - TSMS & Fibs: the Trend Scanner's trend read with Fibonacci levels drawn.
 - Includes the private StartUpTrading Discord trade room with Jack.
+- Includes Jack's masterclass (access through Whop).
+- TSMS & Fibs is no longer part of the membership. Never list it as included.
 - Join page: https://startuptrading.com/join
 - Free entry point: Jack's free ATR indicator and risk calculator at
   https://startuptrading.com/indicators (no card needed).

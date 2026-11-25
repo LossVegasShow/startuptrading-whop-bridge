@@ -8,7 +8,12 @@ PLANS = {
     'plan_qSXeS0xoDapGU': 'Monthly · $99',
     'plan_B84PWLvXemyFX': 'Annual · $495'
 }
-INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner & Market Selector', 2205:'TSMS & Fibs'}
+# The NinjaTrader indicators the membership licenses. The membership also
+# includes the Discord and the masterclass, which Whop grants directly.
+INDICATORS = {2067:'ATR Order Automation', 2071:'Trend Scanner & Market Selector'}
+# No longer part of the membership. Licenses the bridge itself issued for these
+# are switched off on the next sync; licenses it didn't issue are never touched.
+RETIRED_INDICATORS = {2205:'TSMS & Fibs'}
 EVENTS = {'membership.activated','membership.deactivated','membership.cancel_at_period_end_changed','membership.updated','payment.succeeded','payment.failed'}
 
 @dataclass
@@ -40,6 +45,19 @@ class Config:
     # staged rollout after the single-account test: "mem_a:a@x.com,mem_b:b@y.com".
     # Both the Whop membership AND the verified NinjaTrader email must match.
     license_write_allowlist: str = os.getenv('LICENSE_WRITE_ALLOWLIST','')
+    # Production switch: license EVERY verified member with an eligible membership,
+    # not only the allowlist. Off by default. LICENSE_WRITES_ENABLED=false still
+    # stops all writes, and the circuit breaker can pause them (see controls.py).
+    license_all_members: bool = os.getenv('LICENSE_ALL_MEMBERS','false').lower()=='true'
+    # Circuit breaker limits. Exceeding one pauses ALL license writes until an
+    # operator resumes them from /admin. Counted over a rolling window.
+    # Activation reminders to members who haven't activated are NEVER sent just
+    # because licensing opened. An operator approves each batch at /admin/reminders.
+    # Set true only to send future reminders without per-batch approval.
+    activation_reminders_auto: bool = os.getenv('ACTIVATION_REMINDERS_AUTO','false').lower()=='true'
+    breaker_max_grants_per_hour: int = int(os.getenv('BREAKER_MAX_GRANTS_PER_HOUR','60'))
+    breaker_max_revocations_per_hour: int = int(os.getenv('BREAKER_MAX_REVOCATIONS_PER_HOUR','20'))
+    breaker_max_failures_per_15min: int = int(os.getenv('BREAKER_MAX_FAILURES_PER_15MIN','10'))
     public_base_url: str = os.getenv('PUBLIC_BASE_URL','http://127.0.0.1:8000').rstrip('/')
     # Send visitors on any other hostname (e.g. the old *.onrender.com address)
     # to PUBLIC_BASE_URL. Turn on only after the custom domain works over HTTPS.

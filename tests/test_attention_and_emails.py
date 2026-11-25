@@ -161,10 +161,13 @@ def due_now(cfg, cid, kind):
         db.execute('UPDATE message_outbox SET next_attempt_at=0 WHERE customer_id=? AND kind=?', (cid, kind))
 
 
-def open_licensing(cfg, *mids):
-    # Reminders only go out when licensing is open to the member's membership.
+def open_licensing(cfg, *mids, auto=True):
+    # Reminders only go out when licensing is open to the member's membership AND
+    # they are released (approved per batch, or ACTIVATION_REMINDERS_AUTO). These
+    # sending-mechanics tests use auto; tests/test_reminder_release.py covers approval.
     cfg.license_writes = True
     cfg.license_write_allowlist = ','.join(f'{m}:{m}@nt.example' for m in mids)
+    cfg.activation_reminders_auto = auto
 
 
 def test_activation_reminders_at_24h_and_72h(cfg):

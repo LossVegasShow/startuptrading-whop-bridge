@@ -1,5 +1,5 @@
 '''Optional GoHighLevel CRM and post-activation email processing.
-No CRM calls without both GHL settings; no activation emails before all three
+No CRM calls without both GHL settings; no activation emails before every
 licenses are recorded and a setup guide URL is configured.
 '''
 import json
@@ -53,7 +53,7 @@ async def sync_crm(cfg,cid):
         if not c or not row:return 'not_found'
         row=dict(row)
         licenses=db.execute('SELECT product_id,license_id,expiration FROM licenses WHERE customer_id=?',(cid,)).fetchall()
-        active={int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through']}
+        active={int(r['product_id']) for r in licenses if r['license_id'] and r['expiration']==c['paid_through']} & set(INDICATORS)
         c['activated']=active==set(INDICATORS) and bool(c['verified']) and c['status']=='eligible'
     data=build_contact(c,cfg)
     headers={'Authorization':'Bearer '+cfg.ghl_api_key,'Version':'2021-07-28','Content-Type':'application/json'}

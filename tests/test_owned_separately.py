@@ -160,3 +160,80 @@ def test_two_licenses_for_the_same_email_still_need_review(rig):
     with pytest.raises(Exception, match='2067'):
         asyncio.run(eng.reconcile(1))
     assert ('update', ATR) not in eng.nt.writes and ('create', ATR) not in eng.nt.writes
+
+
+# --- TSMS & Fibs (2205) is no longer part of the membership -----------------------
+
+RETIRED = 2205
+
+
+def bridge_issued_retired(cfg, eng, expiry):
+    eng.nt.rows.setdefault(RETIRED, []).append({'id': 82913, 'email': R.EMAIL, 'expirationDateUTC': expiry})
+    with connect(cfg) as db:
+        db.execute("INSERT INTO licenses(customer_id,product_id,license_id,expiration,state,updated_at) VALUES(1,?,?,?,?,?)",
+                   (RETIRED, 82913, expiry, 'renewed', int(time.time())))
+
+
+def test_retired_product_is_not_licensed_to_new_members(rig):
+    cfg, eng = rig
+    out = asyncio.run(eng.reconcile(1))
+    assert {p['product_id'] for p in out['products']} == set(INDICATORS)
+    assert RETIRED not in {w[1] for w in eng.nt.writes}
+    assert RETIRED not in INDICATORS
+
+
+def test_bridge_issued_retired_license_is_switched_off_once(rig):
+    cfg, eng = rig
+    future = (datetime.now(timezone.utc) + timedelta(days=20)).replace(microsecond=0).isoformat()
+    bridge_issued_retired(cfg, eng, future)
+    out = asyncio.run(eng.reconcile(1))
+    assert {'product_id': RETIRED, 'action': 'retired'} in out['products']
+    end = datetime.fromisoformat(eng.nt.rows[RETIRED][0]['expirationDateUTC'].replace('Z', '+00:00'))
+    assert end <= datetime.now(timezone.utc)
+    lic = {r['product_id']: r for r in rows(cfg, 'SELECT * FROM licenses')}
+    assert lic[RETIRED]['state'] == 'retired'
+    assert rows(cfg, "SELECT details FROM audit WHERE action='ninjatrader_retired'")
+    # The member still gets the remaining indicators and exactly one activation email.
+    assert rows(cfg, "SELECT status FROM message_outbox WHERE kind='activation'") == [{'status': 'pending'}]
+    writes = len(eng.nt.writes)
+    asyncio.run(eng.reconcile(1))
+    assert len(eng.nt.writes) == writes                                  # idempotent
+    snap = asyncio.run(lifecycle.snapshot(cfg, eng, 1))
+    assert snap['overall'] == 'consistent'
+    assert snap['retired_products'][0]['status'] == 'ok'
+
+
+def test_retired_license_the_bridge_did_not_issue_is_never_touched(rig):
+    cfg, eng = rig
+    # e.g. a one-time TSMS & Fibs purchase: on NinjaTrader, but no bridge license row.
+    eng.nt.rows.setdefault(RETIRED, []).append({'id': 444, 'email': R.EMAIL, 'expirationDateUTC': None})
+    asyncio.run(eng.reconcile(1))
+    assert eng.nt.rows[RETIRED][0]['expirationDateUTC'] is None
+    assert RETIRED not in {w[1] for w in eng.nt.writes}
+
+
+def test_retired_license_is_not_switched_off_without_write_permission(tmp_path):
+    cfg = Config(db=str(tmp_path / 'r.db'), database_url='', require_database_url=False,
+                 license_writes=False, allowed_test_email=R.EMAIL, allowed_test_membership=R.MEM,
+                 nt_username='u', nt_password='p', nt_cid='c', nt_sec='s')
+    with connect(cfg) as db:
+        db.execute('INSERT INTO customers(membership_id,whop_user_id,buyer_email,buyer_email_verified,nt_email,verified,status,updated_at) '
+                   'VALUES(?,?,?,?,?,?,?,?)', (R.MEM, R.USER, 'b@example.com', 1, R.EMAIL, 1, 'pending', int(time.time())))
+    eng = Engine(cfg)
+    eng.whop, eng.nt = R.FakeWhop(), R.FakeNinja()
+    future = (datetime.now(timezone.utc) + timedelta(days=20)).replace(microsecond=0).isoformat()
+    bridge_issued_retired(cfg, eng, future)
+    asyncio.run(eng.reconcile(1))
+    assert eng.nt.writes == [] and eng.nt.rows[RETIRED][0]['expirationDateUTC'] == future
+    snap = asyncio.run(lifecycle.snapshot(cfg, eng, 1))
+    assert snap['retired_products'][0]['status'] == 'mismatch' and snap['overall'] == 'mismatch'
+
+
+def test_retired_license_changed_by_hand_needs_review(rig):
+    cfg, eng = rig
+    future = (datetime.now(timezone.utc) + timedelta(days=20)).replace(microsecond=0).isoformat()
+    bridge_issued_retired(cfg, eng, future)
+    eng.nt.rows[RETIRED][0]['id'] = 99999                               # someone replaced it
+    with pytest.raises(Exception, match='2205'):
+        asyncio.run(eng.reconcile(1))
+    assert rows(cfg, "SELECT details FROM audit WHERE action='sync_error'")

@@ -57,7 +57,7 @@ async def check_ninja(cfg):
         missing=sorted(expected-available)
         if missing:
             return {'status':'fail','reason':'Vendor access authenticated but expected products are missing','missing_product_ids':missing}
-        return {'status':'pass','note':'Vendor authentication succeeded and all three product IDs are accessible','product_ids':sorted(expected)}
+        return {'status':'pass','note':'Vendor authentication succeeded and every membership product ID is accessible','product_ids':sorted(expected)}
     except Exception:
         return {'status':'fail','reason':'NinjaTrader vendor authentication, connection or response failed; inspect private Render logs'}
 
