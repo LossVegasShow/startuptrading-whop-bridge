@@ -40,7 +40,7 @@ link reads that one setting.
 | `membership_open` | `""` (closed) | **Gate 2** (homepage switch): set `"true"`. Free pages then show the full nav, **Become a Member** and "See the membership". While closed, free pages never link to the purchase funnel |
 | `sales_page_url` | `https://startuptrading.com/join` | Gate 2: `https://startuptrading.com/` |
 | `tv_atr_script_url` | `""` | After the script is published on TradingView. The "Open on TradingView" buttons appear; until then the page says "Coming soon to TradingView" |
-| `ghl_subscribe_form_url` | `""` | After the GHL form exists (section 4). The optional sign-up section appears on the free pages |
+| `ghl_subscribe_form_url` | Form 7's embed URL (set) | The optional sign-up section appears on the free pages (section 4). Blank removes it |
 | `learn_url` | `""` | When `/learn` exists. The nav's Education link moves to it |
 | `tv_profile_url` | `""` | Jack's TradingView profile URL. Shows "Follow Jack on TradingView" on the companion page |
 | `tv_atr_video_url` | `""` | The YouTube demo of the planner. Shows a "Watch it in action" section |
@@ -87,45 +87,122 @@ that's already indexed is removed.
 ## 4. Optional email sign-up (GoHighLevel CRM)
 
 Email is never needed to use the script, calculator or indicator page. The sign-up
-is an extra section near the bottom of the free pages.
+is the last section of each free page (below every tool), and it loads only when the
+reader scrolls near it.
 
-1. **Create the form:** Sites → **Forms** → New, named "Free tools updates".
-   - Fields:
-     - First name (optional)
-     - **Email** (required)
-     - **Consent checkbox** (required). Text: *"Email me about new free tools,
-       education and StartUpTrading releases. I can unsubscribe at any time."*
-   - **Hidden fields**, each with a matching **query key**, so the page can fill them:
+**The form:** "Form 7", embed URL
+`https://api.leadconnectorhq.com/widget/form/sBZe4CvOR4NBkd0oioTZ`, set as
+`ghl_subscribe_form_url`. It carries its own headline ("Be first to access what we
+build next.") and description, so the page adds only an "Optional · Everything on
+this page works without an email" line above it.
 
-     | Hidden field (custom field) | Query key | Filled with |
-     |---|---|---|
-     | Source page | `source_page` | `free_tools`, `tv_atr` or `calculator` |
-     | Interest | `interest` | `free-tools`, `tradingview` or `calculators` |
-     | UTM source | `utm_source` | The visitor's first-touch source |
-     | UTM medium | `utm_medium` | First-touch medium |
-     | UTM campaign | `utm_campaign` | First-touch campaign |
-     | Affiliate | `affiliate` | Whop affiliate code, if any |
+### 4.1 How attribution reaches GoHighLevel (checked against GHL's code, Nov 2026)
 
-   - **On submit:** redirect to `https://startuptrading.com/free-tools?subscribed=1`.
-     That lets analytics count the sign-up.
-   - Style it dark (background `#10151d`, text `#ecf0f5`, button `#fa7b39`) to match.
-2. **Copy the form's embed URL** (Share → Embed → the iframe `src`, for example
-   `https://api.leadconnectorhq.com/widget/form/XXXX`) into `ghl_subscribe_form_url`.
-   Then rebuild and re-paste the free pages.
-3. **Workflow** (Automation → Workflows), triggered by *Form submitted = Free tools updates*:
-   - Add tags `free-tools-subscriber` and `interest-{{interest}}` (or one
-     If/Else branch per interest value).
-   - Add tag `source-{{utm_source}}` when it's present.
-   - Optionally send a welcome email listing the free tools. Use GHL's email
-     builder, which adds the **unsubscribe link** automatically.
-   - Optionally use **double opt-in** (send a confirm-link email, and tag
-     `confirmed` on click). Recommended for deliverability.
-4. **Unsubscribes:** GHL handles them. Every marketing email has its unsubscribe
-   link, and an unsubscribed contact gets DND for email and is excluded from
-   campaigns. Never re-add unsubscribed contacts to lists.
-5. **Keep it separate from member data.** These contacts are prospects. Members
-   are synced by the licensing app with their own tags. A subscriber who later
-   buys is merged by email in GHL, and both tag sets remain.
+- `tracking.js` builds the iframe URL with the parameters below, then loads
+  GoHighLevel's `form_embed.js` once.
+- `form_embed.js` merges the page URL's query string with the iframe's and sends
+  them, the page URL and the referrer to the form (its `query-params` message).
+- The form fills each **hidden field whose query key matches** a parameter, and
+  sends the page URL's own `utm_*` to GoHighLevel's built-in contact attribution
+  (First / Latest Attribution).
+
+So there are two layers:
+1. **Built in, no setup:** GoHighLevel records the UTMs on the page where the
+   person signs up (and its own first-visit session) on the contact.
+2. **Ours, needs the hidden fields below:** the first touch across visits (from
+   `tracking.js`, which remembers it in the browser), the latest touch, the Whop
+   affiliate code and the page and tool. Without these fields, GoHighLevel receives
+   the values but has nowhere to store them.
+
+**Add these hidden fields to the form** (Sites → Forms → Form 7 → add field →
+Hidden; create each as a contact custom field, single-line text, and set its
+**Query key** exactly as shown):
+
+| Custom field | Query key | Example value |
+|---|---|---|
+| Signup page | `source_page` | `tv_atr`, `calculator`, `free_tools` |
+| Signup interest | `interest` | `tradingview`, `calculators`, `free-tools`, `education` |
+| Signup tool | `tool_id` | `atr-position-size-planner` |
+| Affiliate code | `affiliate` | the Whop affiliate code, if any |
+| First UTM source | `first_utm_source` | `youtube` |
+| First UTM medium | `first_utm_medium` | `social` |
+| First UTM campaign | `first_utm_campaign` | `risk_lab` |
+| First UTM content | `first_utm_content` | `short25` |
+| Latest UTM source | `last_utm_source` | `tradingview` |
+| Latest UTM medium | `last_utm_medium` | `social` |
+| Latest UTM campaign | `last_utm_campaign` | `risk_planner` |
+| Latest UTM content | `last_utm_content` | |
+
+A visit with no UTMs but an outside referrer is recorded as source = the referring
+site (for example `youtube.com`) with medium `referral`. Direct visits leave them blank.
+
+### 4.2 Form settings to change in GoHighLevel
+
+| Setting | Change to | Why |
+|---|---|---|
+| **On submit** | Keep **"Show thank-you message"** (don't redirect). Text: *"You're in. Watch your inbox for the next free tool."* | The current text is GHL's default "We appreciate your feedback!". A redirect would leave the free tool the person was using |
+| Form **border** | Colour `#1d2530` (or none), radius 12 | The white border clashes with the site |
+| Field **label** colour | `#b3bcc9` | The current grey labels are hard to read on the dark card |
+| Email label | "Email" | "Email Required" reads oddly; the field is already marked required |
+| Consent checkbox | Above the button | People should see what they agree to before submitting |
+| Background / button | Keep `#141922` / orange | Already matches |
+| Name | "Free tools updates" | Easier to find in reports and workflows |
+
+### 4.3 Workflow (Automation → Workflows)
+
+Trigger: *Form submitted = Free tools updates*.
+- Add tag `free-tools-subscriber`, plus `interest-<value>` (one If/Else branch per
+  Signup interest value) and `source-<value>` when First UTM source is set.
+- Optionally send a welcome email listing the free tools. GHL's email builder adds
+  the **unsubscribe link** automatically. Double opt-in (a confirm-link email, tag
+  `confirmed` on click) is recommended for deliverability.
+- **Unsubscribes:** GHL handles them. Every marketing email has its unsubscribe
+  link, and an unsubscribed contact gets DND for email and is excluded from
+  campaigns. Never re-add unsubscribed contacts to lists.
+- **Keep it separate from member data.** These contacts are prospects. Members are
+  synced by the licensing app with their own tags. A subscriber who later buys is
+  merged by email in GHL, and both tag sets remain.
+
+### 4.4 Cookie consent, mobile and loading
+
+- The embed sets `data-cookie-consent="true"` with provider `auto`. GoHighLevel's
+  script looks for a consent banner it recognises (Cookiebot, OneTrust, CookieYes,
+  Osano, Usercentrics, Complianz, Termly, iubenda or any TCF banner). **Until a
+  visitor accepts marketing cookies in one, the form sets no marketing or ad
+  cookies.** With no banner on the site, that means never. The submission and
+  hidden fields work either way. If you add a banner later, nothing here changes.
+- `tracking.js` itself sets no cookies; it keeps attribution in the visitor's browser
+  storage.
+- The form is full width on phones (checked at 390 px and 1280 px, no sideways
+  scrolling). Its height is reserved while it loads, so the page doesn't jump, and
+  GHL's script then sets the exact height.
+- The form starts loading only when the reader scrolls within about 800 px of
+  it, so it never slows the tools above it. With JavaScript off, a link to
+  the form appears instead.
+
+### 4.5 Counting sign-ups (successful submissions only)
+
+`email_subscribe` fires when the form tells the page that **GoHighLevel accepted
+the submission**. That's the form's own success message, sent only after the
+submit succeeds. Button clicks and failed validation don't count. It fires at most
+once per form per page view, and only for messages from our own form iframe. The
+old `?subscribed=1` redirect method has been removed, so nothing double-counts.
+
+### 4.6 Verify it end to end (5 minutes, after adding the hidden fields)
+
+1. Open in a private window:
+   `https://startuptrading.com/tradingview/atr-position-size-planner?utm_source=test&utm_medium=qa&utm_campaign=form_check&a=<a real affiliate code, or leave out>`
+2. Scroll to the form and sign up with an address you control.
+3. In GTM Preview (or the browser console: `dataLayer.filter(e => e.event === 'email_subscribe')`),
+   check there is **exactly one** `email_subscribe`.
+4. In GHL → Contacts, open the new contact:
+   - the custom fields show Signup page `tv_atr`, Signup interest `tradingview`,
+     First/Latest UTM source `test`, medium `qa`, campaign `form_check`, and the
+     affiliate code if you used one;
+   - the contact's **Attribution** shows source `test` / `qa` / `form_check`.
+5. Repeat once on `/futures-position-size-calculator` with different UTMs. Latest
+   UTM should change, First UTM should stay `test` (same browser).
+6. Delete the test contacts.
 
 ## 5. Analytics
 
@@ -146,7 +223,7 @@ matching the event name.
 | `free_tool_view` | A free tool page or the directory opened | `tool_id` |
 | `tool_use` | First input in a tool on the page | `tool_id` |
 | `outbound_click` | A TradingView script link clicked | `destination`, `tool_id` |
-| `email_subscribe` | The sign-up form submitted (redirect with `?subscribed=1`) | `source_page` |
+| `email_subscribe` | GoHighLevel accepted a sign-up (section 4.5) | `source_page`, `interest`, `tool_id`, `form_id` |
 | `checkout_intent` | Become a Member / Join clicked | `placement` (nav, hero, final, free_page) |
 | `checkout_view` | The on-page Whop checkout scrolled into view | — |
 | `sut_purchase` | `/welcome` loaded after checkout (once per session) | — |
@@ -197,7 +274,9 @@ data is read. Affiliate attribution, licensing and onboarding are unchanged.
 - [ ] Set SEO titles, descriptions and social images (section 3).
 - [ ] Replace the header tracking code with `site-tracking.html` in every GHL website.
 - [ ] GTM + GA4 events (section 5).
-- [ ] Optional: GHL form + workflow (section 4), then set `ghl_subscribe_form_url`, rebuild and re-paste.
+- [x] GHL form created; `ghl_subscribe_form_url` set.
+- [ ] Add the hidden fields and change the form settings (sections 4.1 and 4.2), then the workflow (4.3).
+- [ ] Re-paste the three free pages and the header tracking code, then verify (4.6).
 
 **Test (private window):**
 
@@ -212,7 +291,7 @@ data is read. Affiliate attribution, licensing and onboarding are unchanged.
 | T7 | Nav on the sales page | Technology, Free Tools, Education, Community, About Jack, Become a Member; each anchor scrolls to its section | |
 | T8 | GTM Preview on `/free-tools?utm_source=test&utm_medium=qa` | `sut_attribution` with first_touch utm_source=test; `free_tool_view` | |
 | T9 | Type in the calculator | One `tool_use` | |
-| T10 | Optional sign-up (if configured) | Submit → redirected to `/free-tools?subscribed=1` → `email_subscribe`; GHL contact has source_page, interest, UTM and the tags; unsubscribe link in the welcome email works | |
+| T10 | Optional sign-up | The steps in section 4.6: exactly one `email_subscribe`; the GHL contact has the hidden fields, attribution and tags; the page stays on the tool (thank-you message); unsubscribe link in the welcome email works | |
 | T11 | Phone width (390px) | No sideways scrolling on any page | |
 | T12 | `sitemap.xml` | Lists Home, /free-tools, the TradingView page and the calculator | |
 | T13 | Google Rich Results Test on each page | Structured data detected with no errors | |

@@ -348,22 +348,55 @@ def directory_html(cfg):
     return filters, ''.join(cards) + empty
 
 
+# The optional sign-up form's interest tag, per page. A new educational page gets
+# the form by adding {{subscribe}} to its template and, optionally, a row here
+# (pages not listed are tagged "education").
+SUBSCRIBE_INTEREST = {'tv_atr': 'tradingview', 'calculator': 'calculators', 'free_tools': 'free-tools'}
+GHL_FORM_EMBED_JS = 'https://link.msgsndr.com/js/form_embed.js'
+
+
+def ghl_form_id(url):
+    m = re.search(r'/widget/form/([A-Za-z0-9]+)', url or '')
+    return m.group(1) if m else ''
+
+
 def subscribe_html(cfg, name):
-    """Optional email signup (a GoHighLevel form). Never required to use a tool.
-    Omitted entirely until ghl_subscribe_form_url is set."""
+    """Optional email sign-up: the GoHighLevel form, embedded inline. Never required
+    to use a tool. Omitted entirely until ghl_subscribe_form_url is set.
+
+    The form carries its own headline and description, so this block adds only a
+    short reassurance line. The iframe has no src in the HTML: tracking.js adds the
+    page, interest, first/latest touch and affiliate parameters, sets the src once,
+    then loads GoHighLevel's form_embed.js (which passes them to the form's hidden
+    fields and resizes the iframe). The noscript link keeps it usable without JS."""
     url = cfg.get('ghl_subscribe_form_url', '')
-    if not url:
+    form_id = ghl_form_id(url)
+    if not form_id:
         return ''
     e = lambda v: html.escape(str(v), quote=True)
-    interest = {'tv_atr': 'tradingview', 'calculator': 'calculators', 'free_tools': 'free-tools'}.get(name, 'general')
-    sep = '&' if '?' in url else '?'
-    src = e(f'{url}{sep}source_page={name}&interest={interest}')
-    return (f'<section class="sut-section sut-alt" id="subscribe"><div class="sut-wrap sut-sub">'
-            f'<div><p class="sut-eyebrow">Optional</p><h2>New tools, first.</h2>'
-            f'<p class="sut-lead">Get an email when Jack releases a new free tool or lesson. The tools on this page '
-            f'never need an email. Unsubscribe anytime.</p></div>'
-            f'<iframe class="sut-sub-form" data-ghl-form data-interest="{e(interest)}" data-source-page="{e(name)}" '
-            f'src="{src}" title="Email updates sign-up" loading="lazy"></iframe></div></section>')
+    interest = SUBSCRIBE_INTEREST.get(name, 'education')
+    tool = ''
+    m = re.search(r'data-tool-id="([^"]+)"', (SRC / PAGES[name][0]).read_text()) if name in PAGES else None
+    if m:
+        tool = m.group(1)
+    base = url.split('?')[0]
+    iframe_id = f'inline-{form_id}'
+    return (f'<section class="sut-section sut-alt sut-sub-section" id="subscribe" aria-label="Optional email updates">'
+            f'<div class="sut-wrap sut-sub">'
+            f'<p class="sut-sub-note"><span class="sut-eyebrow">Optional</span> '
+            f'Everything on this page works without an email.</p>'
+            f'<div class="sut-sub-frame">'
+            f'<iframe class="sut-sub-form" data-ghl-form data-sut-src="{e(base)}" '
+            f'data-source-page="{e(name)}" data-interest="{e(interest)}" data-tool-id="{e(tool)}" '
+            f'id="{e(iframe_id)}" data-layout="{{\'id\':\'INLINE\'}}" data-trigger-type="alwaysShow" data-trigger-value="" '
+            f'data-activation-type="alwaysActivated" data-activation-value="" '
+            f'data-deactivation-type="neverDeactivate" data-deactivation-value="" '
+            f'data-form-name="Free tools updates" data-height="519" data-layout-iframe-id="{e(iframe_id)}" '
+            f'data-form-id="{e(form_id)}" data-cookie-consent="true" data-cookie-consent-provider="auto" '
+            f'title="Optional email updates"></iframe>'
+            f'<noscript><a class="sut-btn sut-btn-ghost" href="{e(base)}?source_page={e(name)}&amp;interest={e(interest)}" '
+            f'target="_blank" rel="noopener">Open the sign-up form</a></noscript>'
+            f'</div></div></section>')
 
 
 def membership_note_html(cfg):
