@@ -32,7 +32,11 @@ const FAKE_FORM = `<!doctype html><body style="margin:0;background:#141922;heigh
       parent.postMessage(['set-sticky-contacts', 'embedded_iframe_' + iframeId, iframeId, 'loc', 'fp'], '*');
     }
   });
+  window.addEventListener('message', function (e) {
+    if (typeof e.data === 'number') parent.postMessage('[iFrameSizer]inline-TEST123:' + e.data + ':354:mutationObserver', '*');
+  });
   parent.postMessage(['iframeLoaded'], '*');
+  parent.postMessage('[iFrameSizer]inline-TEST123:500:354:init', '*');
 </script></body>`;
 (async () => {
   const b = await chromium.launch();
@@ -60,13 +64,18 @@ const FAKE_FORM = `<!doctype html><body style="margin:0;background:#141922;heigh
     await frame.evaluate(() => window.postMessage('submit', '*'));
     await frame.evaluate(() => window.postMessage('submit', '*'));
     await p.waitForTimeout(400);
+    // Sizing: the form's own reports (load, validation messages, then the short thank-you).
+    const heightAt = async n => { await frame.evaluate(v => window.postMessage(v, '*'), n); await p.waitForTimeout(150);
+      return p.evaluate(() => document.querySelector('iframe[data-ghl-form]').getBoundingClientRect().height); };
+    const sizes = {load: await p.evaluate(() => document.querySelector('iframe[data-ghl-form]').getBoundingClientRect().height),
+                   validation: await heightAt(720), thanks: await heightAt(180)};
     const events = await p.evaluate(() => dataLayer.map(e => e.event));
     const subscribe = await p.evaluate(() => dataLayer.filter(e => e.event === 'email_subscribe'));
     const box = await p.evaluate(() => {
       const r = document.querySelector('iframe[data-ghl-form]').getBoundingClientRect();
       return {width: r.width, height: r.height, docWidth: document.documentElement.scrollWidth, vw: innerWidth};
     });
-    out[width] = {before, src, events, subscribe, embedLoads: embedLoads.length, box};
+    out[width] = {before, src, events, subscribe, embedLoads: embedLoads.length, box, sizes};
     await p.close();
   }
   await b.close();
@@ -117,4 +126,7 @@ def test_signup_form_in_browser(tmp_path, name, interest):
         assert s['first_touch']['utm_source'] == 'youtube' and s['affiliate'] == 'jackaff'
         # Fits the screen: no sideways scrolling on a phone.
         assert r['box']['docWidth'] <= r['box']['vw'], (width, r['box'])
-        assert r['box']['height'] >= 500
+        # The iframe follows the form's reported height plus the margin GHL leaves out,
+        # growing for validation messages and shrinking for the thank-you message.
+        pad = 24
+        assert r['sizes'] == {'load': 500 + pad, 'validation': 720 + pad, 'thanks': 180 + pad}, r['sizes']

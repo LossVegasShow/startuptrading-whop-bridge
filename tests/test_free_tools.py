@@ -336,3 +336,27 @@ def test_one_tracking_bundle_per_page():
     for name in ('sales', 'free_tools', 'tv_atr', 'calculator'):
         embed = page(name)
         assert embed.count('function sutTouch(') == 1 and embed.count('function sutAffPick(') == 1, name
+
+
+def test_ghl_resizer_height_is_read_only_for_our_iframe(tmp_path):
+    r = node_eval(tmp_path, """[
+      sutSizerHeight('[iFrameSizer]inline-X:542:664:mutationObserver', 'inline-X'),
+      sutSizerHeight('[iFrameSizer]inline-X:654.5:354:init', 'inline-X'),
+      sutSizerHeight('[iFrameSizer]inline-Y:542:664:init', 'inline-X'),
+      sutSizerHeight('[iFrameSizer]inline-XY:542:664:init', 'inline-X'),
+      sutSizerHeight(['set-sticky-contacts'], 'inline-X'),
+      sutSizerHeight('[iFrameSizer]inline-X:abc:1:init', 'inline-X'),
+      sutSizerHeight('[iFrameSizer]inline-X:542:664:init', ''),
+      SUT_FORM_PAD
+    ]""")
+    assert r[:7] == [542, 654.5, None, None, None, None, None]
+    # GoHighLevel's measurement misses the form's 10px top margin on desktop.
+    assert r[7] >= 10
+
+
+def test_form_space_reserved_only_until_sized():
+    css = (SITE / 'src' / 'styles.css').read_text()
+    assert '.sut-sub-form:not([data-sut-sized]) { min-height: 519px; }' in css
+    # Never clip the form by hiding its overflow.
+    rule = re.search(r'\.sut-sub-form \{[^}]*\}', css).group(0)
+    assert 'overflow' not in rule and 'scrolling' not in (SITE / 'build.py').read_text().split('def subscribe_html')[1].split('def membership_note_html')[0]
