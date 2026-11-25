@@ -145,3 +145,21 @@ def status(cfg, db, now=None):
     for kind, (limit, window, label) in limits(cfg).items():
         out[kind] = {'count': count(db, kind, window, now), 'limit': limit, 'window_minutes': window // 60}
     return out
+
+
+# Audit actions that changed (or took ownership of) a NinjaTrader license.
+LICENSE_CHANGE_ACTIONS = ('ninjatrader_created', 'ninjatrader_renewed', 'ninjatrader_expired',
+                          'ninjatrader_retired', 'ninjatrader_adopted_expired', 'ninjatrader_link_transferred_in')
+
+
+def recent_changes(db, days=7, now=None, limit=200):
+    """Every license change in the last `days`, newest first, with the member it
+    belongs to. Read-only: lets an operator confirm exactly which members a
+    licensing mode touched (the write log itself keeps only 24 hours)."""
+    now = now or int(time.time())
+    marks = ','.join('?' * len(LICENSE_CHANGE_ACTIONS))
+    rows = db.execute(f"""SELECT a.at, a.action, a.details, a.customer_id, c.membership_id, c.nt_email
+        FROM audit a LEFT JOIN customers c ON c.id = a.customer_id
+        WHERE a.action IN ({marks}) AND a.at > ? ORDER BY a.id DESC LIMIT ?""",
+                      (*LICENSE_CHANGE_ACTIONS, now - days * 86400, limit)).fetchall()
+    return [dict(r) for r in rows]
