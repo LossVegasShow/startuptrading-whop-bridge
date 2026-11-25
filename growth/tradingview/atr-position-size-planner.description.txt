@@ -1,58 +1,65 @@
-TITLE
-ATR Position Size & Stop Planner
+TITLE (set in the script; paste-checked)
+Futures Position Size Calculator - ATR & Prop Firm Risk
 
 DESCRIPTION (paste as-is. TradingView forbids links, websites, social handles, contact details and company names here. Keep it that way.)
 
-Most traders pick a size first and squeeze the stop to fit it. This planner works the other way round. Risk first, stop second, size last:
+A futures position size calculator for TradingView that sizes trades from risk, not from conviction. Set a risk budget, let ATR set the stop, and the panel shows the maximum number of contracts that keeps the estimated stop risk inside the budget. It supports fixed-dollar, percent-of-account and prop-firm drawdown planning, compares standard and micro contracts side by side, and draws your entry, stop and target as planning levels.
 
-1. Set your risk budget for the trade.
-2. Let volatility set the stop. The stop sits a multiple of ATR from your planned entry (default 1.5 x ATR 14), rounded UP to a whole tick so it is never tighter than planned.
-3. Let the stop set the size. Maximum contracts = risk budget / (stop in points x value per point + costs per contract), rounded DOWN, so the estimated stop risk never exceeds the budget.
+This is an open-source educational planning tool. It does not generate signals, place orders or automate trading.
+
+THE METHOD: RISK FIRST, STOP SECOND, SIZE LAST
+1. Risk budget: the most you are prepared to lose on the trade.
+2. Stop: ATR x multiple from the planned entry (default 1.5 x ATR 14), rounded UP to a whole tick so it is never tighter than planned.
+3. Size: maximum contracts = risk budget / (stop in points x value per point + round-turn costs per contract), rounded DOWN, so the estimated stop risk never exceeds the budget.
 
 THE DASHBOARD
-- The maximum position size is the headline number, with the symbol, timeframe and risk mode above it.
+- MAX POSITION: the headline number, with the symbol, timeframe and risk mode above it.
 - Risk budget, estimated stop risk, budget remaining and budget used (%).
 - ATR, volatility versus its normal level, the stop in points and ticks, and the cost per contract.
 - At the target (optional): the hypothetical reward NET of the same round-turn costs used in the estimated stop risk, with the gross amount and the costs shown beside it.
-- Adjustable text size, compact or full layout, and four panel positions.
+- Text size (Small, Normal, Large), Full or Compact layout, and four panel positions.
+
+RISK MODES: HOW TO USE EACH
+- Fixed $: enter the amount you will risk per trade.
+- % of account: enter the account size and the percentage to risk (for example 50,000 at 1% = 500).
+- Prop firm: enter the original maximum drawdown and the REMAINING drawdown allowance from your firm's dashboard, the losing streak you want to be able to survive (default 10) and a safety buffer (default 10%). Risk budget = remaining allowance x (1 - buffer) / losing streak. The panel shows the remaining allowance against the original and how much is used.
+- Daily loss constraint (any mode, switch it on to use it): enter what is left of today's loss limit and how many full losses it must cover (default 2). Daily cap per trade = remaining daily allowance x (1 - buffer, Prop firm mode only) / planned daily losses. The risk budget is the smaller of the cap and the mode's budget. With the constraint on, an allowance of 0 means the day's limit is used up: the budget is 0 and the panel reads "Risk budget exhausted - no trade."
+
+Prop firms define drawdown differently. A trailing limit moves up with your peak balance; a static one does not. Daily limits, reset times and other rules vary by firm. This is a planning aid. It does not check your account against any firm's rules; staying within them remains your responsibility.
 
 STANDARD VERSUS MICRO
-On ES/MES, NQ/MNQ, YM/MYM, RTY/M2K, CL/MCL, GC/MGC, SI/SIL, 6E/M6E and BTC/MBT, an optional block compares both contracts for the same stop distance. Each contract uses its own tick size and value per point, and its own round-turn cost. You see the maximum contracts, estimated stop risk and remaining budget for each side by side. It works from either chart, the standard or the micro.
+For ES/MES, NQ/MNQ, YM/MYM, RTY/M2K, CL/MCL, GC/MGC, SI/SIL, 6E/M6E and BTC/MBT, an optional block compares both contracts for the same stop distance. Each contract is rounded to its own tick size and uses its own value per point and its own round-turn cost (separate inputs). It shows the maximum contracts, estimated stop risk and remaining budget for each, from either the standard or the micro chart.
 
-RISK MODES
-- Fixed: an amount per trade.
-- Percent of account: account size x risk %.
-- Prop firm: the remaining drawdown allowance, less a safety buffer, divided by the losing streak you want to survive. The panel shows the remaining allowance against the original, and how much is used.
-- Optional daily loss constraint (switch it on to use it): daily cap per trade = remaining daily allowance x (1 - safety buffer, in Prop firm mode) / planned daily losses (default 2). The risk budget is the smaller of this cap and the mode's budget, and the panel shows how many full stops still fit today. With the constraint on, a remaining allowance of 0 means the day's limit is used up: the budget is 0 and the panel reads "Risk budget exhausted - no trade."
+SUPPORTED INSTRUMENTS
+Any symbol with a point value: the main size uses the chart symbol's tick size and point value (or a value you enter). The comparison block covers the nine pairs above using CME contract specifications. Other symbols show the main size without the comparison. Check all specifications against your broker's.
 
-Prop firms define drawdown differently. A trailing limit moves up with your peak balance; a static one does not. Enter the current remaining allowance from your firm's dashboard. This is a planning aid. It does not check your account against any firm's rules; staying within them remains your responsibility.
+WORKED EXAMPLES (arithmetic only, not market data or recommendations)
+- ES, $500 budget, ATR 4.00, 1.5 x ATR: stop 6.00 points (24 ticks) x $50 = $300 per contract. Max 1 contract, estimated stop risk $300, $200 of budget remaining.
+- Same stop on MES ($5 per point): $30 per contract, max 16 contracts, $480 estimated stop risk.
+- NQ, $500 budget, ATR 20, 1.5 x ATR: 30 points x $20 = $600 per contract, more than the budget, so 0 NQ. MNQ: 30 x $2 = $60, max 8 contracts, $480.
+- MNQ with costs: 138-point stop, $2 per point, $5 round-turn cost: $281 per contract. At a 2R target the hypothetical reward is $552 gross, $547 net of costs.
+- Prop firm: $2,500 remaining drawdown, 10% buffer, 10 losses: $225 budget. With the daily constraint on and $100 left today over 2 losses: $45.
 
 PLANNING LEVELS ON THE CHART
-Entry, stop and an optional target (as an R multiple) are drawn as planning levels, with labels prefixed PLAN. Choose Clean (lines only), Prices, or Prices + risk (estimated stop risk at the stop, and the hypothetical net reward at the target). Planning for Long or Short shades the risk and target zones. These levels are drawings only: no orders are placed and nothing is executed. A target reward is hypothetical. It is only realised if price reaches the target and the fill matches the plan.
+Entry, stop and an optional target (an R multiple) are drawn as planning levels, labelled PLAN. Choose Clean (lines only), Prices, or Prices + risk (estimated stop risk at the stop and the hypothetical net reward at the target). Planning for Long or Short shades the risk and target zones. These are drawings only: no orders are placed and nothing is executed. A target reward is hypothetical and is only realised if price reaches the target and the fill matches the plan.
 
-OTHER SETTINGS
-- ATR length, stop multiple, and ATR timeframe (the same or a higher timeframe than the chart; the panel warns if it is lower).
+VOLATILITY AND ATR
 - ATR is TradingView's standard ATR (Wilder's smoothing), the same as the built-in Average True Range with RMA smoothing.
+- ATR timeframe: the chart's, or a higher one (for example a 15-minute ATR on a 5-minute chart). The panel warns if it is lower than the chart's.
 - "Use the last closed bar's ATR" reads the previous completed bar of the ATR timeframe, so it does not look ahead and does not repaint. With it off, ATR (and any alert based on it) updates while the bar forms.
-- Value per point: leave at 0 to use the chart symbol's value, or type one in.
-- Planned entry: 0 uses the last price.
-
-VOLATILITY VERSUS NORMAL
-ATR is compared with its own average over the last 100 bars (adjustable): above 1.25x is elevated, below 0.8x is quiet. When volatility expands, the stop widens and the size shrinks, so the money at risk stays inside the budget.
+- Volatility versus normal: ATR against its own 100-bar average (adjustable). Above 1.25x is elevated, below 0.8x is quiet.
 
 ALERTS
 - Position size changed.
 - Volatility expanded (ATR crossed above 1.25x its normal).
 
 LIMITATIONS
-- A planning aid, not a signal. It does not tell you when, where or which way to trade.
-- With "closed bar" off, ATR and the size can change until the current bar closes.
-- Contract specifications come from the chart symbol and a built-in table of the pairs above. Check them against your broker's.
+- A planning aid, not a signal or an order. It does not tell you when, where or which way to trade.
+- Slippage, gaps and fast markets can fill a stop beyond its level, so a loss can exceed the estimate. Costs are included only if you enter them.
 - Amounts are in the chart symbol's currency; the panel notes when that is not USD.
-- Slippage, gaps and fast markets can fill a stop beyond its level. Costs are included only if you enter them.
-- Very small budgets can round down to 0 contracts. A budget of 0 shows "Risk budget exhausted - no trade."
+- Very small budgets can round down to 0 contracts.
 
-Educational tool. Futures trading involves substantial risk of loss.
+Educational tool. Futures trading involves substantial risk of loss and is not suitable for everyone.
 
 SIGNATURE (profile settings, Premium plan or higher: the ONLY place a link goes. Not in the script.)
-Free futures risk tools, the method behind them and new releases: startuptrading.com/free-tools?utm_source=tradingview&utm_medium=signature&utm_campaign=profile
+Free futures risk tools, the method behind them and new releases: startuptrading.com/free-tools?utm_source=tradingview&utm_medium=social&utm_campaign=futures_risk_planner&utm_content=signature

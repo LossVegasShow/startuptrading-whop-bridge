@@ -1,4 +1,4 @@
-# ATR Position Size & Stop Planner: final release pack
+# Futures Position Size Calculator - ATR & Prop Firm Risk (StartUpTrading Futures Risk Planner): final release pack
 
 Feature set and design are **frozen**. Only verified problems get fixed from here.
 
@@ -100,11 +100,10 @@ environment. Read the four official pages before publishing (links in
 | Promotion links **only** in the Premium **Signature**, and on startuptrading.com | Permitted location |
 | **Ask a moderator** before using: a series name in titles; the method line as a footer; naming Jack's other scripts in descriptions | Needs confirmation |
 
-**Title.** The script is titled **"ATR Position Size & Stop Planner"**. Your QA report
-calls it "ATR Futures Risk & Position Size Planner". Pick one **before** publishing:
-the title is what people search for, and it's hard to change afterwards. The
-current title matches the website and the tests. To switch, I'll change the
-`indicator()` title, the description, the companion page and `tools.json` together.
+**Title (final):** **"Futures Position Size Calculator - ATR & Prop Firm Risk"**, with
+short title "Futures Risk" and dashboard "FUTURES RISK PLANNER". It uses a plain hyphen
+because the script is kept plain ASCII. The rationale and competitor research are in
+`../FLAGSHIP_POSITIONING.md` §2–3.
 
 ## 5. Publishing on Jack's account (step by step)
 1. **Profile first:** photo, display name "Jack Gleason", and a short bio ("Futures
@@ -123,10 +122,10 @@ current title matches the website and the tests. To switch, I'll change the
 5. Run checklist F1–F20 one last time on this account.
 6. **Publish script** (top right of the Pine Editor):
    - Visibility **Public**, **Open-source**.
-   - **Title:** exactly the agreed title.
+   - **Title:** exactly "Futures Position Size Calculator - ATR & Prop Firm Risk" (it comes from the script).
    - **Description:** paste the DESCRIPTION section **as-is**. It **can't be edited
      after publishing**.
-   - Category: Indicators. Tags: position sizing, risk management, ATR, futures, prop firm.
+   - Category: Indicators. Tags: position sizing, risk management, ATR, futures, prop firm, micro futures, stop loss, risk reward.
    - Check the preview chart shows the panel and levels clearly, then **Publish**.
 7. **Afterwards:**
    - Copy the script URL into `site.config.json` → `tv_atr_script_url`.
@@ -138,8 +137,8 @@ current title matches the website and the tests. To switch, I'll change the
 8. **Launch content:**
    - One educational idea the same day: ES or NQ, the ATR stop and size, the micro
      comparison. No links.
-   - A short YouTube demo that says "search *ATR Position Size & Stop Planner* on
-     TradingView".
+   - A short YouTube demo that says "search *Futures Position Size Calculator - ATR &
+     Prop Firm Risk* on TradingView".
    - Reply to every comment for the first two weeks.
 9. **Track** (`../TRADINGVIEW_ECOSYSTEM.md` §8): followers, favorites, idea views,
-   and signature sessions (`utm_source=tradingview`) in GA4.
+   and signature sessions (`utm_source=tradingview&utm_medium=social`) in GA4.

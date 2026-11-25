@@ -207,3 +207,62 @@ def test_attribution_first_and_last_touch(tmp_path):
     assert ref == {'at': 2, 'utm_source': 'youtube.com', 'utm_medium': 'referral'}
     assert internal is None and direct is None
     assert first_kept['first']['utm_source'] == 'tradingview' and first_kept['last']['utm_source'] == 'youtube.com'
+
+
+# --- Flagship positioning: SEO spec (titles, descriptions, H1s, canonicals, author) ----
+
+SEO_SPEC = {
+    'tv_atr': ('Free TradingView Futures Position Size & Risk Indicator',
+               'Free TradingView indicator for ATR position sizing, prop firm drawdown planning, micro futures '
+               'comparison and visual trade risk management.',
+               'Free futures risk & position size indicator for TradingView.'),
+    'calculator': ('Free Futures Position Size Calculator | ES, NQ, MES, MNQ',
+                   'Calculate futures contract size, ATR stops and estimated trade risk for ES, NQ, MES and MNQ. '
+                   'Free prop firm risk planner. No sign-up required.',
+                   'Free futures position size calculator & prop firm risk planner.'),
+    'free_tools': ('Free Futures Trading Tools & Indicators | StartUpTrading',
+                   'Explore free TradingView indicators, NinjaTrader tools, futures position size calculators '
+                   'and risk management resources from StartUpTrading.',
+                   'Free trading technology for futures traders.'),
+}
+
+
+@pytest.mark.parametrize('name', list(SEO_SPEC))
+def test_titles_descriptions_and_h1_follow_the_spec(name):
+    import html as h
+    title, desc, h1 = SEO_SPEC[name]
+    _, _, _, b_title, b_desc = load_build().PAGES[name]
+    assert (b_title, b_desc) == (title, desc)
+    embed = page(name)
+    found = re.search(r'<h1>(.*?)</h1>', embed, re.S).group(1)
+    assert ' '.join(h.unescape(re.sub(r'<[^>]+>', ' ', found)).split()).lower() == h1.lower()
+    assert embed.count('<h1>') == 1
+
+
+@pytest.mark.parametrize('name,key', [('tv_atr', 'tv_atr_page_url'), ('calculator', 'calculator_url'),
+                                      ('free_tools', 'free_tools_url')])
+def test_canonical_url_in_standalone_pages(name, key):
+    _, full = load_build().render(CFG, name)
+    assert full.count('rel="canonical"') == 1 and f'<link rel="canonical" href="{CFG[key]}">' in full
+
+
+def test_members_pages_have_no_canonical_and_stay_noindex():
+    for name in ('welcome', 'setup'):
+        _, full = load_build().render(CFG, name)
+        assert 'rel="canonical"' not in full and 'noindex' in full
+
+
+def test_author_attribution_is_visible_and_in_structured_data():
+    embed = page('tv_atr')
+    assert 'By Jack Gleason.' in embed
+    app = next(g for g in ld(embed)['@graph'] if g['@type'] == 'SoftwareApplication')
+    assert app['author'] == {'@type': 'Person', 'name': 'Jack Gleason'}
+    assert app['name'] == 'StartUpTrading Futures Risk Planner'
+    assert app['alternateName'] == 'Futures Position Size Calculator - ATR & Prop Firm Risk'
+    assert 'Futures Position Size Calculator - ATR &amp; Prop Firm Risk' in embed      # install step
+
+
+def test_one_tracking_bundle_per_page():
+    for name in ('sales', 'free_tools', 'tv_atr', 'calculator'):
+        embed = page(name)
+        assert embed.count('function sutTouch(') == 1 and embed.count('function sutAffPick(') == 1, name
