@@ -1,5 +1,7 @@
 # Flagship positioning, SEO and organic discovery: StartUpTrading Futures Risk Planner
 
+> **Content allocation and the 30-day social plan are superseded by `AWARENESS_FIRST_PLAN.md`** (personality-led, 50/30/15/5). The SEO, keyword map, tool pages and measurement below still apply.
+
 **What this covers:**
 - the naming, positioning and keyword strategy
 - the TradingView publication package

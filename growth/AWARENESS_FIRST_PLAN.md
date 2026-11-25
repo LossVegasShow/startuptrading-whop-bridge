@@ -1,0 +1,292 @@
+# Awareness-first growth plan: making Jack Gleason recognisable
+
+**Goal:** futures traders recognise Jack: his face, his voice and his point of view.
+The tools and the membership benefit from that recognition; they don't lead it.
+This plan replaces the tool-first emphasis of `FLAGSHIP_POSITIONING.md` §8 and §10.
+The SEO, tool pages and Risk Lab remain, at a smaller share.
+
+---
+
+## 0. Three decisions before production starts
+
+1. **Jack has to be on camera, or at least on his own voice.** The YouTube pipeline in
+   `video/` produces narrated explainers with an AI voice under "The Risk Desk" name.
+   That builds a topic channel, not a recognisable person.
+   - Discovery and authority content (80% of the mix) needs **Jack's face and/or his
+     voice**.
+   - The AI pipeline remains useful for Risk Lab visuals, charts and B-roll.
+   - **Minimum viable setup:** a phone on a tripod, a lavalier mic, window light, and
+     one 60–90-minute batch session a week (8–10 shorts + 1 long-form segment).
+2. **"20 Years at the Screens" must be literally true.** Jack's previously stated start
+   year is 2008, about 18 years in 2026. Either Jack confirms 20 years (counting from
+   when he actually started), or the series becomes **"From the Screens"** or
+   **"Since 2008"**. Every experience claim in this plan uses only what Jack confirms.
+3. **Channel home.** Use **one** YouTube channel in Jack's name: rename the existing
+   channel or create "Jack Gleason | StartUpTrading". Series live as playlists. A
+   separate brand channel splits the audience at the moment it matters most.
+
+---
+
+## 1. Content allocation
+
+| Share | Bucket | Purpose | Series |
+|---|---|---|---|
+| **50%** | High-reach discovery | Reach traders who've never heard of Jack | Jack Reacts, From the Screens, broad-appeal shorts |
+| **30%** | Professional authority and market analysis | Show competence, consistently | The Opening Bell, method explainers |
+| **15%** | Technology demos and Risk Lab | Prove the method; introduce the free tools | The Risk Lab, Inside StartUpTrading |
+| **5%** | Direct membership promotion | Tell viewers what the membership is; never pushy | Inside StartUpTrading (offer episodes) |
+
+**Weekly rhythm:**
+- 7–8 shorts, spread across YouTube Shorts, Instagram Reels and TikTok
+- 1–2 long-form episodes
+- 2 TradingView ideas
+- 1 collaboration action (pitch, recording or follow-up)
+
+**Promotion runs only after launch Gate 2.** `growth/LAUNCH_AND_GROWTH.md`: the
+membership must be open and licensing working before promoting it.
+
+---
+
+## 2. Competitive intelligence
+
+### What I could and couldn't establish
+- **Could:** who the visible futures creators, podcasts, prop-firm media and
+  NinjaTrader educators are (sources in §5), and title and topic patterns visible in
+  public listings.
+- **Couldn't:** view counts relative to each channel's normal performance. That needs
+  per-video data. **No performance metrics appear in this plan.**
+
+### How to do the outlier analysis (about 2 hours, then monthly)
+1. **List 10–15 futures creators.** Start with §5 and add the ones Jack watches.
+2. **Get the data.** For each channel, export the last ~50 videos with their views,
+   publish date and title. YouTube's channel "Popular" tab, or a third-party tool
+   such as vidIQ or ViewStats, gives this. Do the same manually for Reels and TikToks.
+3. **Score each video:** outlier score = views ÷ the channel's median views over the
+   same period. A score of **3× or more** marks an outlier.
+4. **Tag each outlier** with:
+   - topic
+   - title pattern
+   - thumbnail pattern (face/no face, text, emotion)
+   - opening line (the first 5 seconds)
+   - format (reaction, story, chart breakdown, live, interview)
+   - pain point
+5. **Count the tags.** The patterns that repeat across **several** creators are what to
+   test first. Record everything in `growth/outliers.csv`, the baseline for month 2.
+
+### Patterns visible in public listings (qualitative, to be tested)
+- **The credibility-plus-reveal framing:** "20-Year Pro Trader Reveals His…" and
+  "Millionaire Day Trader Reveals…" both appear among the podcast and media titles.
+  - Jack can use the **credibility half honestly** ("A futures trader since 2008
+    explains…").
+  - **Skip the money half.** No "millionaire" or earnings framing.
+- **Prop-firm success and failure stories:** a dominant topic across Topstep, Apex and
+  Tradeify media and independent channels. The pain points are blown accounts,
+  trailing drawdown, consistency rules, and overtrading after a win.
+- **NQ/ES and micros:** many channels narrow to NQ and ES. Beginners are steered to
+  MES and MNQ. The risk confusion between the two sizes recurs.
+- **Live and real-time:** daily live trading streams are common. This is a crowded
+  space, but it's also where trust is built.
+- **Risk management as the "real secret":** prop-firm stories regularly conclude that
+  "risk management beats strategy". That's Jack's home ground.
+
+### Jack's distinctive position
+**"The adult in the room": a long-time futures trader who talks about risk the way
+professionals do, builds his own tools, and never sells a lifestyle.**
+
+- **Against hype:** no screenshots of P&L, no cars, no "I made $X today".
+- **Specific and practical:** every piece answers one question a trader actually has.
+- **Tool-backed:** when Jack says "size from risk", he can show it in the planner.
+- **Fair:** Jack Reacts critiques *advice and concepts*, never mocks people.
+
+---
+
+## 3. The five series
+
+| Series | Bucket | Format | What it is | Guardrails |
+|---|---|---|---|---|
+| **Jack Reacts** | Discovery | 30–60 s shorts; 15–25 min long-form | Jack responds to popular trading advice, claims and memes: what's right, what's missing, what he'd do instead | React to **ideas**. Quote claims as text on screen, or use short clips under fair use with commentary, with credit. Ask permission for longer clips. No dunking on individuals; no "exposed" titles |
+| **From the Screens** (or "20 Years at the Screens" if confirmed) | Discovery | 45–90 s stories; occasional 10–15 min | Experience, mistakes and lessons from Jack's years trading | Only true stories Jack confirms. No P&L figures or income |
+| **The Opening Bell** | Authority | 60 s pre-market short; weekly 10–15 min "week ahead"; TradingView ideas | Timely commentary: the session's events, volatility regime, levels Jack watches, and what that means for risk | Educational, not signals. No "buy here / sell there". Disclaimers |
+| **The Risk Lab** | Tech / Risk Lab | 45–60 s shorts; 8–12 min episodes | Measurable experiments **about risk and process**, using the free tools | Measure risk variability, rounding, cost effects and drawdown survival. **Not** profit results or backtested returns |
+| **Inside StartUpTrading** | Tech / Promotion | 60 s shorts; occasional 8–10 min | How the tools are built, why, what's next. The membership explained plainly | Promotion episodes only after Gate 2. Honest about who it's *not* for |
+
+---
+
+## 4. First 30 days: production calendar
+
+**Legend:**
+- **Bucket:** D = discovery · A = authority · T = tech/Risk Lab · P = promotion.
+- **Audience:** N = new futures traders · P = prop-firm traders · I = intermediate.
+- **Production:** C = Jack on camera · V = Jack's voice over a chart or screen ·
+  S = screen recording (the planner, the calculator) · AI = the `video/` pipeline for
+  visuals.
+
+**Ecosystem links** go in the profile and description only. They point to the free
+tools (calculator, TradingView planner, `/indicators`), never directly to checkout.
+
+### 30 short-form concepts
+| # | Series | B | Hook (first line) | Aud. | Format | Prod. | Ecosystem connection |
+|---|---|---|---|---|---|---|---|
+| 1 | Jack Reacts | D | "'Risk 1% per trade.' Here's the part nobody tells you." | N | Reaction to on-screen quote | C | Calculator (% mode) |
+| 2 | Jack Reacts | D | "'Just trade micros until you're profitable.' Good advice? Half of it." | N | Reaction | C | Calculator (MES/MNQ) |
+| 3 | Jack Reacts | D | "The prop-firm tip that quietly fails accounts." | P | Reaction | C | Planner prop mode |
+| 4 | From the Screens | D | "The trade that taught me more than any book." | N/I | Story | C | — (pure brand) |
+| 5 | From the Screens | D | "What I'd tell myself the year I started." | N | Story | C | — |
+| 6 | Discovery | D | "NQ says zero. MNQ says eight." | N/P | Chart reveal | V+S | TradingView planner |
+| 7 | Discovery | D | "Why traders blow prop accounts on their *good* days." | P | Explainer | C+S | Calculator (prop) |
+| 8 | Discovery | D | "Most traders size their trades backwards." | N | Explainer | C | Calculator |
+| 9 | Jack Reacts | D | "'Win rate is everything.' Let's check that." | N/I | Reaction + whiteboard | C | — |
+| 10 | From the Screens | D | "The day I stopped looking at my P&L during the session." | I | Story | C | — |
+| 11 | Discovery | D | "Three numbers to know before you click buy." | N | List | C+S | Planner dashboard |
+| 12 | Discovery | D | "Your stop isn't too tight. Your size is too big." | N/P | Explainer | C | Calculator |
+| 13 | Jack Reacts | D | "The 'revenge trade' meme, from someone who's been there." | N/I | Reaction | C | — |
+| 14 | From the Screens | D | "A losing week that made me a better trader." | I | Story | C | — |
+| 15 | Jack Reacts | D | "'Move your stop to break-even fast.' When it helps, when it hurts." | N/I | Reaction | C+S | Planner levels |
+| 16 | Opening Bell | A | "CPI morning. Here's why today's range is different." | I/P | Pre-market | C+S | Planner volatility row |
+| 17 | Opening Bell | A | "ES or NQ this week? Here's what's actually moving." | I | Pre-market | V+S | — |
+| 18 | Opening Bell | A | "Monday open: the first level I mark." | I | Chart | V+S | TradingView idea (same day) |
+| 19 | Opening Bell | A | "Volatility is elevated. Here's what that does to your size." | I/P | Pre-market | C+S | Planner regime |
+| 20 | Authority | A | "How I plan a trade in 30 seconds." | I | Walkthrough | S+V | Planner |
+| 21 | Opening Bell | A | "FOMC day: what changes in my process." | I/P | Pre-market | C | — |
+| 22 | Authority | A | "What ATR actually measures, in 40 seconds." | N | Explainer | AI+V | `/indicators` (free ATR) |
+| 23 | Authority | A | "Crude oil's tick size catches people out." | I | Explainer | V+S | Calculator (CL) |
+| 24 | Authority | A | "Static vs trailing drawdown, on one chart." | P | Explainer | AI+V | Calculator (prop) |
+| 25 | Risk Lab | T | "Fixed 2 contracts vs ATR size: how much did the risk swing?" | I | Experiment | S+AI+V | Planner |
+| 26 | Risk Lab | T | "How often does a 4-point ES stop sit inside normal noise?" | I | Experiment | S+AI+V | Planner ATR |
+| 27 | Risk Lab | T | "Rounding down vs rounding up contracts: what it does to risk." | N/I | Experiment | AI+V | Calculator |
+| 28 | Risk Lab | T | "How many losses can a $2,500 trailing drawdown survive?" | P | Experiment | S+V | Planner prop mode |
+| 29 | Inside StartUpTrading | T | "Why we built a free TradingView risk tool." | All | Behind the scenes | C+S | `/free-tools` |
+| 30 | Inside StartUpTrading | P | "What's in the membership, and who it's *not* for." (after Gate 2) | I | Plain offer | C | Homepage |
+
+**Risk Lab rule:** episodes measure risk, rounding, costs, noise or drawdown survival
+on real charts. They never show or imply trading profits, and they aren't backtests
+presented as results.
+
+### Long-form YouTube (6 episodes in 30 days)
+| # | Series | Title idea | Length | Prod. | Connection |
+|---|---|---|---|---|---|
+| L1 | Jack Reacts | "Reacting to the most common prop-firm advice" | 15–20 min | C + on-screen quotes | Planner prop mode |
+| L2 | From the Screens | "My trading story: what changed and what didn't" (verified facts only) | 15–20 min | C | About Jack page |
+| L3 | Opening Bell | "Week ahead in ES and NQ: events, volatility, levels" (weekly) | 10–12 min | C+S | TradingView ideas |
+| L4 | Opening Bell | "Week ahead" (second week) | 10–12 min | C+S | — |
+| L5 | Risk Lab | "Fixed size vs ATR size across a month of ES: the risk you didn't see" | 10–12 min | S+AI+V | Planner, calculator |
+| L6 | Inside StartUpTrading | "Building a free futures risk tool, from idea to TradingView" | 8–10 min | C+S | `/free-tools`, the planner |
+
+The existing AI-narrated video 001 ("How many contracts…") can be re-cut with a
+**Jack-recorded intro and voice-over** instead of being published as-is.
+
+### 8 TradingView publications (ideas, not scripts)
+All are educational and use a clean chart. There are no links, handles or company
+names; the Signature carries the link (Premium). See
+`TRADINGVIEW_ECOSYSTEM.md` §1 for the rules.
+
+1. ES week ahead: volatility regime and the levels Jack watches
+2. NQ vs MNQ on a real chart: same stop, different risk
+3. CPI morning: why ATR jumps and what it does to position size
+4. CL: tick size and contract value, explained on the chart
+5. Prop-firm budgeting from the remaining drawdown (planner on chart)
+6. GC: volatility expansion and stop placement
+7. FOMC preparation: a process, not a prediction
+8. Month in review: how the volatility regime shifted, and how sizing adapted
+
+### Repurposing Jack's existing appearances
+I don't have a list of Jack's past podcasts, streams or interviews. Send them over.
+For each one:
+1. Ask the host for **written permission** to clip it.
+2. Cut 30–60 s self-contained moments.
+3. Credit the show on screen and in the caption.
+4. Tag the series (usually From the Screens or Jack Reacts).
+
+---
+
+## 5. Borrowed audiences: outreach plan (20 opportunities)
+
+Priority is a qualitative judgement of relevance to futures and risk, credibility, and
+access for a first-time guest. No relationships are implied. Each one needs a fresh
+check of current guest policies.
+
+| # | Opportunity | Type | Why it fits | Access | Priority |
+|---|---|---|---|---|---|
+| 1 | [Chat With Traders](https://rephonic.com/podcasts/chat-with-traders) | Podcast | Long-form trader interviews; futures guests | Medium–hard | A |
+| 2 | [Trading Nut](https://tradingnut.com/episodes/) | Podcast | Interviews with practising traders, including futures | Medium | A |
+| 3 | [Optimus Futures Podcast](https://optimusfutures.com/podcast/tag/futures-trading/) | Podcast (broker) | Futures-only audience; past ES trader guests | Medium | A |
+| 4 | [Futures Radio Show](https://rephonic.com/podcasts/futures-radio-show) | Podcast | Futures-specific | Medium | A |
+| 5 | TopstepTV / [Topstep community](https://www.topstep.com/blog/best-free-trading-community) | Prop-firm media | The largest prop community; daily streams | Medium–hard | A |
+| 6 | [Funded: A Tradeify Podcast](https://podcasts.apple.com/us/podcast/id1895323589) / TradeifyTV | Prop-firm media | A prop audience that needs risk education | Medium | A |
+| 7 | NinjaTrader Live ([relaunch](https://ninjatrader.com/News/NinjaTrader-Unveils-NinjaTrader-Live)) | Platform livestream | Plans to add industry experts; NinjaTrader users | Hard | A |
+| 8 | NinjaTrader Ecosystem vendor webinars ([education](https://ninjatrader.com/futures/blogs/level-up-your-futures-trading-with-expert-education/)) | Platform education | Jack is already a vendor; webinars are part of NinjaTrader education | Medium | A |
+| 9 | Benzinga "Trader Bacon" (Apex, [source](https://www.benzinga.com/amp/content/33131339)) | Media show | Prop and futures audience | Hard | B |
+| 10 | [Speculators Podcast](https://chartable.com/podcasts/speculators-podcast/episodes/144977517-futures-prop-trading-mastery-exclusive-interview-with-topstep-ceo) | Podcast | Futures and prop topics | Medium | B |
+| 11 | [The Day Trading Show](https://pocketcasts.com/podcast/the-day-trading-show/8484c440-4517-0138-975e-0acc26574db2/millionaire-day-trader-reveals-the-secret-to-future-prop-firm-success/b564f16b-9247-4fdc-96ee-e6d557a6ff73) | Podcast | Prop-firm and risk stories | Medium | B |
+| 12 | [2 Bulls in a China Shop](https://redcircle.com/shows/2-bulls-in-a-china-shop/ep/35e54e11-d87d-4397-ba20-97529e43dde0) | Roundtable podcast | Candid prop-firm discussion | Easy–medium | B |
+| 13 | [Desire To Trade](https://rephonic.com/podcasts/desire-to-trade-podcast-forex-trading-tips-intervi) | Podcast | Large trader-interview catalogue (multi-asset) | Medium | B |
+| 14 | [Diary Of A Trader](https://diaryofatrader.substack.com/p/mastering-futures-insights-from-a) | Podcast / Substack | Futures interviews | Easy–medium | B |
+| 15 | [1 Minute Futures Trader](https://www.youtube.com/@1minutefuturestrader) | YouTube creator | NQ/ES scalping, prop tips, risk | Medium | B |
+| 16 | Damn Good Trading (Kyle Kozlowski, [Damn Prop Firms](https://damnpropfirms.com/?p=235)) | YouTube / review site | Prop-firm audience. Note the affiliate ties | Medium | B |
+| 17 | RealSimpleAriel ([cited by a funded-trader guide](https://fortraders.com/blog/top-5-best-trading-youtubers-in-2025-curated-by-expert)) | YouTube creator | NQ/ES execution-focused audience | Hard | B |
+| 18 | TradingView Ideas community (Jack's own ideas, plus comments on others' educational ideas) | Platform | Daily discovery; Editors' Picks for strong education | Easy | A |
+| 19 | r/FuturesTrading, [NexusFi](https://nexusfi.com/a/prop-firms/prop-firm-position-sizing) | Communities | Futures practitioners. **Follow each community's self-promotion rules**: answer questions, disclose, use links only where allowed | Easy | B |
+| 20 | Futures creator lists ([Feedspot](https://videos.feedspot.com/futures_trading_youtube_channels/)) | Discovery list | Source for smaller NQ/ES creators open to collabs (duets, joint Risk Lab) | Easy | C |
+
+**Pitch template (education first, no subscription pitch):**
+
+> Subject: A risk-first segment for your [show] audience
+>
+> Hi [name], I've followed [specific episode/topic]. I'm Jack Gleason, a futures trader [since YEAR, confirmed] who builds his own risk tools for NinjaTrader and TradingView.
+> Your audience talks a lot about [pain point, e.g. trailing drawdown]. I'd love to walk through one practical idea: [e.g. "how to size a trade from the drawdown you have left, not the account size"], with real examples. No pitch. Happy to share a free calculator your listeners can use without signing up.
+> Topics I can cover: sizing from risk; NQ vs MNQ risk; surviving trailing drawdown; what changes on CPI/FOMC days.
+> [Two recent clips or ideas as proof]
+> Jack
+
+**Collaboration formats for creators:**
+- a joint Risk Lab episode (the same chart, two approaches)
+- a duet or stitch reaction (with permission)
+- a guest Opening Bell segment
+- a podcast swap
+
+---
+
+## 6. Measurement: a 30-day baseline, then adapt
+
+| Metric | Where | How |
+|---|---|---|
+| Non-follower reach | YouTube Studio (new vs returning viewers; impressions from non-subscribers), Instagram Insights (accounts reached: non-followers), TikTok analytics (For You traffic %) | Per video; median per series |
+| Retention | YouTube (average % viewed; the first-30-seconds curve), Reels and TikTok (average watch time, completion) | Shorts: % watched past 3 s and to the end |
+| Shares and saves | Platform analytics | Per 1,000 views |
+| Profile visits | Instagram, TikTok, YouTube (channel page views) | Per 1,000 views |
+| **Followers per 1,000 views** | New followers ÷ views × 1,000 | **The headline awareness metric**, per series and format |
+| Branded search | Search Console (queries containing "jack gleason" or "startuptrading"), Google Trends (Jack's name, if there's enough volume) | Monthly |
+| Free tool adoption | GA4 `free_tool_view`, `tool_use`; TradingView script users and favorites | Weekly |
+| Website referrals | GA4 sessions by `utm_source` (youtube, instagram, tiktok, tradingview) with `utm_medium=social` and `utm_campaign=<series>` | Weekly |
+| Qualified subscribers | GA4 `email_subscribe` and GHL contacts with source tags; later `sut_purchase` and Whop memberships by first touch | Monthly |
+
+**Link conventions** (in bios and descriptions only):
+`?utm_source=youtube|instagram|tiktok&utm_medium=social&utm_campaign=jack_reacts|from_the_screens|opening_bell|risk_lab|inside_sut`
+
+**Rules for month 2:**
+1. Rank series and formats by **followers per 1,000 views**, then by shares and saves
+   per 1,000.
+2. **Double** the top quartile, **keep** the middle half, and **rework or drop** the
+   bottom quartile (change the hook or format once before dropping).
+3. Re-run the outlier analysis (§2) with month-1 data from your own channel.
+4. Only then revisit the 50/30/15/5 split. If authority content wins on followers per
+   1,000 views, shift toward it.
+
+---
+
+## 7. Guardrails (unchanged and non-negotiable)
+
+- **No earnings or P&L claims,** no "millionaire" or lifestyle framing, and no
+  fabricated or hypothetical trading results.
+- **No misleading controversy,** clickbait the content doesn't deliver, mocking of
+  individuals, or "exposed" framing.
+- **No artificial engagement:** no bought views, follows or comments, and no
+  engagement pods.
+- **TradingView:** no links or company names in ideas or scripts; links in the Premium
+  Signature only.
+- **Platform disclosures:** mark AI-generated or synthetic media where required
+  (YouTube's altered-content setting).
+- **Risk disclosure** in descriptions: "Educational content. Futures trading involves
+  substantial risk of loss."
+- **Website, licensing, checkout, affiliate attribution and launch gates are
+  unchanged.** Promotion waits for Gate 2.
