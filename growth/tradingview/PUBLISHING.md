@@ -106,6 +106,9 @@ because the script is kept plain ASCII. The rationale and competitor research ar
 `../FLAGSHIP_POSITIONING.md` §2–3.
 
 ## 5. Publishing on Jack's account (step by step)
+
+**Published (v1.2, Nov 2026):** [Futures Position Size Calculator - ATR & Prop Firm Risk](https://www.tradingview.com/script/ZBt4abLo-Futures-Position-Size-Calculator-ATR-Prop-Firm-Risk/) by [Jack_Gleason](https://www.tradingview.com/u/Jack_Gleason/). Step 7 is done in the repo: `tv_atr_script_url`, `tv_profile_url` and the registry status are set, and the script header carries Jack's username. Still to do: the real screenshots (step 7) and the launch content (step 8).
+
 1. **Profile first:** photo, display name "Jack Gleason", and a short bio ("Futures
    trader since 2008. Risk-first tools for futures."). If Jack is on Premium or
    higher, set the **Signature** to the text at the bottom of the description file.
