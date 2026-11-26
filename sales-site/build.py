@@ -16,6 +16,7 @@ for each page in PAGES:
 
 Everything is scoped under `.sut` so GoHighLevel's own styles can't clash.
 """
+import base64
 import html
 import json
 import random
@@ -129,6 +130,9 @@ def render(cfg, name='sales'):
     values['subscribe'] = subscribe_html(cfg, name)
     values['membership_note'] = membership_note_html(cfg)
     values['community_note'] = community_note_html(cfg, name)
+    # Jack's hero portrait is embedded in the page itself (about 28 KB), so it shows
+    # with the HTML: no second server, no wait for the licensing app to wake up.
+    values['jack_hero_src'] = hero_image_src(cfg)
     # Footer link to the free community, except on members' pages (they're already in).
     values['footer_community'] = (f'<a href="{html.escape(cfg["community_join_url"], quote=True)}" target="_blank" rel="noopener" '
                                   f'data-community-cta="footer">Free Discord community</a>'
@@ -404,6 +408,13 @@ def subscribe_html(cfg, name):
             f'<noscript><a class="sut-btn sut-btn-ghost" href="{e(base)}?source_page={e(name)}&amp;interest={e(interest)}" '
             f'target="_blank" rel="noopener">Open the sign-up form</a></noscript>'
             f'</div></div></section>')
+
+
+def hero_image_src(cfg):
+    path = HERE.parent / 'static' / 'brand' / 'jack-hero.webp'
+    if path.is_file():
+        return 'data:image/webp;base64,' + base64.b64encode(path.read_bytes()).decode()
+    return html.escape(cfg.get('jack_hero_url', ''), quote=True)
 
 
 def community_note_html(cfg, name):
