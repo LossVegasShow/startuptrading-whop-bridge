@@ -464,6 +464,194 @@
   .sut-hero-portrait { min-height: 330px; }
 }
 
+/* ═══ Visual layer (design_fx) ══════════════════════════════════════════════
+   Static styles apply to everyone; motion is gated on .sut-js (set by fx.js)
+   and disabled for prefers-reduced-motion by the global rule above. */
+
+/* Numbers read like a terminal: mono, tabular. */
+.sut .sut-amount b, .sut-strip b, .sut-demo-out b, .sut-scan-n, .sut-cred-list dt { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.sut .sut-amount b { letter-spacing: -.06em; }
+.sut h1 { text-wrap: balance; }
+.sut h2, .sut h3 { text-wrap: balance; }
+
+/* Contract-spec ticker tape */
+.sut-tape { position: relative; display: flex; align-items: stretch; height: 38px; border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(250,123,57,.06), transparent 30%), var(--bg-2); overflow: hidden;
+  font: 500 12px/1 var(--mono); }
+.sut-tape-label { flex: none; display: flex; align-items: center; padding: 0 16px; color: var(--accent); letter-spacing: .08em;
+  text-transform: uppercase; border-right: 1px solid var(--line); background: var(--bg-2); position: relative; z-index: 1; }
+.sut-tape-track { display: flex; flex: 1; min-width: 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.sut-tape ul { display: flex; flex: none; align-items: center; animation: sut-tape 70s linear infinite; }
+.sut-tape:hover ul { animation-play-state: paused; }
+.sut-tape li { display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; white-space: nowrap; color: var(--muted); border-right: 1px solid var(--line); }
+.sut-tape li b { color: var(--text); font-weight: 600; }
+.sut-tape li span { color: var(--text-2); font-family: var(--sans); font-size: 12.5px; }
+.sut-tape li em { font-style: normal; }
+.sut-tape li em:last-child { color: var(--accent-2); }
+@keyframes sut-tape { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .sut-tape-track { overflow-x: auto; } .sut-tape ul[aria-hidden] { display: none; } }
+
+/* Hero: live chart backdrop, glow behind Jack, platform chips */
+.sut-hero-fx { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; display: block; pointer-events: none;
+  opacity: 0; transition: opacity 1.2s ease;
+  -webkit-mask-image: linear-gradient(90deg, transparent 8%, rgba(0,0,0,.35) 38%, #000 62%);
+  mask-image: linear-gradient(90deg, transparent 8%, rgba(0,0,0,.35) 38%, #000 62%); }
+.sut-fx-on .sut-hero-fx { opacity: 1; }
+.sut-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(60% 70% at 18% 40%, rgba(7,9,13,.92), transparent 70%), linear-gradient(to top, var(--bg) 0, transparent 22%); }
+.sut-hero-glow { position: absolute; left: 50%; bottom: 0; width: 120%; height: 85%; transform: translateX(-50%); pointer-events: none; z-index: 0;
+  background: radial-gradient(50% 55% at 50% 45%, rgba(250,123,57,.30), rgba(250,123,57,.08) 45%, transparent 70%); filter: blur(8px); }
+.sut-js .sut-hero-glow { animation: sut-breathe 7s ease-in-out infinite; }
+@keyframes sut-breathe { 50% { opacity: .7; transform: translateX(-50%) scale(1.04); } }
+.sut-hero-jack { z-index: 1; }
+.sut-platforms { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.sut .sut-plat { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 999px;
+  background: rgba(16,21,29,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 500 12.5px var(--sans); color: var(--text-2); }
+.sut-plat svg { width: 14px; height: 14px; fill: var(--accent); }
+
+/* Depth: film grain + glass surfaces */
+.sut-fx .sut-hero, .sut-fx .sut-alt, .sut-fx .sut-final {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.sut-fx .sut-final { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), radial-gradient(60% 80% at 50% 100%, rgba(250,123,57,.14), transparent 70%); }
+.sut-fx .sut-steps li, .sut-fx .sut-card, .sut-fx .sut-cred, .sut-fx .sut-demo-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)), rgba(16,21,29,.72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+
+/* Buttons: soft glow */
+.sut-fx .sut-btn:not(.sut-btn-ghost) { box-shadow: 0 0 0 0 rgba(250,123,57,0), 0 8px 24px -12px rgba(250,123,57,.6); transition: background-color .15s ease, box-shadow .25s ease, transform .06s ease; }
+.sut-fx .sut-btn:not(.sut-btn-ghost):hover { box-shadow: 0 0 0 4px rgba(250,123,57,.16), 0 14px 34px -12px rgba(250,123,57,.75); }
+
+/* Pricing card: slow moving border light */
+@property --sut-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.sut-fx .sut-price { position: relative; }
+.sut-fx .sut-price::before { content: ""; position: absolute; inset: -1px; border-radius: 15px; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--sut-a), transparent 0 62%, rgba(250,123,57,.85) 75%, rgba(255,186,140,.9) 79%, transparent 88% 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.sut-js .sut-price::before { animation: sut-orbit 9s linear infinite; }
+@keyframes sut-orbit { to { --sut-a: 360deg; } }
+
+/* Scroll reveal (only once JS is running, so no-JS sees everything) */
+.sut-js [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.sut-js [data-reveal].is-in { opacity: 1; transform: none; }
+.sut-js .sut-day [data-reveal]:nth-child(2) { transition-delay: .08s; }
+.sut-js .sut-day [data-reveal]:nth-child(3) { transition-delay: .16s; }
+
+/* Steps: connected rail */
+.sut-fx .sut-steps { position: relative; }
+.sut-fx .sut-steps span { display: inline-flex; align-items: center; gap: 10px; }
+.sut-fx .sut-steps span::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(250,123,57,.15), 0 0 14px rgba(250,123,57,.6); }
+
+/* Platform windows: illustration label, media, tool canvas */
+.sut .sut-win-tag { margin-left: auto; font: 500 10.5px var(--mono); font-style: normal; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 2px 8px; }
+.sut-media { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--bg-2); }
+.sut-tool-fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sut-fx-on .sut-tool-fx ~ .sut-candles { display: none; }
+
+/* Trend Scanner illustration */
+.sut-scan { padding: 18px 20px 20px; font: 500 13px var(--mono); aspect-ratio: 16 / 10; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  background: linear-gradient(to bottom, var(--surface), var(--bg-2)); }
+.sut-scan-head, .sut-scan-row, .sut-scan-foot { display: grid; grid-template-columns: 56px 86px 1fr 34px; align-items: center; gap: 14px; }
+.sut-scan-head { grid-template-columns: 56px 86px 1fr; color: var(--muted); font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; padding: 0 10px 8px; border-bottom: 1px solid var(--line); }
+.sut-scan-row { padding: 9px 10px; border-bottom: 1px solid rgba(29,37,48,.6); border-radius: 6px; }
+.sut-scan-row:hover { background: rgba(255,255,255,.025); }
+.sut-scan-row b { color: var(--text); }
+.sut-scan-row em { font-style: normal; font-size: 11.5px; padding: 3px 8px; border-radius: 999px; justify-self: start; }
+.sut .is-bull { color: var(--up); background: rgba(61,220,151,.1); }
+.sut .is-bear { color: var(--down); background: rgba(255,107,107,.1); }
+.sut .is-flat { color: var(--text-2); background: rgba(179,188,201,.08); }
+.sut-meter { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.sut-meter i { display: block; height: 100%; width: var(--v); border-radius: inherit; background: linear-gradient(90deg, rgba(61,220,151,.35), var(--up)); }
+.sut-meter.is-bear i { background: linear-gradient(90deg, rgba(255,107,107,.35), var(--down)); }
+.sut-meter.is-flat i { background: linear-gradient(90deg, rgba(179,188,201,.2), var(--text-2)); }
+.sut-meter.is-bear, .sut-meter.is-flat { background: var(--line); }
+.sut-js .sut-win:not(.is-in) .sut-meter i { width: 0; }
+.sut-js .sut-meter i { transition: width 1.1s cubic-bezier(.2,.7,.2,1) .25s; }
+.sut-scan-n { color: var(--text-2); text-align: right; }
+.sut-scan-foot { grid-template-columns: 110px 1fr auto; white-space: nowrap; margin-top: 12px; padding: 12px 10px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; }
+.sut-split { display: flex; gap: 3px; height: 8px; }
+.sut-split i { border-radius: 2px; }
+.sut-split .is-bull { background: var(--up); } .sut-split .is-bear { background: var(--down); } .sut-split .is-flat { background: var(--line-2); }
+
+/* Interactive ATR demo */
+.sut-demo { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; margin-top: 96px; padding-top: 96px; border-top: 1px solid var(--line); }
+.sut-demo-copy h3 { margin: 14px 0 14px; }
+.sut-demo-copy p:not(.sut-eyebrow) { color: var(--text-2); font-size: 16.5px; }
+.sut-demo-panel { border: 1px solid var(--line-2); border-radius: 14px; padding: 26px; background: var(--surface); }
+.sut-demo-ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sut .sut-demo-ctl label { display: grid; gap: 6px; font: 500 12px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sut .sut-demo-ctl select { min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text); font: 500 15px var(--mono); }
+.sut .sut-demo-range { display: grid; gap: 12px; margin-top: 22px; font: 500 13px var(--mono); color: var(--text-2); }
+.sut-demo-range output { color: var(--accent-2); font-weight: 600; font-size: 15px; }
+.sut .sut-demo-range input { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 99px; outline-offset: 6px;
+  background: linear-gradient(90deg, var(--accent) 0 var(--fill, 16%), var(--line-2) var(--fill, 16%) 100%); }
+.sut-demo-range input::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--text); border: 4px solid var(--accent); box-shadow: 0 0 0 6px rgba(250,123,57,.18); cursor: grab; }
+.sut-demo-range input::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 4px solid var(--accent); box-shadow: 0 0 0 6px rgba(250,123,57,.18); cursor: grab; }
+.sut-demo-out { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: 24px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--line); }
+.sut-demo-out > div { display: grid; gap: 4px; padding: 14px 12px; background: var(--bg-2); }
+.sut-demo-out span { font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sut-demo-out b { font-size: 19px; color: var(--text); font-weight: 600; letter-spacing: -.02em; }
+.sut-demo-out .is-key { background: linear-gradient(180deg, rgba(250,123,57,.16), rgba(250,123,57,.05)); }
+.sut-demo-out .is-key b { color: var(--accent-2); font-size: 26px; }
+.sut-demo.is-zero .sut-demo-out .is-key b { color: var(--down); }
+.sut-demo-blocks { display: flex; flex-wrap: wrap; gap: 5px; min-height: 22px; margin-top: 16px; align-items: center; }
+.sut-demo-blocks i { width: 18px; height: 18px; border-radius: 4px; background: linear-gradient(180deg, var(--accent-2), var(--accent)); box-shadow: 0 4px 12px -4px rgba(250,123,57,.7); animation: sut-pop .25s ease-out both; }
+.sut-demo-blocks em { font: 600 12px var(--mono); font-style: normal; color: var(--accent-2); margin-left: 4px; }
+.sut .sut-demo-note { margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+/* Discord channel preview */
+.sut-server-body { padding: 20px 22px 24px; background: linear-gradient(to bottom, var(--surface), var(--bg-2)); }
+.sut .sut-server-group { font: 600 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 8px 0 8px; }
+.sut .sut-server-group + ul + .sut-server-group { margin-top: 18px; }
+.sut-server-body li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 11px 12px; border-radius: 8px; }
+.sut-server-body li:hover { background: rgba(255,255,255,.03); }
+.sut-server-body li b { font: 600 14px var(--mono); color: var(--text); }
+.sut-server-body li span { grid-column: 1; color: var(--muted); font-size: 13.5px; }
+.sut .sut-lockchip, .sut .sut-openchip { grid-column: 2; grid-row: 1 / span 2; align-self: center; font: 600 10.5px var(--mono); font-style: normal; letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+.sut .sut-lockchip { color: var(--accent-2); background: var(--accent-soft); }
+.sut .sut-openchip { color: var(--up); background: rgba(61,220,151,.1); }
+
+/* Jack: credential card + bio */
+.sut-cred { padding: 28px; }
+.sut-cred-top { display: flex; align-items: center; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sut-mono-badge { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; font: 700 19px var(--mono); color: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent-2), var(--accent)); box-shadow: 0 10px 30px -10px rgba(250,123,57,.7); }
+.sut-cred-top b { display: block; font-size: 19px; color: var(--text); letter-spacing: -.02em; }
+.sut-cred-top div span { color: var(--muted); font-size: 14px; }
+.sut-cred-list { margin: 8px 0 0; }
+.sut-cred-list > div { display: grid; grid-template-columns: 96px 1fr; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.sut-cred-list > div:last-child { border-bottom: 0; }
+.sut-cred-list dt { color: var(--accent-2); font-weight: 600; font-size: 14px; }
+.sut-cred-list dd { margin: 0; color: var(--text-2); font-size: 15px; }
+.sut-bio { margin-top: 22px; display: grid; gap: 14px; }
+.sut-bio p { color: var(--text-2); font-size: 16.5px; max-width: 620px; }
+
+/* Inside the membership */
+.sut-card { border: 1px solid var(--line-2); border-radius: 14px; padding: 26px; background: var(--surface); }
+.sut .sut-card-k { font: 500 11.5px var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+.sut-card h3 { margin: 14px 0 8px; font-size: 21px; }
+.sut-card p { color: var(--text-2); font-size: 15px; }
+
+@media (max-width: 980px) {
+  .sut-demo { grid-template-columns: 1fr; gap: 32px; }
+  .sut-hero-fx { -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.6) 55%, #000); mask-image: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.6) 55%, #000); }
+  .sut-hero::after { background: linear-gradient(180deg, rgba(7,9,13,.75), transparent 60%), linear-gradient(to top, var(--bg) 0, transparent 22%); }
+}
+@media (max-width: 760px) {
+  .sut-demo { margin-top: 64px; padding-top: 64px; }
+  .sut-demo-panel { padding: 18px; }
+  .sut-demo-out { grid-template-columns: 1fr 1fr; }
+  .sut-scan { padding: 12px; font-size: 12px; aspect-ratio: auto; }
+  .sut-scan-head, .sut-scan-row { grid-template-columns: 40px 74px 1fr 26px; gap: 10px; }
+  .sut-scan-head { grid-template-columns: 40px 74px 1fr; }
+  .sut-scan-foot { grid-template-columns: 1fr 1fr; } .sut-scan-foot > span:last-child { display: none; }
+  .sut-tape-label { display: none; }
+  .sut-cred { padding: 22px; }
+  .sut-cred-list > div { grid-template-columns: 84px 1fr; }
+  .sut .sut-frame-bar em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+}
+
 </style>
 <div class="sut" id="top" data-page="welcome">
 <!-- StartUpTrading thank-you page (GHL path /welcome). Whop's embedded checkout
