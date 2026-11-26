@@ -20,7 +20,7 @@ def render(name, **kw):
 
 def test_config_points_the_sales_page_at_the_root():
     assert CFG['sales_page_url'] == ROOT and 'join_url' not in CFG
-    assert CFG['membership_open'] == ''            # purchasing stays gated until acceptance tests pass
+    assert CFG['membership_open'] == 'true'        # opened 2026-11-26 after the live acceptance tests passed
 
 
 def test_sales_page_canonical_og_and_structured_data_name_the_root():
