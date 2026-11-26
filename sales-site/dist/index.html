@@ -658,6 +658,63 @@
   .sut .sut-frame-bar em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 }
 
+/* ═══ Visual layer, site-wide ═══════════════════════════════════════════════ */
+/* Glass cards with a lift on hover: free tools, calculator, related links, member pages */
+.sut-fx .sut-tool, .sut-fx .sut-calc-card, .sut-fx .sut-related a, .sut-fx .sut-next > li, .sut-fx .sut-help > div,
+.sut-fx .sut-downloads li, .sut-fx .sut-calc-cta, .sut-fx .sut-checkout {
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)), rgba(16,21,29,.74);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+.sut-fx .sut-tool, .sut-fx .sut-related a { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.sut-fx .sut-tool:hover, .sut-fx .sut-related a:hover { transform: translateY(-3px); border-color: rgba(250,123,57,.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -28px rgba(250,123,57,.45); }
+.sut-fx .sut-next > li.is-current { background: linear-gradient(90deg, var(--accent-soft), transparent 60%), rgba(16,21,29,.74); }
+.sut-fx .sut-calc-out { background: linear-gradient(180deg, rgba(250,123,57,.16), rgba(250,123,57,.05)); box-shadow: 0 18px 40px -26px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-out b { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent-2); }
+.sut-fx .sut-filter[aria-pressed="true"] { box-shadow: 0 0 0 3px rgba(250,123,57,.12), 0 8px 20px -12px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Text-only heroes (free tools, calculator, TradingView, member pages): chart on the right */
+.sut-fx .sut-welcome, .sut-fx .sut-calc-hero { position: relative; isolation: isolate; overflow: hidden; }
+.sut-fx .sut-calc-hero { padding-bottom: 56px; }
+.sut-fx .sut-welcome .sut-hero-fx, .sut-fx .sut-calc-hero .sut-hero-fx {
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); }
+
+/* Tall chart window (TradingView page) */
+.sut .sut-frame-tall { aspect-ratio: 4 / 5; }
+
+/* NinjaTrader menu illustration (/setup) */
+.sut-menu-mock { margin-top: 18px; max-width: 520px; }
+.sut-menu-bar { display: flex; gap: 2px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--bg-2); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-bar span { padding: 5px 10px; border-radius: 6px; }
+.sut-menu-bar .is-open { background: var(--surface-2); color: var(--text); }
+.sut-menu-drop { position: relative; display: grid; width: 230px; margin: 0 0 18px 60px; padding: 6px; border: 1px solid var(--line-2); border-top: 0;
+  border-radius: 0 0 10px 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-drop > span { position: relative; display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 6px; }
+.sut-menu-drop .is-hot { background: var(--accent-soft); color: var(--text); box-shadow: inset 2px 0 0 var(--accent); }
+.sut-menu-drop i { font-style: normal; color: var(--accent); }
+.sut-menu-sub { position: absolute; left: calc(100% + 6px); top: -6px; display: grid; width: 200px; padding: 6px; border: 1px solid var(--line-2);
+  border-radius: 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font-weight: 500; }
+.sut-menu-sub em { font-style: normal; padding: 7px 10px; border-radius: 6px; color: var(--text-2); }
+.sut-menu-sub em.is-hot { color: var(--accent-ink); background: var(--accent); box-shadow: 0 6px 18px -8px rgba(250,123,57,.8); }
+.sut-js .sut-menu-sub em.is-hot { animation: sut-pulse-hot 2.6s ease-in-out infinite; }
+@keyframes sut-pulse-hot { 50% { box-shadow: 0 0 0 4px rgba(250,123,57,.2), 0 6px 18px -8px rgba(250,123,57,.8); } }
+.sut-next .sut-frame { margin-top: 18px; }
+@media (max-width: 760px) {
+  .sut-menu-drop { margin-left: 8px; width: 170px; font-size: 12px; }
+  .sut-menu-sub { left: 40px; top: 100%; width: 180px; }
+  .sut-menu-drop { margin-bottom: 92px; }
+  .sut-menu-bar span:nth-child(n+4) { display: none; }
+}
+/* Steps on member pages: let illustration windows shrink instead of widening the column. */
+.sut-next > li > div { min-width: 0; }
+.sut-next .sut-frame { max-width: 100%; }
+.sut-win .sut-frame-bar { min-width: 0; }
+.sut-win .sut-frame-bar em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) {
+  .sut .sut-links-always { gap: 14px; }
+  .sut .sut-links-always a { white-space: nowrap; font-size: 13px; }
+}
+
 </style>
 <div class="sut sut-fx" id="top">
 <!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
@@ -672,7 +729,6 @@
     <a class="sut-btn sut-btn-sm" href="#checkout" data-member-cta="nav">Become a Member</a>
   </div>
 </header>
-
 <div class="sut-tape" aria-label="Futures contract specifications"><div class="sut-tape-label">Contract specs</div><div class="sut-tape-track"><ul><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul><ul aria-hidden="true"><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul></div></div>
 
 <section class="sut-hero">
@@ -1742,6 +1798,14 @@ function sutSizerHeight(data, iframeId) {
   var small = !!(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
 
   // ── Scroll reveal ────────────────────────────────────────────────────────
+  // Common blocks on every page fade in as they scroll into view. Only blocks that
+  // start below the fold are animated, so nothing visible on load ever flickers.
+  var AUTO = '.sut-section .sut-head, .sut-tool, .sut-calc-card, .sut-calc-cta, .sut-frame, .sut-next > li, ' +
+             '.sut-related li, .sut-faq, .sut-steps, .sut-list, .sut-sub, .sut-help > div, .sut-calc-table-wrap, .sut-calc-how';
+  var fold = window.innerHeight || 800, autos = root.querySelectorAll(AUTO);
+  for (var au = 0; au < autos.length; au++) {
+    if (!autos[au].hasAttribute('data-reveal') && autos[au].getBoundingClientRect().top > fold) autos[au].setAttribute('data-reveal', '');
+  }
   var reveals = root.querySelectorAll('[data-reveal]');
   if (reduce || !('IntersectionObserver' in window)) {
     for (var r = 0; r < reveals.length; r++) reveals[r].classList.add('is-in');
@@ -1953,6 +2017,22 @@ function sutSizerHeight(data, iframeId) {
       });
       x.fillStyle = rgba(COL.mut, 0.9);
       x.fillText('RISK $' + o.risk + '   ATR(14) ' + atr.toFixed(2) + '   STOP ' + stopD.toFixed(2) + ' pts', 14 * d, H - 14 * d);
+      if (o.panel) {
+        // The planner's size panel (top left of the plot): same arithmetic as the script.
+        var micro = Math.floor(o.risk / (stopD * o.pv / 10)), pwid = 196 * d, ph = 118 * d, px = 14 * d, py = 14 * d;
+        x.fillStyle = 'rgba(11,14,20,.88)'; x.strokeStyle = rgba(COL.acc, 0.45); x.lineWidth = d;
+        x.beginPath(); if (x.roundRect) x.roundRect(px, py, pwid, ph, 8 * d); else x.rect(px, py, pwid, ph); x.fill(); x.stroke();
+        var rowsP = [['RISK PLANNER', o.market + ' · fixed $', COL.mut, COL.mut],
+                     ['MAX SIZE', n2 + ' ' + o.market, COL.mut, n2 ? COL.acc : COL.dn],
+                     ['MICRO', micro + ' ' + o.micro, COL.mut, COL.txt],
+                     ['RISK BUDGET', '$' + o.risk, COL.mut, COL.txt],
+                     ['STOP RISK', '$' + (n2 * stopD * o.pv).toFixed(0), COL.mut, COL.txt]];
+        rowsP.forEach(function (rw, ri) {
+          var yy = py + (ri * 21 + 20) * d;
+          x.fillStyle = rgba(rw[2], 0.95); x.fillText(rw[0], px + 12 * d, yy);
+          x.fillStyle = rgba(rw[3], 1); x.textAlign = 'right'; x.fillText(rw[1], px + pwid - 12 * d, yy); x.textAlign = 'left';
+        });
+      }
     }
 
     // Last-price line and tag
@@ -1992,8 +2072,10 @@ function sutSizerHeight(data, iframeId) {
     });
     var tool = root.querySelectorAll('canvas[data-fx-chart="bracket"]');
     for (var t = 0; t < tool.length; t++) {
+      var ds = tool[t].dataset, panel = ds.panel === 'true';
       mount(tool[t], { seed: 2067 + t, start: 5310, cw: small ? 6 : 8, gap: small ? 14 : 17, axis: true, profile: false, bracket: true,
-        risk: 180, pv: 5, market: 'MES', top: 0.2, bottom: 0.9, candleAlpha: 0.6, fps: 24, tickMs: 700 });
+        risk: Number(ds.risk || 180), pv: Number(ds.pv || 5), market: ds.market || 'MES', micro: ds.micro || 'MES', panel: panel,
+        top: panel ? 0.34 : 0.2, bottom: 0.9, candleAlpha: 0.6, fps: 24, tickMs: 700 });
     }
     root.classList.add('sut-fx-on');
     if (reduce) return;                     // one still frame, no animation

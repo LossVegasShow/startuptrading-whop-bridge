@@ -16,21 +16,28 @@ def render(name='sales', **kw):
     return load_build().render(dict(CFG, **kw), name)[0]
 
 
-def test_fx_only_on_the_sales_page_and_switchable():
-    on = render()
-    assert 'class="sut sut-fx"' in on and '<canvas class="sut-hero-fx"' in on and 'Market.prototype' in on
-    off = render(design_fx='')
-    assert 'class="sut"' in off and '<canvas class="sut-hero-fx"' not in off and 'Market.prototype' not in off
+PAGES = ('sales', 'free_tools', 'calculator', 'tv_atr', 'welcome', 'setup')
+
+
+def test_one_visual_system_on_every_page_and_switchable():
+    for page in PAGES:
+        on = render(page)
+        assert 'class="sut sut-fx"' in on and on.count('<canvas class="sut-hero-fx"') == 1, page
+        assert on.count('class="sut-tape"') == 1 and 'Market.prototype' in on, page
+        off = render(page, design_fx='')
+        assert 'class="sut sut-fx"' not in off and '<canvas class="sut-hero-fx"' not in off, page
+        assert 'class="sut-tape"' not in off and 'Market.prototype' not in off, page
+    on, off = render(), render(design_fx='')
     # Checkout, tracking and the approved hero copy are identical either way.
     for marker in ('data-whop-checkout-plan-id', 'data-member-cta="hero"', "Jack's tools.<br>Your charts.", 'sutAttribution'):
         assert marker in on and marker in off
-    for page in ('free_tools', 'calculator', 'tv_atr', 'welcome', 'setup'):
-        assert 'Market.prototype' not in render(page), page
 
 
 def test_no_placeholders_and_no_invented_testimonials():
+    for page in PAGES:
+        markup = re.sub(r'<script.*?</script>', '', render(page), flags=re.S)
+        assert 'class="sut-ph' not in markup and 'goes here' not in markup and 'Screenshot:' not in markup, page
     html = render()
-    assert 'class="sut-ph' not in html and 'goes here' not in html
     assert 'What members say' not in html          # no quotes until real, permissioned ones exist
     # Illustrations are labelled as such.
     assert html.count('>Illustration<') == 2 and 'Channel preview' in html

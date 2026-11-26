@@ -1,7 +1,7 @@
 <div class="sut" id="top" data-page="setup">
 <!-- StartUpTrading install guide (GHL path /setup). INDICATOR_SETUP_URL in Render
      points here, so the "your tools are ready" email links to this page.
-     Built by sales-site/build.py; edit src/, not dist/. Boxes with class "sut-ph"
+     Built by sales-site/build.py; edit src/, not dist/. Chart and menu windows are labelled illustrations; boxes with class "sut-ph"
      are placeholders for screenshots. Products, files and NinjaTrader names come
      from ../products.json. -->
 
@@ -55,7 +55,15 @@
         <div>
           <h3>Import into NinjaTrader</h3>
           <p>In the NinjaTrader Control Center, open <b>Tools → Import → NinjaScript Add-On…</b>, choose the first .zip and click <b>OK</b>. Repeat for the second file, then restart NinjaTrader.</p>
-          <div class="sut-ph sut-ph-text"><strong>Screenshot: the Import menu</strong><small>Optional: Control Center → Tools → Import → NinjaScript Add-On.</small></div>
+          <figure class="sut-frame sut-win sut-menu-mock" aria-label="Illustration: NinjaTrader Control Center, Tools menu, Import, NinjaScript Add-On">
+            <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · Control Center</em><i class="sut-win-tag">Illustration</i></div>
+            <div class="sut-menu-bar"><span>New</span><span class="is-open">Tools</span><span>Workspaces</span><span>Connections</span><span>Help</span></div>
+            <div class="sut-menu-drop">
+              <span>Account Data</span><span>Historical Data</span><span>Database Management</span>
+              <span class="is-hot">Import <i>▸</i><b class="sut-menu-sub"><em class="is-hot">NinjaScript Add-On…</em><em>Basket Orders…</em></b></span>
+              <span>Export</span><span>Options</span>
+            </div>
+          </figure>
         </div>
       </li>
       <li>
@@ -64,7 +72,10 @@
           <h3>Add them to a chart</h3>
           <p>Open a chart (for example ES or NQ), then:</p>
           {{product_locations}}
-          <div class="sut-ph sut-ph-text"><strong>Screenshot: both tools on a chart</strong><small>Jack: confirm where each tool appears in NinjaTrader and add a screenshot.</small></div>
+          <figure class="sut-frame sut-win">
+            <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · ES · Chart</em><i class="sut-win-tag">Illustration</i></div>
+            <div class="sut-frame-body"><canvas class="sut-tool-fx" data-fx-chart="bracket" data-market="ES" data-micro="MES" data-pv="50" data-risk="500" role="img" aria-label="Illustration: an ES chart with ATR-based entry, stop and target brackets"></canvas>{{candles}}</div>
+          </figure>
         </div>
       </li>
     </ol>

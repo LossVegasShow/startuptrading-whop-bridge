@@ -20,8 +20,9 @@ FORM = 'https://api.leadconnectorhq.com/widget/form/TEST123'
 
 DRIVER = r"""
 const {chromium} = require('playwright');
-const [html, outPath] = [process.argv[2], process.argv[3]];
 const fs = require('fs');
+// The page is passed as a file: inline it would exceed the OS limit on one argument.
+const [html, outPath] = [fs.readFileSync(process.argv[2], 'utf8'), process.argv[3]];
 const FAKE_FORM = `<!doctype html><body style="margin:0;background:#141922;height:500px">
 <script>
   window.addEventListener('message', function (e) {
@@ -100,7 +101,8 @@ def _run(tmp_path, name):
             + b.site_tracking_snippet() + '</head><body>' + embed + '</body></html>')
     (tmp_path / 'driver.js').write_text(DRIVER)
     out = tmp_path / 'out.json'
-    subprocess.run([node, str(tmp_path / 'driver.js'), html, str(out)], check=True, cwd=tmp_path, timeout=120)
+    (tmp_path / 'page.html').write_text(html)
+    subprocess.run([node, str(tmp_path / 'driver.js'), str(tmp_path / 'page.html'), str(out)], check=True, cwd=tmp_path, timeout=120)
     return json.loads(out.read_text())
 
 

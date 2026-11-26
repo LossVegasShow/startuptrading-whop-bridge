@@ -9,6 +9,14 @@
   var small = !!(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
 
   // ── Scroll reveal ────────────────────────────────────────────────────────
+  // Common blocks on every page fade in as they scroll into view. Only blocks that
+  // start below the fold are animated, so nothing visible on load ever flickers.
+  var AUTO = '.sut-section .sut-head, .sut-tool, .sut-calc-card, .sut-calc-cta, .sut-frame, .sut-next > li, ' +
+             '.sut-related li, .sut-faq, .sut-steps, .sut-list, .sut-sub, .sut-help > div, .sut-calc-table-wrap, .sut-calc-how';
+  var fold = window.innerHeight || 800, autos = root.querySelectorAll(AUTO);
+  for (var au = 0; au < autos.length; au++) {
+    if (!autos[au].hasAttribute('data-reveal') && autos[au].getBoundingClientRect().top > fold) autos[au].setAttribute('data-reveal', '');
+  }
   var reveals = root.querySelectorAll('[data-reveal]');
   if (reduce || !('IntersectionObserver' in window)) {
     for (var r = 0; r < reveals.length; r++) reveals[r].classList.add('is-in');
@@ -220,6 +228,22 @@
       });
       x.fillStyle = rgba(COL.mut, 0.9);
       x.fillText('RISK $' + o.risk + '   ATR(14) ' + atr.toFixed(2) + '   STOP ' + stopD.toFixed(2) + ' pts', 14 * d, H - 14 * d);
+      if (o.panel) {
+        // The planner's size panel (top left of the plot): same arithmetic as the script.
+        var micro = Math.floor(o.risk / (stopD * o.pv / 10)), pwid = 196 * d, ph = 118 * d, px = 14 * d, py = 14 * d;
+        x.fillStyle = 'rgba(11,14,20,.88)'; x.strokeStyle = rgba(COL.acc, 0.45); x.lineWidth = d;
+        x.beginPath(); if (x.roundRect) x.roundRect(px, py, pwid, ph, 8 * d); else x.rect(px, py, pwid, ph); x.fill(); x.stroke();
+        var rowsP = [['RISK PLANNER', o.market + ' · fixed $', COL.mut, COL.mut],
+                     ['MAX SIZE', n2 + ' ' + o.market, COL.mut, n2 ? COL.acc : COL.dn],
+                     ['MICRO', micro + ' ' + o.micro, COL.mut, COL.txt],
+                     ['RISK BUDGET', '$' + o.risk, COL.mut, COL.txt],
+                     ['STOP RISK', '$' + (n2 * stopD * o.pv).toFixed(0), COL.mut, COL.txt]];
+        rowsP.forEach(function (rw, ri) {
+          var yy = py + (ri * 21 + 20) * d;
+          x.fillStyle = rgba(rw[2], 0.95); x.fillText(rw[0], px + 12 * d, yy);
+          x.fillStyle = rgba(rw[3], 1); x.textAlign = 'right'; x.fillText(rw[1], px + pwid - 12 * d, yy); x.textAlign = 'left';
+        });
+      }
     }
 
     // Last-price line and tag
@@ -259,8 +283,10 @@
     });
     var tool = root.querySelectorAll('canvas[data-fx-chart="bracket"]');
     for (var t = 0; t < tool.length; t++) {
+      var ds = tool[t].dataset, panel = ds.panel === 'true';
       mount(tool[t], { seed: 2067 + t, start: 5310, cw: small ? 6 : 8, gap: small ? 14 : 17, axis: true, profile: false, bracket: true,
-        risk: 180, pv: 5, market: 'MES', top: 0.2, bottom: 0.9, candleAlpha: 0.6, fps: 24, tickMs: 700 });
+        risk: Number(ds.risk || 180), pv: Number(ds.pv || 5), market: ds.market || 'MES', micro: ds.micro || 'MES', panel: panel,
+        top: panel ? 0.34 : 0.2, bottom: 0.9, candleAlpha: 0.6, fps: 24, tickMs: 700 });
     }
     root.classList.add('sut-fx-on');
     if (reduce) return;                     // one still frame, no animation

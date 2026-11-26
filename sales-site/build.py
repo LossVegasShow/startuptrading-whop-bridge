@@ -140,8 +140,8 @@ def render(cfg, name='sales'):
     page = re.sub(r'<!--include:([\w.-]+\.html)-->', lambda m: (SRC / m.group(1)).read_text(), page)
     css = (SRC / 'styles.css').read_text()
     # affiliate.js runs first: it sets window.SUT_AFFILIATE for app.js.
-    # fx.js (the visual layer) is only for the sales page, and only when design_fx is on.
-    fx_on = name == 'sales' and str(cfg.get('design_fx', '')).lower() == 'true'
+    # fx.js: the visual layer for every page (ticker, live hero chart, reveals), when design_fx is on.
+    fx_on = str(cfg.get('design_fx', '')).lower() == 'true'
     js = '\n'.join((SRC / f).read_text() for f in ('affiliate.js', 'tracking.js', 'app.js') + (('fx.js',) if fx_on else ()))
     cfg = dict(cfg)
     cfg['design_fx'] = 'true' if fx_on else ''
@@ -158,10 +158,9 @@ def render(cfg, name='sales'):
     cfg['cta_href'] = '#checkout' if embed_on else cfg['checkout_url']
     values = {k: html.escape(str(v), quote=True) for k, v in cfg.items()}
     values['candles'] = candles()
-    values['tape'] = tape_html()
     values['scanner_media'] = media_html(cfg.get('scanner_media_url', ''), 'Trend Scanner & Market Selector in NinjaTrader 8')
     values['atr_media'] = media_html(cfg.get('atr_media_url', ''), 'ATR Order Automation placing ATR-based brackets in NinjaTrader 8')
-    values['nav'] = nav_html(cfg, name)
+    values['nav'] = nav_html(cfg, name) + ('\n' + tape_html() if fx_on else '')
     values['tool_filters'], values['tool_cards'] = directory_html(cfg)
     values['subscribe'] = subscribe_html(cfg, name)
     values['membership_note'] = membership_note_html(cfg)
@@ -198,6 +197,13 @@ def render(cfg, name='sales'):
         body = pattern.sub(lambda m: m.group(1) if on else '', body)
         pattern = re.compile(rf'<!--ifnot:{key}-->(.*?)<!--endifnot:{key}-->', re.S)
         body = pattern.sub(lambda m: '' if on else m.group(1), body)
+    if fx_on:
+        # One visual system on every page: the root class switches the styles on and
+        # every hero gets the live chart backdrop (drawn by fx.js after load).
+        body = body.replace('<div class="sut" id="top"', '<div class="sut sut-fx" id="top"', 1)
+        if 'class="sut-tape"' not in body and '</header>' in body:     # pages with their own header
+            body = body.replace('</header>', '</header>\n' + tape_html(), 1)
+        body = re.sub(r'(<section class="sut-hero[^"]*">)', r'\1\n  <canvas class="sut-hero-fx" aria-hidden="true"></canvas>', body, count=1)
     ld = structured_data(name, cfg, body)
     if ld:
         body += '\n<script type="application/ld+json">' + ld + '</script>'
