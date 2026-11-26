@@ -143,7 +143,14 @@ def test_free_pages_offer_the_free_community():
         assert f'data-community-cta="{name}"' in embed and 'Join the free Discord' in embed, name
     import re
     markup = lambda h: re.sub(r'<script.*?</script>', '', h, flags=re.S)
-    for name in ('sales', 'welcome', 'setup'):
+    sales = markup(b.render(cfg, 'sales')[0])
+    for place in ('hero', 'pricing', 'faq', 'footer'):
+        assert f'data-community-cta="{place}"' in sales, place
+    # Free entry to the Discord; the trade room stays paid.
+    assert 'Free Discord community</th><td class="yes">✓</td><td class="yes">✓</td>' in sales
+    assert 'Members-only trade room with Jack</th><td class="no">—</td><td class="yes">✓</td>' in sales
+    assert 'Private Discord' not in sales
+    for name in ('welcome', 'setup'):          # members' pages: already in the community
         assert 'data-community-cta' not in markup(b.render(cfg, name)[0]), name
     assert 'data-community-cta' not in markup(b.render(dict(cfg, community_join_url=''), 'free_tools')[0])
 

@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from fastapi import FastAPI, HTTPException, Request, Form
-from fastapi.responses import FileResponse,HTMLResponse,RedirectResponse,JSONResponse
+from fastapi.responses import FileResponse,HTMLResponse,RedirectResponse,JSONResponse,Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from config import Config,INDICATORS,EVENTS,PLANS
@@ -32,6 +32,7 @@ import customer_errors
 import email_templates
 import controls
 import acquisition
+import product_files
 import ga4_data
 
 cfg=Config(); engine=Engine(cfg)
@@ -213,7 +214,7 @@ async def canonical_host(request,call_next):
 @app.middleware('http')
 async def secure_headers(request,call_next):
     resp=await call_next(request)
-    resp.headers['Cache-Control']='no-store';resp.headers['Referrer-Policy']='same-origin'
+    resp.headers['Cache-Control']='public, max-age=86400' if request.url.path.startswith('/static/brand/') else 'no-store';resp.headers['Referrer-Policy']='same-origin'
     resp.headers['X-Content-Type-Options']='nosniff';resp.headers['X-Frame-Options']='DENY'
     # Google Tag Manager / GA4 hosts are allowed only when a container is configured.
     g=bool(cfg.gtm_container_id) and not request.url.path.startswith('/admin')
@@ -226,6 +227,54 @@ async def secure_headers(request,call_next):
         # Tell browsers to only ever use HTTPS for this host (not subdomains).
         resp.headers['Strict-Transport-Security']='max-age=31536000'
     return resp
+
+# Members-only product downloads (files stored privately in the database; see product_files.py).
+@app.get('/downloads/{filename}')
+def download(request:Request,filename:str):
+    if not product_files.registered(filename):raise HTTPException(404,'Not found')
+    token=request.cookies.get('sut_session','')
+    c=None
+    if len(token)>=30:
+        with connect(cfg) as db:
+            row=db.execute('SELECT customer_id FROM sessions WHERE token_hash=? AND expires_at>?',(hash_token(token),int(time.time()))).fetchone()
+            c=customer(db,row['customer_id']) if row else None
+    if not c:
+        # Sign in with Whop first, then come straight back to this download.
+        resp=RedirectResponse('/oauth/login',303)
+        resp.set_cookie(product_files.NEXT_COOKIE,'/downloads/'+filename,max_age=900,httponly=True,
+                        secure=cfg.public_base_url.startswith('https://'),samesite='lax')
+        return resp
+    if c['status']!='eligible':
+        # Only an active paid membership downloads the tools (never the free community).
+        return render_error(request,'no_membership',403)
+    with connect(cfg) as db:
+        content=product_files.fetch(db,filename)
+        if content is not None:audit(db,c['id'],'product_download',filename)
+    if content is None:raise HTTPException(503,'This download is being prepared. Please contact support.')
+    return Response(content,media_type='application/zip',headers={
+        'Content-Disposition':f'attachment; filename="{filename}"','Cache-Control':'private, no-store'})
+
+@app.get('/admin/products',response_class=HTMLResponse)
+def admin_products(request:Request):
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    with connect(cfg) as db:files=product_files.status(db)
+    return page(request,'admin_products.html',files=files,base=cfg.public_base_url,message='')
+
+@app.post('/admin/products',response_class=HTMLResponse)
+async def admin_products_upload(request:Request):
+    require_admin(request,cfg.admin_password,cfg.public_base_url)
+    form=await request.form()
+    messages=[]
+    for key in form:
+        f=form[key]
+        if hasattr(f,'read') and getattr(f,'filename',''):
+            data=await f.read(product_files.MAX_BYTES+1)
+            with connect(cfg) as db:
+                ok,msg=product_files.store(db,f.filename.rsplit('/',1)[-1].rsplit('\\',1)[-1],data)
+                if ok:audit(db,None,'product_file_uploaded',msg[:200])
+            messages.append(('OK: ' if ok else 'Refused: ')+msg)
+    with connect(cfg) as db:files=product_files.status(db)
+    return page(request,'admin_products.html',files=files,base=cfg.public_base_url,message=' · '.join(messages) or 'No file selected')
 
 @app.get('/health')
 def health():
@@ -575,7 +624,9 @@ async def oauth_callback(request:Request,code:str='',state:str='',error:str=''):
         session=secrets.token_urlsafe(36)
         db.execute('INSERT INTO sessions(token_hash,customer_id,expires_at) VALUES(?,?,?)',
                    (hash_token(session),cid,int(time.time())+86400*14))
-    response=RedirectResponse('/onboarding',303)
+    # Back to the download that sent them to sign in, if any (validated path only).
+    response=RedirectResponse(product_files.safe_next(request.cookies.get(product_files.NEXT_COOKIE)) or '/onboarding',303)
+    response.delete_cookie(product_files.NEXT_COOKIE)
     response.delete_cookie(acquisition.ATTR_COOKIE)
     response.set_cookie('sut_session',session,httponly=True,
         secure=not cfg.public_base_url.startswith('http://127.0.0.1:'),samesite='lax',max_age=1209600)

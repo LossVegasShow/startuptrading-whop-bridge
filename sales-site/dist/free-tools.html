@@ -446,6 +446,24 @@
 
 .sut-community-note { margin-top: 14px; }
 
+/* Hero portrait: Jack in front of the chart panel, cut off by the hero's bottom
+   border as if standing behind it (his head rises above the panel). */
+.sut-hero { --hero-pb: 72px; overflow: hidden; }
+.sut-hero-portrait { position: relative; margin: 0; align-self: stretch; display: flex; align-items: center; min-height: 440px; }
+.sut-hero-portrait .sut-hero-frame { width: 100%; }
+.sut-hero-jack { position: absolute; left: 50%; bottom: calc(-1 * var(--hero-pb)); transform: translateX(-50%);
+  height: calc(100% + var(--hero-pb)); width: auto; max-width: 112%; object-fit: contain; object-position: bottom center;
+  filter: drop-shadow(0 24px 40px rgba(0,0,0,.55)); pointer-events: none; user-select: none; }
+.sut .sut-hero-community { margin: 18px 0 0; font-size: 14.5px; color: var(--text-2); }
+.sut .sut-hero-community a { font-weight: 600; }
+@media (max-width: 980px) {
+  .sut-hero-portrait { min-height: 380px; }
+}
+@media (max-width: 760px) {
+  .sut-hero { --hero-pb: 48px; }
+  .sut-hero-portrait { min-height: 330px; }
+}
+
 </style>
 <div class="sut" id="top" data-page="free_tools" data-tool-id="free-tools-directory">
 <!-- Free tools directory (GHL path /free-tools). Cards come from sales-site/tools.json;
@@ -503,6 +521,7 @@
       <span class="sut-logo">STARTUPTRADING</span>
       <nav aria-label="Footer">
         <a href="https://startuptrading.com/free-tools">Free tools</a>
+        <a href="https://whop.com/checkout/plan_Nzi6M0goKvcWY/" target="_blank" rel="noopener" data-community-cta="footer">Free Discord community</a>
         <a href="https://activate.startuptrading.com/">Member activation</a>
         <a href="mailto:support@startuptrading.com">Support</a>
         

@@ -388,7 +388,7 @@ dashboard: `tests/test_ga4.py`, `test_attribution.py`, `test_marketing.py`.
 | 7 | Whop | Webhook subscribed to **payment.succeeded, payment.failed, payment.created, payment.pending** (+ the membership events); API key has **payment:basic:read** |
 | 8 | GoHighLevel → Form 7 and workflows | Section 7 (hidden fields `first_channel`, `last_channel`; Original fields; workflow; subscriber workflow; `GHL_CUSTOM_FIELDS_JSON` keys `acquisition_first_channel`, `acquisition_last_channel`) |
 | 9 | Testing | Section 9, then publish GTM |
-| 10 | GoHighLevel Media | Upload the two product zips; send me the links for `products.json`. Never upload them to GitHub |
+| 10 | Licensing app | Upload the two product zips at `/admin/products` (stored privately; members-only downloads). Never upload them to GitHub |
 | 11 | Whop + Discord | Section 12: community redirect URL, Discord roles via Whop, channel permissions; then re-paste header + all embeds, import + publish GTM |
 
 ## 11. Blockers and limitations

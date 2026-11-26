@@ -1,0 +1,27 @@
+{% extends "_base.html" %}
+{% block title %}Product files{% endblock %}
+{% block brand_sub %}Operations{% endblock %}
+{% block content %}
+<div class="page-head">
+  <span class="eyebrow">Operations · private</span>
+  <h1>Product files</h1>
+  <p class="lead">The NinjaTrader exports members download from /setup. They're stored privately in this app's database, never in
+    GitHub, and served only to signed-in members with an active paid membership. A file is accepted only if its name and SHA-256
+    match products.json.</p>
+  <p class="mk-nav"><a href="/admin">Operations</a> · <a href="/admin/marketing">Marketing</a> · <b>Product files</b></p>
+</div>
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+<section class="card">
+  <h2>Status</h2>
+  <div class="scroll"><table><tr><th>Product</th><th>File</th><th>Stored</th><th>Members' download link</th></tr>
+  {% for f in files %}<tr><td>{{ f.name }}</td><td><code>{{ f.file }}</code></td>
+    <td>{% if f.ok %}Yes · {{ '{:,}'.format(f.size) }} bytes · verified{% elif f.uploaded %}Stored copy doesn't match products.json{% else %}Not uploaded{% endif %}</td>
+    <td><code>{{ base }}/downloads/{{ f.file }}</code></td></tr>{% endfor %}
+  </table></div>
+</section>
+<form class="card mk-links" method="post" action="/admin/products" enctype="multipart/form-data">
+  <h2>Upload</h2>
+  {% for f in files %}<label>{{ f.name }} <small>{{ f.file }}</small><input type="file" name="file{{ loop.index }}" accept=".zip"></label>{% endfor %}
+  <p><button>Upload and verify</button></p>
+</form>
+{% endblock %}

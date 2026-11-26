@@ -129,6 +129,10 @@ def render(cfg, name='sales'):
     values['subscribe'] = subscribe_html(cfg, name)
     values['membership_note'] = membership_note_html(cfg)
     values['community_note'] = community_note_html(cfg, name)
+    # Footer link to the free community, except on members' pages (they're already in).
+    values['footer_community'] = (f'<a href="{html.escape(cfg["community_join_url"], quote=True)}" target="_blank" rel="noopener" '
+                                  f'data-community-cta="footer">Free Discord community</a>'
+                                  if cfg.get('community_join_url') and name not in ('welcome', 'setup') else '')
     values['tv_cta'] = tv_cta_html(cfg)
     values['product_downloads'], values['product_locations'] = product_downloads_html(cfg)
     values['cta_attr'] = '' if embed_on else ' data-checkout'
