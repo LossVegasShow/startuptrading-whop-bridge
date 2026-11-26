@@ -697,6 +697,16 @@
   .sut .sut-links-always a { white-space: nowrap; font-size: 13px; }
 }
 
+/* Hosted-checkout mode: what happens after Join (fills the checkout column) */
+.sut-after { border: 1px solid var(--line-2); border-radius: 14px; padding: 30px; background: var(--surface); }
+.sut-fx .sut-after { background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)), rgba(16,21,29,.74); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.sut-after h3 { margin: 14px 0 20px; }
+.sut-after ol { counter-reset: sut-after; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.sut-after li { counter-increment: sut-after; display: grid; grid-template-columns: 44px 1fr; gap: 2px 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.sut-after li::before { content: "0" counter(sut-after); grid-row: 1 / span 2; font: 600 13px/24px var(--mono); color: var(--accent); }
+.sut-after li b { color: var(--text); font-weight: 600; }
+.sut-after li span { color: var(--text-2); font-size: 15px; }
+
 </style>
 <div class="sut sut-fx" id="top">
 <!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
@@ -708,7 +718,7 @@
   <div class="sut-wrap sut-nav-in">
     <a class="sut-logo" href="#top" aria-label="StartUpTrading home"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>STARTUPTRADING</a>
     <nav class="sut-links" aria-label="Main"><a href="#indicators">Technology</a><a href="https://startuptrading.com/free-tools">Free Tools</a><a href="#room">Education</a><a href="#room">Community</a><a href="#jack">About Jack</a></nav>
-    <a class="sut-btn sut-btn-sm" href="#checkout" data-member-cta="nav">Become a Member</a>
+    <a class="sut-btn sut-btn-sm" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout data-member-cta="nav">Become a Member</a>
   </div>
 </header>
 <div class="sut-tape" aria-label="Futures contract specifications"><div class="sut-tape-label">Contract specs</div><div class="sut-tape-track"><ul><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul><ul aria-hidden="true"><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul></div></div>
@@ -721,7 +731,7 @@
       <h1>Jack's tools.<br>Your charts.<br><span class="sut-dim">Always evolving.</span></h1>
       <p class="sut-lead">Real NinjaTrader&nbsp;8 tools Jack built to trade futures in his own account. Every new tool he releases is added to your membership and licensed to you automatically. Plus the trade room and his masterclasses.</p>
       <div class="sut-cta-row">
-        <a class="sut-btn sut-btn-lg" href="#checkout" data-member-cta="hero">Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout data-member-cta="hero">Join for $99/month <span class="sut-arrow" aria-hidden="true">→</span></a>
         <a class="sut-btn sut-btn-ghost sut-btn-lg" href="#indicators">See what's included</a>
       </div>
       <ul class="sut-assure">
@@ -938,37 +948,25 @@
           <li>Automatic licensing to your NinjaTrader account</li>
         </ul>
         
+        <a class="sut-btn sut-btn-lg sut-btn-block sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout>Join monthly <span class="sut-arrow" aria-hidden="true">→</span></a>
+        <a class="sut-btn sut-btn-lg sut-btn-block sut-y" href="https://whop.com/checkout/plan_B84PWlvXemyfX/" data-checkout data-plan="annual">Join annually <span class="sut-arrow" aria-hidden="true">→</span></a>
+        
         <p class="sut-fine sut-m">$99 billed monthly through Whop. Cancel anytime.</p>
         <p class="sut-fine sut-y">$495 billed once a year through Whop. Cancel anytime; access runs to the end of the year you've paid for.</p>
       </div>
 
       
-      <div class="sut-checkout" id="checkout">
-        <div class="sut-checkout-head">
-          <span class="sut-tag"><span class="sut-lock" aria-hidden="true"></span>Secure checkout</span>
-          <span class="sut-checkout-plan sut-m">Monthly · $99</span>
-          <span class="sut-checkout-plan sut-y">Annual · $495</span>
-        </div>
-        <!-- Whop embedded checkout. The hidden plan stays rendered (collapsed, not
-             display:none) so its iframe is sized correctly when you switch. After
-             payment Whop sends the buyer straight to the activation page. -->
-        <div class="sut-embed sut-m">
-          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
-          <div data-whop-checkout-plan-id="plan_qSXeS0xoDapGU" data-whop-checkout-theme="dark"
-               data-whop-checkout-theme-accent-color="orange"
-               data-whop-checkout-return-url="https://startuptrading.com/welcome"></div>
-        </div>
-        <div class="sut-embed sut-y">
-          <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
-          <div data-whop-checkout-plan-id="plan_B84PWlvXemyfX" data-whop-checkout-theme="dark"
-               data-whop-checkout-theme-accent-color="orange"
-               data-whop-checkout-return-url="https://startuptrading.com/welcome"></div>
-        </div>
-        <p class="sut-fine sut-checkout-fallback">
-          Payments are processed by Whop. Checkout not loading?
-          <a class="sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout target="_blank" rel="noopener">Open it on Whop ↗</a><a class="sut-y" href="https://whop.com/checkout/plan_B84PWlvXemyfX/" data-checkout data-plan="annual" target="_blank" rel="noopener">Open it on Whop ↗</a>
-        </p>
+      <div class="sut-after" data-reveal>
+        <span class="sut-tag"><span class="sut-lock" aria-hidden="true"></span>Secure checkout by Whop</span>
+        <h3>What happens when you join</h3>
+        <ol>
+          <li><b>Pay on Whop</b><span>Card or wallet on Whop's secure checkout. Your receipt and Discord access arrive straight away.</span></li>
+          <li><b>Activate in about three minutes</b><span>You come back here, sign in and confirm your NinjaTrader email with a 6-digit code. No password needed.</span></li>
+          <li><b>Trade with the tools</b><span>Download, import and add them to a chart. New tools are licensed to you automatically.</span></li>
+        </ol>
+        <p class="sut-fine">Cancel anytime in Whop. You keep access to the end of the period you've paid for.</p>
       </div>
+      
       
     </div>
 
@@ -1043,7 +1041,7 @@
   <div class="sut-wrap sut-final-in" data-reveal>
     <h2>Trade with Jack's tools.</h2>
     <p class="sut-lead">$99/month or $495/year. Every new tool included. Cancel anytime.</p>
-    <a class="sut-btn sut-btn-lg" href="#checkout" data-member-cta="final">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
+    <a class="sut-btn sut-btn-lg" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout data-member-cta="final">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>
     <p class="sut-fine">Already a member? <a href="https://activate.startuptrading.com/">Activate your trading tools</a>. Not ready? <a href="https://startuptrading.com/indicators?utm_source=startuptrading&amp;utm_medium=sales_page&amp;utm_campaign=not_ready&amp;utm_content=final" data-free="final">Start with the free ATR Expansion Bar Indicator</a>.</p>
     <p class="sut-fine">Futures trading involves substantial risk of loss. Our tools and education are designed to support your trading process, not to replace your own judgement. STARTUPTRADING · Every move shapes your future.</p>
   </div>
@@ -2070,4 +2068,3 @@ function sutSizerHeight(data, iframeId) {
 })();
 
 </script>
-<script async defer src="https://js.whop.com/static/checkout/loader.js"></script>

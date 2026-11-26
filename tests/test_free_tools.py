@@ -232,7 +232,7 @@ def test_tracking_hooks_present():
     calc = markup(page('calculator'))
     assert 'data-tool-id="futures-position-size-calculator"' in calc and calc.count('data-tool-use') == 2
     sales = markup(page('sales'))
-    assert sales.count('data-member-cta=') >= 3 and 'id="checkout"' in sales
+    assert sales.count('data-member-cta=') >= 3 and 'id="pricing"' in sales
     # The site-wide snippet is current and carries both affiliate capture and analytics.
     snippet = (SITE / 'dist' / 'site-tracking.html').read_text()
     assert snippet == load_build().site_tracking_snippet()

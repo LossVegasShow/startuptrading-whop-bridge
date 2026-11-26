@@ -1,7 +1,7 @@
 {
   "checkout_url": "https://whop.com/checkout/plan_qSXeS0xoDapGU/",
   "checkout_url_annual": "https://whop.com/checkout/plan_B84PWlvXemyfX/",
-  "embed_checkout": "true",
+  "embed_checkout": "",
   "whop_accent_color": "orange",
   "free_indicator_url": "https://startuptrading.com/indicators",
   "free_indicator_name": "ATR Expansion Bar Indicator",
