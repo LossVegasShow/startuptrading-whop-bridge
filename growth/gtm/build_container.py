@@ -85,6 +85,13 @@ def table(key, pairs, k='parameter', v='parameterValue'):
     return t
 
 
+# Sent on every event as well as in the Google tag's configuration: GA4 drops the
+# configuration when the stream's "Ignore duplicate instances of on-page configuration"
+# setting is on, but event parameters always arrive (verified 2026-11-26).
+PAGE_PARAMS = [('page_type', '{{Page type}}'), ('content_group', '{{Page type}}'),
+               ('page_location', '{{Page location (clean)}}')]
+
+
 def build():
     ids = iter(range(1, 1000))
     base = {'accountId': '0', 'containerId': '0'}
@@ -131,7 +138,7 @@ def build():
         tags.append({**base, 'tagId': str(next(ids)), 'name': name, 'type': 'gaawe', 'fingerprint': '0',
                      'parameter': [p('BOOLEAN', 'sendEcommerceData', 'false'), p('TEMPLATE', 'eventName', event_name),
                                    p('TEMPLATE', 'measurementIdOverride', '{{GA4 measurement ID}}'),
-                                   table('eventSettingsTable', params + [('page_type', '{{Page type}}')]), user_props],
+                                   table('eventSettingsTable', params + PAGE_PARAMS), user_props],
                      'firingTriggerId': [trig], 'tagFiringOption': 'ONCE_PER_EVENT',
                      'monitoringMetadata': {'type': 'MAP'}, 'consentSettings': {'consentStatus': 'NOT_SET'}})
 

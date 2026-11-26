@@ -68,7 +68,11 @@ def test_gtm_classifies_root_and_join_as_the_sales_page():
     tags = {t['name']: t for t in c['tag']}
     blob = json.dumps(tags['GA4 - Google tag (page view)'])
     assert '"content_group"' in blob and '{{Page type}}' in blob
-    assert all('page_type' in json.dumps(t) for t in c['tag'] if t['type'] == 'gaawe')
+    for t in (t for t in c['tag'] if t['type'] == 'gaawe'):
+        params = {m['map'][0]['value']: m['map'][1]['value'] for m in
+                  next(x for x in t['parameter'] if x['key'] == 'eventSettingsTable')['list']}
+        assert params['page_type'] == params['content_group'] == '{{Page type}}', t['name']
+        assert params['page_location'] == '{{Page location (clean)}}', t['name']
 
 
 def test_affiliate_script_decorates_root_and_join():
