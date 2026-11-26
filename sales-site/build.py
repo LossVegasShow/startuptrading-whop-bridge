@@ -175,10 +175,27 @@ def render(cfg, name='sales'):
                if canonical_url(cfg, name) else '') +
             f'<meta name="description" content="{html.escape(description.replace("{price_monthly}", cfg["price_monthly"]), quote=True)}">\n'
             + ('<meta name="robots" content="noindex">\n' if name in ('welcome', 'setup') else '') +
+            social_meta(cfg, name, title, description) +
             '<meta name="theme-color" content="#07090d">\n'
             '<style>html,body{margin:0;background:#07090d}</style>\n'
             f'</head>\n<body>\n{embed}</body>\n</html>\n')
     return embed, full
+
+
+def social_meta(cfg, name, title, description):
+    """Open Graph / Twitter tags for the indexable pages. On the live site GoHighLevel
+    writes these from each page's SEO settings; the values here are the ones to enter."""
+    url = canonical_url(cfg, name)
+    if not url:
+        return ''
+    e = lambda v: html.escape(v, quote=True)
+    desc = description.replace('{price_monthly}', cfg['price_monthly'])
+    tags = [('property', 'og:type', 'website'), ('property', 'og:site_name', 'StartUpTrading'),
+            ('property', 'og:url', url), ('property', 'og:title', title), ('property', 'og:description', desc),
+            ('name', 'twitter:card', 'summary_large_image' if cfg.get('og_image_url') else 'summary')]
+    if cfg.get('og_image_url'):
+        tags.append(('property', 'og:image', cfg['og_image_url']))
+    return ''.join(f'<meta {a}="{k}" content="{e(v)}">\n' for a, k, v in tags)
 
 
 def canonical_url(cfg, name):
@@ -201,12 +218,12 @@ def structured_data(name, cfg, body):
     """schema.org JSON-LD that search engines read: the business, the membership
     with its two prices, the FAQ, and the free calculator. Built from the same
     config and copy as the page, so it can't drift from what visitors see."""
-    site = cfg['join_url'].split('/join')[0]
+    site = cfg['site_url'].rstrip('/')
     org = {'@type': 'Organization', '@id': site + '/#org', 'name': 'StartUpTrading', 'url': site + '/'}
     if cfg.get('youtube_url'):
         org['sameAs'] = [cfg['youtube_url']]
     if name == 'sales':
-        offers = [{'@type': 'Offer', 'name': label, 'price': price, 'priceCurrency': 'USD', 'url': cfg['join_url'],
+        offers = [{'@type': 'Offer', 'name': label, 'price': price, 'priceCurrency': 'USD', 'url': site + '/#pricing',
                    'availability': 'https://schema.org/InStock',
                    'priceSpecification': {'@type': 'UnitPriceSpecification', 'price': price, 'priceCurrency': 'USD',
                                           'billingDuration': 1, 'unitCode': unit}}
@@ -216,8 +233,8 @@ def structured_data(name, cfg, body):
                'applicationCategory': 'FinanceApplication', 'operatingSystem': 'Windows (NinjaTrader 8)',
                'description': 'Proprietary NinjaTrader 8 tools (ATR Order Automation and Trend Scanner & Market '
                               'Selector) licensed automatically to the member\'s NinjaTrader account, every new tool as '
-                              'it is released, a private Discord trade room and masterclasses.',
-               'url': cfg['join_url'], 'publisher': {'@id': site + '/#org'}, 'offers': offers}
+                              'it is released, a members-only trade room and masterclasses.',
+               'url': site + '/', 'publisher': {'@id': site + '/#org'}, 'offers': offers}
         faq = [{'@type': 'Question', 'name': _text(q), 'acceptedAnswer': {'@type': 'Answer', 'text': _text(a)}}
                for q, a in re.findall(r'<details><summary>(.*?)</summary><p>(.*?)</p></details>', body, re.S)]
         graph = [org, {'@type': 'WebSite', '@id': site + '/#site', 'name': 'StartUpTrading', 'url': site + '/',
@@ -517,7 +534,7 @@ def site_tracking_body_snippet(cfg=None):
 
 def affiliate_snippet():
     """Paste into GoHighLevel → Settings → Tracking code (header), site-wide, so an
-    affiliate's ?a= is captured on ANY startuptrading.com page, not just /join."""
+    affiliate's ?a= is captured on ANY startuptrading.com page, not just the homepage."""
     return ('<!-- StartUpTrading: Whop affiliate attribution (sales-site/src/affiliate.js) -->\n'
             '<script>\n' + (SRC / 'affiliate.js').read_text() + '</script>\n')
 

@@ -8,7 +8,8 @@ Publish (growth/MARKETING_ANALYTICS.md section 6).
 
 What it sets up (and nothing else):
   - Google tag (GA4 G-S0PT1NK0FK): ONE page_view per page, page_location cleaned of
-    tokens and non-marketing query parameters, user properties first/last channel.
+    tokens and non-marketing query parameters, user properties first/last channel,
+    content_group = page type (the homepage / and legacy /join are "membership_sales").
     Fires once per page load on the site's own sut_attribution event (sent once per
     page by tracking.js) or, on the activation app (no tracking.js), on page load.
   - GA4 event tags for the dataLayer events in sales-site/src/tracking.js, renamed to
@@ -52,6 +53,18 @@ CLEAN_URL_JS = """function () {
   }
 }"""
 
+# The homepage (/) IS the membership sales page; /join serves the same page (legacy links).
+PAGE_TYPE_JS = """function () {
+  var host = {{Page Hostname}}, path = ({{Page Path}} || '/').replace(/\\/+$/, '') || '/';
+  if (host === 'activate.startuptrading.com') return 'activation';
+  if (path === '/' || path === '/join') return 'membership_sales';
+  if (path === '/free-tools') return 'free_tools_directory';
+  if (path === '/futures-position-size-calculator' || path.indexOf('/tradingview/') === 0) return 'free_tool';
+  if (path === '/welcome') return 'post_checkout';
+  if (path === '/setup') return 'member_setup';
+  return 'other';
+}"""
+
 USER_PROPS_JS = """function () {
   return { first_channel: {{DLV - first_channel}} || 'unknown', last_channel: {{DLV - last_channel}} || 'unknown' };
 }"""
@@ -86,6 +99,7 @@ def build():
                                    p('TEMPLATE', 'name', name)])
     var('GA4 measurement ID', 'c', [p('TEMPLATE', 'value', GA4_ID)])
     var('Page location (clean)', 'jsm', [p('TEMPLATE', 'javascript', CLEAN_URL_JS)])
+    var('Page type', 'jsm', [p('TEMPLATE', 'javascript', PAGE_TYPE_JS)])
     var('GA4 user properties', 'jsm', [p('TEMPLATE', 'javascript', USER_PROPS_JS)])
     var('GA4 event name', 'smm', [p('BOOLEAN', 'setDefaultValue', 'true'), p('TEMPLATE', 'input', '{{Event}}'),
                                   table('map', [(k, v) for k, v in GENERIC.items() if k != v], 'key', 'value'),
@@ -117,7 +131,7 @@ def build():
         tags.append({**base, 'tagId': str(next(ids)), 'name': name, 'type': 'gaawe', 'fingerprint': '0',
                      'parameter': [p('BOOLEAN', 'sendEcommerceData', 'false'), p('TEMPLATE', 'eventName', event_name),
                                    p('TEMPLATE', 'measurementIdOverride', '{{GA4 measurement ID}}'),
-                                   table('eventSettingsTable', params), user_props],
+                                   table('eventSettingsTable', params + [('page_type', '{{Page type}}')]), user_props],
                      'firingTriggerId': [trig], 'tagFiringOption': 'ONCE_PER_EVENT',
                      'monitoringMetadata': {'type': 'MAP'}, 'consentSettings': {'consentStatus': 'NOT_SET'}})
 
@@ -125,6 +139,7 @@ def build():
                  'parameter': [p('TEMPLATE', 'tagId', '{{GA4 measurement ID}}'),
                                table('configSettingsTable', [('send_page_view', 'true'),
                                                              ('page_location', '{{Page location (clean)}}'),
+                                                             ('content_group', '{{Page type}}'),
                                                              ('user_properties', '{{GA4 user properties}}')])],
                  'firingTriggerId': [t_attr, t_activate], 'tagFiringOption': 'ONCE_PER_LOAD',
                  'monitoringMetadata': {'type': 'MAP'}, 'consentSettings': {'consentStatus': 'NOT_SET'}})

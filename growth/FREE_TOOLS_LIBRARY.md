@@ -38,7 +38,7 @@ link reads that one setting.
 | Setting | Now | Change when |
 |---|---|---|
 | `membership_open` | `""` (closed) | **Gate 2** (homepage switch): set `"true"`. Free pages then show the full nav, **Become a Member** and "See the membership". While closed, free pages never link to the purchase funnel |
-| `sales_page_url` | `https://startuptrading.com/join` | Gate 2: `https://startuptrading.com/` |
+| `sales_page_url` | `https://startuptrading.com/` (the homepage is the sales page) | — |
 | `tv_atr_script_url` | `""` | After the script is published on TradingView. The "Open on TradingView" buttons appear; until then the page says "Coming soon to TradingView" |
 | `ghl_subscribe_form_url` | Form 7's embed URL (set) | The optional sign-up section appears on the free pages (section 4). Blank removes it |
 | `learn_url` | `""` | When `/learn` exists. The nav's Education link moves to it |

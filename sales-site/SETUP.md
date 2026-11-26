@@ -46,8 +46,9 @@ buttons that open Whop's hosted checkout. Nothing else changes.
 
 1. **Sites → Websites** (or **Funnels**) → **New** → **From blank**. Name it
    "StartUpTrading", then add a page named "Join" with path **`/join`**.
-   (Decided 2026-11-19: the existing home page at `/` stays; the membership page
-   lives at `startuptrading.com/join`.)
+   (Updated 2026-11-26: this Join page is now the site's **default page**, so it
+   serves `startuptrading.com/` and `/join` keeps working for old links. See
+   `growth/HOMEPAGE_DEPLOYMENT.md`.)
 2. In the builder, delete the default header and footer sections.
 3. Add one **Section** → set it to **Full width**. In its settings, set
    padding and margin to **0** and the background to `#07090d`.
@@ -93,15 +94,13 @@ That page thanks them and walks them through activation, Discord and support.
    URL to `https://startuptrading.com/welcome` as well, so buyers who use the
    hosted-checkout fallback link land on the same page.
 
-### 2c. Link the existing home page to `/join`
+### 2c. The homepage is the sales page
 
-On the current home page (`/`) in GHL:
-- Change **"Join the Discord"** (now `https://whop.com/startuptrading/`) to
-  **`/join`**, so visitors see the membership offer and pay on your site.
-- Optional: in the Tools section, add a line under the one-time products such as
-  *"Or get both indicators plus the Discord and masterclass: membership from $99/month →"* linking to
-  `/join`.
-- In Render, set `CHECKOUT_URL=https://startuptrading.com/join#pricing`. It's the
+Superseded (2026-11-26): the Join page is the default page, so `startuptrading.com/`
+is the membership sales page. The old Home + VSL funnel is untouched. Deployment
+steps: `growth/HOMEPAGE_DEPLOYMENT.md`.
+
+- In Render, set `CHECKOUT_URL=https://startuptrading.com/#pricing`. It's the
   "rejoin" link in the access-ended email and the "Become a member" button
   on the activation app's no-membership page.
 

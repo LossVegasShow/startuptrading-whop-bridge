@@ -200,9 +200,9 @@ def test_calculator_page_is_indexable_and_tagged():
     assert 'Futures Position Size Calculator' in full
     assert 'utm_campaign=calculator' in embed and 'data-free' in embed
     # The membership link appears only once the offer is open (membership_open).
-    assert (f'href="{cfg["join_url"]}"' in embed) == (cfg.get('membership_open') == 'true')
+    assert (f'href="{cfg["sales_page_url"]}#pricing"' in embed) == (cfg.get('membership_open') == 'true')
     open_cfg = dict(cfg, membership_open='true')
-    assert f'href="{cfg["join_url"]}"' in load_build().render(open_cfg, 'calculator')[0]
+    assert f'href="{cfg["sales_page_url"]}#pricing"' in load_build().render(open_cfg, 'calculator')[0]
     assert '{{' not in embed and '<div data-whop-checkout-plan-id=' not in embed  # no checkout here
 
 

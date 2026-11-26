@@ -1,8 +1,8 @@
 /* Whop affiliate attribution.
-   Affiliates share startuptrading.com/join?a=THEIR_CODE (or any startuptrading.com
+   Affiliates share startuptrading.com/?a=THEIR_CODE (or any startuptrading.com
    page with ?a=). The code is remembered in this browser for AFF_DAYS, most recent
    affiliate wins, and is passed to both embedded Whop checkouts (monthly and annual)
-   and to any Whop checkout or /join link on the page. It never changes the
+   and to any Whop checkout or membership page link (/ or /join) on the page. It never changes the
    checkout's return URL, plan or price. Used by the sales pages and, standalone,
    as GoHighLevel's site-wide tracking code (dist/affiliate-tracking.html). */
 /*aff-core*/
@@ -31,7 +31,8 @@ function sutAffPick(search, stored, now) {
   }
 }
 
-// Add ?a=CODE to Whop checkout links and to links to the /join page, unless the
+// Add ?a=CODE to Whop checkout links and to links to the membership sales page
+// (the homepage, or /join kept for older links), unless the
 // link already names an affiliate. Other links are returned unchanged.
 function sutAffDecorate(href, code, siteHost) {
   if (!code) return href;
@@ -40,7 +41,7 @@ function sutAffDecorate(href, code, siteHost) {
     var host = url.hostname.replace(/^www\./, '');
     var site = String(siteHost || '').replace(/^www\./, '');
     var whop = host === 'whop.com' && (/^\/checkout\//.test(url.pathname) || /^\/startuptrading\/?/i.test(url.pathname));
-    var join = host === site && /^\/join\/?$/.test(url.pathname);
+    var join = host === site && /^\/(join\/?)?$/.test(url.pathname);
     if (!(whop || join) || url.searchParams.has('a')) return href;
     url.searchParams.set('a', code);
     return url.toString();
