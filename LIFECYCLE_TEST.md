@@ -114,9 +114,12 @@ check them against the product list in the NinjaTrader vendor portal (P5).
    (*Tools → Import → NinjaScript Add-On*), restart, and add them to a chart.
 
 **Downloads:** the product files are proprietary and never committed (the GitHub
-repository is public). They're hosted outside GitHub (GoHighLevel Media) and each
-link is set as `download_url` in `products.json`; `/setup` has one button per
-product (a placeholder until the link is set):
+repository is public). An admin uploads them once at
+`https://activate.startuptrading.com/admin/products`; they're stored in the licensing
+app's database (accepted only if the SHA-256 matches `products.json`) and served at
+`/downloads/<file>` **only to signed-in members with an active paid membership**.
+Anyone else is sent through Whop sign-in first and returned to the download. `/setup`
+links to those URLs:
 
 | ID | Product | File | Appears in NinjaTrader as |
 |---|---|---|---|
@@ -152,7 +155,7 @@ by this app.
 
 | # | Item | Owner | How to clear it |
 |---|---|---|---|
-| **R1** | **Host the two product files** outside GitHub | You | GoHighLevel → Media → upload both zips → copy each file's public link and send them to me (they go in `download_url` in `products.json`). Never upload them to GitHub |
+| **R1** | **Upload the two product files** | You | `https://activate.startuptrading.com/admin/products` → choose both zips → Upload and verify. Both rows must say "verified" |
 | **R2** | **Confirm the NinjaTrader locations** (`ninjatrader_location` in `products.json`): ATR Order Automation under **Strategies**, the scanner under **Indicators**, both in a **StartupTrading** folder | Jack | Import both files and look. If either is wrong, tell me and I'll update `products.json` (the setup page follows) |
 | **R3** | **Scanner build contents.** The scanner file also contains a "StartupTrading Tools (Tester)" item | Jack | Confirm it's meant to ship to customers, or re-export without it |
 | **R4** | **Support email.** The license messages inside both products say `contact@startuptrading.com`; the site and emails use `support@startuptrading.com` | You | Make sure both inboxes reach you (or forward one to the other) |
@@ -260,7 +263,7 @@ cancelled.
 | **Anything unexpected** (unexpected member changes, duplicate licenses, errors) | Render: `LICENSE_WRITES_ENABLED=false` → deploy | Stops every write, including revocations, within one deploy. Licenses already issued keep their expiry dates, so NinjaTrader still switches them off when the paid period ends |
 | Circuit breaker trips | Investigate `/admin/attention`; resume only by typing `RESUME` at `/admin` | Writes stay paused until then, even across restarts |
 | Narrow licensing again | `LICENSE_ALL_MEMBERS=false` and `LICENSE_WRITE_ALLOWLIST=mem_…:email,…` | Only those pairs are written; nobody else gains or loses anything |
-| A bad product file | Upload the new file to GoHighLevel Media, update its `download_url` and `sha256` in `products.json`, rebuild and re-paste `/setup` | Customers download the new file; licenses are unaffected |
+| A bad product file | Update its `sha256` in `products.json` (and the file name if it changes), deploy, then upload the new file at `/admin/products` | Customers download the new file; licenses are unaffected |
 | The test is done | End and refund the test membership in Whop, then Reconcile its record | Its licenses expire; nothing else changes |
 | Revert the free pages' membership links | Tell me to set `membership_open` back to off; re-paste the three free pages | The "Become a Member" nav and links disappear |
 

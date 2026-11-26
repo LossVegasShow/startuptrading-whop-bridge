@@ -243,7 +243,7 @@ so new buyers get reminders without a manual release.
       includes (Home, Tools section). Separate one-time products can stay.
 - [ ] Publish the `/setup` install guide (`sales-site/dist/setup-embed.html`,
       `sales-site/SETUP.md` step 2e). The download buttons come from
-      `products.json` (each product's `download_url`; files hosted on GoHighLevel Media, never in GitHub).
+      `products.json` (members-only downloads from the licensing app; upload the files at `/admin/products`, never to GitHub).
       Add the screenshots, rebuild and paste again. `INDICATOR_SETUP_URL` already
       points to it.
 

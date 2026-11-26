@@ -16,7 +16,7 @@ allowlist. Keep `/join` unlinked and don't promote anything until Gate 2.
 Must be true before Gate 1 (details in `PRODUCTION_LICENSING.md`):
 - [ ] NinjaTrader Desktop revocation confirmed (`LIFECYCLE_TEST.md` step 6). The
       cleanup reconcile of `mem_XN7y9ppQsdx2np` doubles as this check.
-- [ ] `/setup` download links: upload both product zips to GoHighLevel Media and set each `download_url` in `products.json` (never commit the files). Screenshots still to add.
+- [ ] Upload both product zips at `activate.startuptrading.com/admin/products` (members-only downloads; never in GitHub). Screenshots still to add.
 - [ ] `ALERT_WEBHOOK_URL` is set in Render and a test alert arrived.
 - [ ] Jack has confirmed how current members' 2067/2071 licenses were issued.
 - [ ] Whop: TSMS & Fibs removed from the product; Discord and masterclasses

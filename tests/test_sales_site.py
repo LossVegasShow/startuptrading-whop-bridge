@@ -259,10 +259,12 @@ def test_setup_page_is_the_indicator_setup_url_and_sells_nothing():
     assert 'TSMS' not in embed and '{{' not in embed
 
 
-def test_setup_download_placeholder_until_a_link_is_set():
+def test_setup_links_to_members_only_downloads():
     _, embed, _ = setup_page()
-    # No download_url in products.json yet: placeholders, never a dead link.
-    assert 'Download link goes here' in embed and 'data-download=' not in embed
+    # Files are hosted privately by the licensing app (never GitHub); members only.
+    for f in ('SUT_ATR_Orders_2026.zip', 'StartupTrading_Tools_Scanner_2026.zip'):
+        assert f'href="https://activate.startuptrading.com/downloads/{f}"' in embed
+    assert 'Download link goes here' not in embed
 
 
 def test_setup_copy_passes_marketing_compliance():
