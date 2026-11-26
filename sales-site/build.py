@@ -128,6 +128,7 @@ def render(cfg, name='sales'):
     values['tool_filters'], values['tool_cards'] = directory_html(cfg)
     values['subscribe'] = subscribe_html(cfg, name)
     values['membership_note'] = membership_note_html(cfg)
+    values['community_note'] = community_note_html(cfg, name)
     values['tv_cta'] = tv_cta_html(cfg)
     values['product_downloads'], values['product_locations'] = product_downloads_html(cfg)
     values['cta_attr'] = '' if embed_on else ' data-checkout'
@@ -399,6 +400,24 @@ def subscribe_html(cfg, name):
             f'<noscript><a class="sut-btn sut-btn-ghost" href="{e(base)}?source_page={e(name)}&amp;interest={e(interest)}" '
             f'target="_blank" rel="noopener">Open the sign-up form</a></noscript>'
             f'</div></div></section>')
+
+
+def community_note_html(cfg, name):
+    """The free StartUpTrading Community (Discord) offer on free pages. A separate,
+    free Whop product: joining never grants indicator licenses or the paid offer.
+    Omitted until community_join_url is set."""
+    url = cfg.get('community_join_url', '')
+    if not url:
+        return ''
+    e = lambda v: html.escape(str(v), quote=True)
+    return ('<aside class="sut-free sut-community-note"><div class="sut-free-copy">'
+            '<p class="sut-eyebrow muted">Free community</p>'
+            '<h3>Talk risk with other futures traders.</h3>'
+            '<p>Join the free StartUpTrading Discord: help with the free tools, market talk and announcements from Jack. '
+            'Members get the live trade room and members-only channels on top.</p>'
+            f'<a class="sut-btn sut-btn-ghost" href="{e(url)}" target="_blank" rel="noopener" data-community-cta="{e(name)}">'
+            'Join the free Discord <span class="sut-arrow" aria-hidden="true">↗</span></a>'
+            '<p class="sut-fine">Free, through Whop.</p></div></aside>')
 
 
 def membership_note_html(cfg):

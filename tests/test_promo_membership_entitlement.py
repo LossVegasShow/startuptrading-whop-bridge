@@ -85,7 +85,7 @@ def test_real_period_dates_still_win_over_the_rolling_period():
     {'product_id': 'prod_other', 'product': {'id': 'prod_other'}},
     {'variant_id': 'plan_not_approved'},
     {'variant_id': _DROP},
-    {'variant_id': 'plan_qSXeS0xoDapGU', 'plan': {'id': 'plan_B84PWLvXemyFX'}},  # conflicting plan
+    {'variant_id': 'plan_qSXeS0xoDapGU', 'plan': {'id': 'plan_B84PWlvXemyfX'}},  # conflicting plan
 ], ids=['other-business', 'no-business', 'other-product', 'unapproved-plan', 'no-plan', 'plan-conflict'])
 def test_identity_failures_stay_ineligible(changes):
     assert membership_entitlement(live(**changes), now=NOW) is None
@@ -113,10 +113,10 @@ def test_unsafe_shapes_stay_ineligible(changes):
 
 
 def test_annual_plan_needs_a_365_day_period():
-    annual = live(variant_id='plan_B84PWLvXemyFX', billing_period_days=365)
+    annual = live(variant_id='plan_B84PWlvXemyfX', billing_period_days=365)
     ent = membership_entitlement(annual, now=NOW)
-    assert ent and ent['plan_id'] == 'plan_B84PWLvXemyFX'
-    assert membership_entitlement(live(variant_id='plan_B84PWLvXemyFX', billing_period_days=30), now=NOW) is None
+    assert ent and ent['plan_id'] == 'plan_B84PWlvXemyfX'
+    assert membership_entitlement(live(variant_id='plan_B84PWlvXemyfX', billing_period_days=30), now=NOW) is None
 
 
 def test_rolling_period_end_ignores_records_with_any_timestamp():

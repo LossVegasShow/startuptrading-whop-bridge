@@ -30,7 +30,7 @@ def payment(pid='pay_1', mem='mem_a', status='paid', total='99.00', reason='subs
     p = {'id': pid, 'membership_id': mem, 'status': status, 'substatus': status, 'billing_reason': reason,
          'currency': 'usd', 'total': {'amount': total, 'currency': 'usd'}, 'usd_total': {'amount': total, 'currency': 'usd'},
          'refunded_amount': {'amount': refunded, 'currency': 'usd'}, 'paid_at': paid, 'created_at': paid,
-         'updated_at': updated, 'variant_id': 'plan_qSXeS0xoDapGU', 'product_id': 'prod_x', 'promo_code_id': None,
+         'updated_at': updated, 'variant_id': 'plan_qSXeS0xoDapGU', 'product_id': 'prod_Nr8ggb93WCyC1', 'promo_code_id': None,
          'checkout_origin': 'https://startuptrading.com', 'checkout_surface': 'embedded_checkout',
          # Personal fields Whop sends that must never be stored:
          'customer_email': 'buyer@example.com', 'customer_phone': '+15550000', 'ip_address': '203.0.113.9',

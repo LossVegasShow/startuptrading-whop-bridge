@@ -444,6 +444,8 @@
   .sut .sut-downloads .sut-btn { white-space: normal; max-width: 100%; text-align: center; justify-content: center; }
 }
 
+.sut-community-note { margin-top: 14px; }
+
 </style>
 <div class="sut" id="top">
 <!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
@@ -637,13 +639,13 @@
         </div>
         <div class="sut-embed sut-y">
           <div class="sut-embed-loading" aria-hidden="true">Loading secure checkout…</div>
-          <div data-whop-checkout-plan-id="plan_B84PWLvXemyFX" data-whop-checkout-theme="dark"
+          <div data-whop-checkout-plan-id="plan_B84PWlvXemyfX" data-whop-checkout-theme="dark"
                data-whop-checkout-theme-accent-color="orange"
                data-whop-checkout-return-url="https://startuptrading.com/welcome"></div>
         </div>
         <p class="sut-fine sut-checkout-fallback">
           Payments are processed by Whop. Checkout not loading?
-          <a class="sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout target="_blank" rel="noopener">Open it on Whop ↗</a><a class="sut-y" href="https://whop.com/checkout/plan_B84PWLvXemyFX/" data-checkout data-plan="annual" target="_blank" rel="noopener">Open it on Whop ↗</a>
+          <a class="sut-m" href="https://whop.com/checkout/plan_qSXeS0xoDapGU/" data-checkout target="_blank" rel="noopener">Open it on Whop ↗</a><a class="sut-y" href="https://whop.com/checkout/plan_B84PWlvXemyfX/" data-checkout data-plan="annual" target="_blank" rel="noopener">Open it on Whop ↗</a>
         </p>
       </div>
       
@@ -847,7 +849,8 @@ function sutAffDecorate(href, code, siteHost) {
 
    Events: sut_attribution, free_tool_view, tool_use, calculation_complete,
    free_tool_select, outbound_click, email_subscribe (successful submissions only),
-   checkout_intent, checkout_view, file_download; checkout_return comes from app.js.
+   checkout_intent, checkout_view, file_download, community_join_click, community_join;
+   checkout_return comes from app.js.
    Every event carries first_channel / last_channel / first_touch / last_touch.
 
    This file can be on a page twice (the site-wide header code and a page embed).
@@ -1106,9 +1109,15 @@ function sutSizerHeight(data, iframeId) {
   w.SUT_VISITOR = ls ? vid : '';
   var base = { first_touch: attr.first || null, last_touch: sutLatest(attr), first_channel: (attr.first || {}).channel || 'unknown',
     last_channel: (sutLatest(attr) || {}).channel || 'unknown', affiliate: w.SUT_AFFILIATE || '' };
+  // Event-specific parameters. GTM's data model keeps the last value of every key,
+  // so each event explicitly clears the ones it doesn't set (no leftovers such as a
+  // previous event's calculator on tool_use).
+  var EVENT_KEYS = ['tool_id', 'calculator', 'source_page', 'interest', 'form_id', 'placement', 'destination',
+    'file_name', 'file_extension', 'link_url', 'group_id'];
   var push = function (event, data) {
     var o = { event: event };
     for (var k in base) o[k] = base[k];
+    for (var i = 0; i < EVENT_KEYS.length; i++) o[EVENT_KEYS[i]] = undefined;
     for (var j in (data || {})) o[j] = data[j];
     w.dataLayer.push(o);
   };
@@ -1245,6 +1254,10 @@ function sutSizerHeight(data, iframeId) {
         // A tool chosen from the free tools directory.
         var card = a.closest('article[data-tool-id]');
         if (card && !a.hasAttribute('data-outbound')) push('free_tool_select', { tool_id: card.getAttribute('data-tool-id') });
+        // The free community (Discord) offer clicked.
+        if (a.hasAttribute('data-community-cta')) {
+          push('community_join_click', { placement: a.getAttribute('data-community-cta') });
+        }
         // A product file download started (GA4's recommended file_download event).
         if (a.hasAttribute('data-download')) {
           var file = a.getAttribute('data-download');
@@ -1282,6 +1295,14 @@ function sutSizerHeight(data, iframeId) {
     }
     wireForms();
     fitForms();
+    // Back from joining the free community: Whop redirects to a page with
+    // ?community=joined. Counted once per browser (reloads and shared links don't
+    // repeat it); the verified count comes from Whop in the licensing app.
+    if (new URLSearchParams(w.location.search).get('community') === 'joined' && first('community_join')) {
+      var already = false;
+      try { already = !!(ls && ls.getItem('sut_community_joined')); if (ls) ls.setItem('sut_community_joined', '1'); } catch (e) { /* storage blocked */ }
+      if (!already) push('community_join', { group_id: 'startuptrading_community' });
+    }
   };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', ready); else ready();
 })();

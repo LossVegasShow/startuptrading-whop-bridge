@@ -328,7 +328,7 @@ def test_admin_plan_column_names_monthly_and_annual(cfg, monkeypatch):
     monkeypatch.setattr(web, 'cfg', cfg)
     cfg.admin_password = 'a-long-admin-password-for-tests'
     with connect(cfg) as db:
-        for mid, plan in (('mem_month', 'plan_qSXeS0xoDapGU'), ('mem_year', 'plan_B84PWLvXemyFX'), ('mem_none', None)):
+        for mid, plan in (('mem_month', 'plan_qSXeS0xoDapGU'), ('mem_year', 'plan_B84PWlvXemyfX'), ('mem_none', None)):
             cid = add_customer(db, mid)
             db.execute('UPDATE customers SET plan_id=? WHERE id=?', (plan, cid))
     html = TestClient(web.app, base_url='https://activate.example.com').get(

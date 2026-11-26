@@ -23,8 +23,16 @@ def membership_plan_id(record):
     values=[record.get('variant_id'),record.get('plan_id'),
             embedded.get('id') if isinstance(embedded,dict) else None]
     values=[v for v in values if isinstance(v,str) and v]
-    if len(set(values))>1: return None
-    return values[0] if values else None
+    # Whop resolves plan IDs case-insensitively and reports its canonical spelling.
+    # Compare without case and return our canonical spelling for known plans.
+    if len({v.casefold() for v in values})>1: return None
+    return canonical_plan_id(values[0]) if values else None
+
+
+def canonical_plan_id(value):
+    from config import PLANS, COMMUNITY_PLAN_ID
+    known={p.casefold():p for p in (*PLANS, COMMUNITY_PLAN_ID)}
+    return known.get(str(value).casefold(),value)
 
 
 def membership_plan_conflict(record):
@@ -33,7 +41,7 @@ def membership_plan_conflict(record):
     values=[record.get('variant_id'),record.get('plan_id'),
             nested.get('id') if isinstance(nested,dict) else None]
     vals=[v for v in values if isinstance(v,str) and v]
-    return len(set(vals))>1
+    return len({v.casefold() for v in vals})>1
 
 
 def normalize_membership(record):
@@ -46,7 +54,7 @@ def normalize_membership(record):
 
 # Billing period each approved plan must report. A record whose
 # billing_period_days disagrees with its plan is never granted a rolling period.
-PLAN_PERIOD_DAYS = {'plan_qSXeS0xoDapGU': 30, 'plan_B84PWLvXemyFX': 365}
+PLAN_PERIOD_DAYS = {'plan_qSXeS0xoDapGU': 30, 'plan_B84PWlvXemyfX': 365}
 # Keep at least this much runway on a rolling period so a license is never
 # issued that lapses before the next reconcile can extend it.
 ROLLING_MIN_RUNWAY = dt.timedelta(days=2)

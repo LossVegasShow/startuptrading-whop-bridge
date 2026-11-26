@@ -21,7 +21,7 @@ API = 'https://analyticsdata.googleapis.com/v1beta/properties/{pid}:runReport'
 CACHE_SECONDS = 6 * 3600
 FUNNEL_EVENTS = ['free_tool_view', 'tool_use', 'calculation_complete', 'select_content', 'tradingview_click',
                  'generate_lead', 'select_promotion', 'begin_checkout', 'checkout_return', 'file_download',
-                 'purchase', 'ninjatrader_linked', 'activation_complete']
+                 'purchase', 'ninjatrader_linked', 'activation_complete', 'community_join_click', 'join_group']
 
 
 class GA4Unavailable(Exception):

@@ -27,7 +27,7 @@ There is **no replacement checkout or new paid product**. The existing StartUpTr
 Whop company ID: `biz_a1txPozoELC3Yc`  
 Whop product: `prod_Nr8ggb93WCyC1`  
 Monthly plan: `plan_qSXeS0xoDapGU`  
-Annual plan: `plan_B84PWLvXemyFX`
+Annual plan: `plan_B84PWlvXemyfX`
 
 ## Licensing safety and account paths
 

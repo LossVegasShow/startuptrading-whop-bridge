@@ -389,6 +389,7 @@ dashboard: `tests/test_ga4.py`, `test_attribution.py`, `test_marketing.py`.
 | 8 | GoHighLevel → Form 7 and workflows | Section 7 (hidden fields `first_channel`, `last_channel`; Original fields; workflow; subscriber workflow; `GHL_CUSTOM_FIELDS_JSON` keys `acquisition_first_channel`, `acquisition_last_channel`) |
 | 9 | Testing | Section 9, then publish GTM |
 | 10 | GoHighLevel Media | Upload the two product zips; send me the links for `products.json`. Never upload them to GitHub |
+| 11 | Whop + Discord | Section 12: community redirect URL, Discord roles via Whop, channel permissions; then re-paste header + all embeds, import + publish GTM |
 
 ## 11. Blockers and limitations
 
@@ -401,3 +402,74 @@ dashboard: `tests/test_ga4.py`, `test_attribution.py`, `test_marketing.py`.
 - **No spend data:** CAC and ROAS are unavailable.
 - **Product files** are hosted outside GitHub (the repository is public). The `/setup` buttons stay placeholders until both `download_url`s are set.
 - **Settings in Render outside the code:** check `/health`. If it reports `"mode":"all_members"`, unrestricted licensing is on in Render; set `LICENSE_ALL_MEMBERS=false` to keep it off (see `PRODUCTION_LICENSING.md`). `membership_open` is off in the site build, reminders are held, and no campaigns or emails were sent.
+
+## 12. Free community (Discord)
+
+**Product (verified against the Whop API on 26 Nov 2026):** "StartUpTrading
+Community", product **`prod_QB1IxeSU30Qm6`**, plan **`plan_Nzi6M0goKvcWY`** ($0,
+one-time). It's a separate product from the paid membership (`prod_Nr8ggb93WCyC1`).
+
+**Guarantees (in code, tested in `tests/test_community.py`):**
+- **No licenses:** community members are never licensed. Licensing, activation and
+  emails only consider the paid product and its two plans, and a community-only Whop
+  user can't sign in to the activation app.
+- **No revenue:** community memberships are never paid subscribers or revenue.
+  Revenue and GA4 purchases count only the paid product's payments.
+- **Upgrades:** a community member can buy the paid membership as normal. The
+  dashboard counts the upgrade (same Whop user) and its revenue.
+- **Recorded for marketing only:** verified community joins arrive through Whop's
+  `membership.*` webhooks, are stored in `community_members` (IDs, status, join date),
+  and appear in `/admin/marketing` → Free community.
+
+**On the site:**
+- **Offer:** "Join the free Discord" appears on `/free-tools`, the calculator and the
+  TradingView page (`community_join_url` in `site.config.json`).
+- **Events:** clicks send `community_join_click` (GA4, with `placement`). Returning
+  from Whop with `?community=joined` sends `join_group` (GA4 recommended event,
+  `group_id=startuptrading_community`), once per browser, attributed to the visitor's
+  channels.
+
+### 12.1 Whop (you)
+1. Whop dashboard → **StartUpTrading Community** → plan settings → **Redirect URL after
+   checkout**: `https://startuptrading.com/free-tools?community=joined`. Use exactly this:
+   the `community=joined` part records the join in GA4.
+2. Whop dashboard → Apps → **Discord** (the bot already connected to your server):
+   - **StartUpTrading Community** → grant role **Community**.
+   - **StartUpTrading** (paid) → grant roles **Member** and **Community**.
+   - Turn on "remove roles when access ends" for both.
+3. Whop → Developer → Webhooks: your existing webhook is account-wide, so it already
+   receives community `membership.*` events. Nothing to add.
+
+### 12.2 Discord (you)
+1. Server Settings → **Roles** → create **Community** and **Member**. Drag the **Whop
+   bot's role above both**, or Whop can't assign them.
+2. Channels:
+   - **@everyone:** can see only #welcome and #rules.
+   - **Community category** (#announcements, #free-tools-help, #general, #market-talk):
+     View Channel for **Community**. #announcements is send-only for staff.
+   - **Members category** (#trade-room, #masterclasses, #indicator-support,
+     #member-chat): View Channel for **Member** only.
+3. Safety:
+   - Server Settings → Safety Setup → Verification level **Medium**.
+   - **AutoMod** on (spam, mention spam, links in #general).
+   - Slow-mode of 10 s in #general.
+   - Pin the rules: education only, no trade signals or profit claims.
+
+### 12.3 Re-deploy (you)
+This change updates `tracking.js`, so **re-paste the header code and every embed**:
+- **Header:** `site-tracking.html`. **Body:** `site-tracking-body.html`.
+- **Embeds:** `/free-tools`, calculator, TradingView page, `/welcome`, `/join`,
+  `/setup`.
+
+Then import the updated GTM container (Merge → Overwrite) and **Publish**, and run
+`python growth/gtm/check_live.py`: every page should say OK.
+
+### 12.4 Annual plan ID fix (found while verifying)
+
+Whop's canonical ID for the annual plan is **`plan_B84PWlvXemyfX`**. The configuration
+used `plan_B84PWLvXemyFX`. Whop's checkout tolerated it, because its lookup ignores
+letter case, but membership records carry the canonical spelling. That would have
+stopped annual buyers being recognised for licensing.
+
+All references now use the canonical ID, and plan matching ignores letter case.
+Monthly (`plan_qSXeS0xoDapGU`) was already correct.

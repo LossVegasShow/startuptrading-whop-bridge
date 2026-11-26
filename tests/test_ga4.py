@@ -55,7 +55,7 @@ def test_container_one_page_view_and_no_browser_purchase():
     assert {'GA4 - select_content (free tool)', 'GA4 - select_promotion (membership CTA)', 'GA4 - tradingview_click'} <= set(tags)
     lookup = {v['name']: v for v in CONTAINER['variable']}['GA4 event name']
     pairs = {m['map'][0]['value']: m['map'][1]['value'] for m in lookup['parameter'][2]['list']}
-    assert pairs == {'email_subscribe': 'generate_lead', 'checkout_view': 'begin_checkout'}
+    assert pairs == {'email_subscribe': 'generate_lead', 'checkout_view': 'begin_checkout', 'community_join': 'join_group'}
 
 
 def test_container_sends_no_personal_data():

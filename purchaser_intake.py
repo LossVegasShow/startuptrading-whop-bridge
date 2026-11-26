@@ -6,6 +6,7 @@ from a fresh authenticated Whop API lookup. No NinjaTrader license is created he
 import time
 from clients import IntegrationError, membership_entitlement, membership_plan_id
 from config import BUSINESS_ID, PRODUCT_ID, PLANS
+import acquisition
 from store import connect, request_crm_sync, audit
 
 
@@ -89,6 +90,11 @@ async def import_membership(cfg,whop, membership_id, *, verified_membership=None
     if not isinstance(m,dict) or m.get('id')!=membership_id:
         raise IntegrationError('Whop membership lookup ID mismatch')
     if not is_target_membership(m):
+        # The free community product: recorded for marketing only. Never a
+        # customer, never licensed, never sent activation emails.
+        if acquisition.is_community_membership(m):
+            with connect(cfg) as db:acquisition.record_community_member(db,m)
+            return {'state':'community_member'}
         return {'state':'ignored_other_product'}
     userid=m.get('user_id')
     if not isinstance(userid,str) or not userid.startswith('user_'):
@@ -143,7 +149,7 @@ async def handle_queued_event(cfg,whop,engine,event):
         # Payment IDs are not membership IDs; never mistake them for a buyer.
         return 'needs_mapping'
     result=await import_membership(cfg,whop,mid)
-    if result['state'] in ('ignored_other_product','ignored_ineligible','unmappable'):
+    if result['state'] in ('ignored_other_product','ignored_ineligible','unmappable','community_member'):
         return result['state']
     # Existing verified customers reconcile their licenses; new buyers remain
     # unverified and cannot be provisioned by just receiving a webhook.

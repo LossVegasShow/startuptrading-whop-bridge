@@ -429,3 +429,5 @@
   .sut-downloads .sut-btn, .sut-downloads .sut-ph { grid-column: 1; grid-row: auto; justify-self: stretch; margin-top: 8px; }
   .sut .sut-downloads .sut-btn { white-space: normal; max-width: 100%; text-align: center; justify-content: center; }
 }
+
+.sut-community-note { margin-top: 14px; }

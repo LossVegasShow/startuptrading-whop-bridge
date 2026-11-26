@@ -24,7 +24,7 @@ from urllib.parse import quote
 
 import httpx
 
-from config import INDICATORS
+from config import INDICATORS, PRODUCT_ID, COMMUNITY_PRODUCT_ID, BUSINESS_ID
 
 # The acquisition channel taxonomy. Same keys as sales-site/src/tracking.js sutChannel.
 CHANNELS = {
@@ -114,6 +114,51 @@ def record_ga_client(db, membership_id, client_id, source, now=None):
     cur = db.execute('INSERT INTO ga_clients(membership_id,client_id,source,captured_at) VALUES(?,?,?,?) '
                      'ON CONFLICT(membership_id) DO NOTHING', (membership_id, client_id, source[:30], now or int(time.time())))
     return cur.rowcount == 1
+
+
+# --- Free community (Discord) ---------------------------------------------------------
+
+def is_community_membership(m):
+    """A verified Whop membership of the free StartUpTrading Community product."""
+    if not isinstance(m, dict):
+        return False
+    prod = m.get('product') if isinstance(m.get('product'), dict) else {}
+    acct = m.get('account') if isinstance(m.get('account'), dict) else {}
+    account = m.get('account_id') or acct.get('id')
+    return (m.get('product_id') or prod.get('id')) == COMMUNITY_PRODUCT_ID and (not account or account == BUSINESS_ID)
+
+
+def record_community_member(db, m, now=None):
+    """Upsert a community membership (no personal data: ids, status, join date)."""
+    if not is_community_membership(m) or not str(m.get('id', '')).startswith('mem_'):
+        return False
+    user = m.get('user_id') or ((m.get('user') or {}).get('id') if isinstance(m.get('user'), dict) else None)
+    db.execute("""INSERT INTO community_members(membership_id,whop_user_id,status,joined_at,updated_at) VALUES(?,?,?,?,?)
+        ON CONFLICT(membership_id) DO UPDATE SET status=excluded.status, updated_at=excluded.updated_at""",
+               (m['id'], user if str(user or '').startswith('user_') else None, str(m.get('status') or '')[:30],
+                m.get('created_at'), now or int(time.time())))
+    return True
+
+
+def community_report(db, start=None, end=None):
+    """Free community joins and upgrades to the paid membership (verified, from Whop)."""
+    rows = [dict(r) for r in db.execute('SELECT * FROM community_members')]
+    paid_users = {r['whop_user_id']: r for r in db.execute(
+        "SELECT whop_user_id, membership_id, status FROM customers WHERE whop_user_id IS NOT NULL AND status<>'transferred'")}
+    revenue = {}
+    for p in db.execute("SELECT membership_id, usd_total, total, refunded_amount FROM payments WHERE status='paid' AND total>0"):
+        revenue[p['membership_id']] = revenue.get(p['membership_id'], 0) + \
+            (p['usd_total'] if p['usd_total'] is not None else p['total'] or 0) - (p['refunded_amount'] or 0)
+
+    def in_range(r):
+        t = _ts(r['joined_at']) or r['updated_at']
+        return (start is None or t >= start) and (end is None or t < end)
+    joined = [r for r in rows if in_range(r)]
+    upgraded = [r for r in joined if r['whop_user_id'] in paid_users]
+    up_rev = sum(revenue.get(paid_users[r['whop_user_id']]['membership_id'], 0) for r in upgraded)
+    return {'joined': len(joined), 'active': sum(1 for r in joined if r['status'] in ('active', 'completed', 'trialing')),
+            'upgraded': len(upgraded), 'upgrade_rate': round(100 * len(upgraded) / len(joined), 1) if joined else None,
+            'upgraded_revenue': round(up_rev, 2)}
 
 
 # --- Payments ------------------------------------------------------------------------
@@ -231,7 +276,8 @@ def report(cfg, db, start=None, end=None, basis='first', channel='', campaign=''
         if int(r['product_id']) in INDICATORS and (r['license_id'] or r['state'] == 'owned_separately') \
                 and r['state'] not in ('expired', 'already_expired', 'absent'):
             licensed.setdefault(r['customer_id'], set()).add(int(r['product_id']))
-    payments = [dict(r) for r in db.execute('SELECT * FROM payments')]
+    # Only the paid membership's payments ever count (the free community is a separate product).
+    payments = [dict(r) for r in db.execute('SELECT * FROM payments') if r['product_id'] in (None, '', PRODUCT_ID)]
 
     excluded = set()
     for c in customers:
@@ -302,7 +348,7 @@ def report(cfg, db, start=None, end=None, basis='first', channel='', campaign=''
                 last = max(paid, key=lambda p: p['paid_at'] or p['created_at'] or '')
                 amount = (last['usd_total'] if last['usd_total'] is not None else last['total'] or 0) - (last['refunded_amount'] or 0)
                 if amount > 0:
-                    totals['mrr'] += amount / 12 if 'B84PWLvXemyFX' in str(last['plan_id']) else amount
+                    totals['mrr'] += amount / 12 if 'B84PWlvXemyfX' in str(last['plan_id']) else amount
         elif pays or c['status'] == 'eligible':
             totals['promo_only'] += 1
         if c['verified']:
@@ -377,6 +423,8 @@ def pending_ga_events(cfg, db, now=None):
 
     by_mem = {}
     for p in db.execute("SELECT * FROM payments WHERE status='paid' AND total>0 AND membership_id IS NOT NULL"):
+        if p['product_id'] not in (None, '', PRODUCT_ID):
+            continue
         by_mem.setdefault(p['membership_id'], []).append(dict(p))
     for mem, pays in by_mem.items():
         if mem in excluded:
