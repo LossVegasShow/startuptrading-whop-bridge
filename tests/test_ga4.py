@@ -38,7 +38,7 @@ def test_container_references_resolve():
     trig = {t['triggerId'] for t in CONTAINER['trigger']} | {'2147479573'}
     for t in CONTAINER['tag']:
         assert set(t['firingTriggerId']) <= trig, t['name']
-    assert CONTAINER['container']['publicId'] == 'GTM-NXZL43PP'
+    assert CONTAINER['container']['publicId'] == 'GTM-ML2LKZ7C'
     assert {v['name']: v for v in CONTAINER['variable']}['GA4 measurement ID']['parameter'][0]['value'] == 'G-S0PT1NK0FK'
 
 
@@ -71,9 +71,9 @@ def test_container_sends_no_personal_data():
 def test_gtm_only_in_site_wide_header_not_in_page_embeds():
     b = load_build()
     head, body = b.site_tracking_snippet(), b.site_tracking_body_snippet()
-    assert head.count("window.SUT_GTM_ID = 'GTM-NXZL43PP'") == 1 and 'googletagmanager.com/gtm.js' in head
+    assert head.count("window.SUT_GTM_ID = 'GTM-ML2LKZ7C'") == 1 and 'googletagmanager.com/gtm.js' in head
     assert head.index('SUT_GTM_ID') < head.index('SUT_AFF_KEY')            # consent defaults + GTM first
-    assert 'ns.html?id=GTM-NXZL43PP' in body
+    assert 'ns.html?id=GTM-ML2LKZ7C' in body
     assert (SITE / 'dist' / 'site-tracking.html').read_text() == head
     assert (SITE / 'dist' / 'site-tracking-body.html').read_text() == body
     cfg = json.loads((SITE / 'site.config.json').read_text())
@@ -85,7 +85,7 @@ def test_gtm_only_in_site_wide_header_not_in_page_embeds():
 @pytest.fixture
 def app_client(tmp_path, monkeypatch):
     import app
-    cfg = cfg_for(tmp_path, gtm_container_id='GTM-NXZL43PP')
+    cfg = cfg_for(tmp_path, gtm_container_id='GTM-ML2LKZ7C')
     monkeypatch.setattr(app, 'cfg', cfg)
     with TestClient(app.app, base_url=BASE) as c:
         yield c, cfg
@@ -94,7 +94,7 @@ def app_client(tmp_path, monkeypatch):
 def test_activation_pages_load_gtm_admin_pages_never(app_client):
     c, cfg = app_client
     r = c.get('/')
-    assert '<script src="/static/gtm.js" data-gtm="GTM-NXZL43PP"></script>' in r.text
+    assert '<script src="/static/gtm.js" data-gtm="GTM-ML2LKZ7C"></script>' in r.text
     csp = r.headers['content-security-policy']
     assert "script-src 'self' https://www.googletagmanager.com" in csp and 'google-analytics.com' in csp
     admin = c.get('/admin/marketing', auth=('admin', PW))
@@ -261,3 +261,15 @@ def test_service_account_jwt_is_signed_rs256():
     claims = json.loads(base64.urlsafe_b64decode(pad(b)))
     assert claims['scope'].endswith('analytics.readonly') and claims['exp'] == 4600
     key.public_key().verify(base64.urlsafe_b64decode(pad(s)), f'{h}.{b}'.encode(), padding.PKCS1v15(), hashes.SHA256())
+
+
+def test_only_the_confirmed_gtm_container_is_used():
+    """GTM-ML2LKZ7C is the production container; the earlier one is discontinued."""
+    import subprocess
+    old = 'GTM-' + 'NXZL43PP'
+    files = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True).stdout.split()
+    hits = [f for f in files if f.endswith(('.py', '.json', '.html', '.js', '.md', '.txt'))
+            and old in (ROOT / f).read_text(errors='ignore')]
+    assert hits == []
+    assert json.loads((SITE / 'site.config.json').read_text())['gtm_container_id'] == 'GTM-ML2LKZ7C'
+    assert json.loads((SITE / 'site.config.json').read_text())['ga4_measurement_id'] == 'G-S0PT1NK0FK'
