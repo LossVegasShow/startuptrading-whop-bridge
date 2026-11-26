@@ -329,13 +329,27 @@ GA4 data is cached for 6 hours. If GA4 fails or isn't configured, those columns 
 
 ## 9. Live testing checklist (GTM Preview, Tag Assistant, GA4 DebugView)
 
+**Before testing: check that every live page runs the current scripts.** GoHighLevel
+runs each page's embed (in the body) **before** the site-wide header code, so a page
+whose embed is older than the header sends an old-shaped `sut_attribution` to GTM
+(this is what made `first_channel` / `last_channel` undefined on /free-tools on
+26 Nov). Run:
+
+```bash
+python growth/gtm/check_live.py
+```
+
+Every page must say `OK`. A page marked `STALE` needs its embed re-pasted from
+`sales-site/dist/` and published. Whenever `tracking.js` changes, re-paste the
+header code **and** every embed.
+
 **Setup:** GTM → **Preview** → enter `https://startuptrading.com/free-tools?utm_source=qa&utm_medium=test&utm_campaign=gtm_check` → Tag Assistant opens the site in a debug window. In GA4 → Admin → **DebugView**, the debug device appears within a minute. Use a fresh browser profile with no ad blocker.
 
 | # | Test | In Tag Assistant | In GA4 DebugView / elsewhere | Pass |
 |---|---|---|---|---|
 | L1 | GTM loads once | Container GTM-ML2LKZ7C listed **once**; Consent shows defaults (ad_storage denied) | — | |
 | L2 | One page view per page | On `sut_attribution`: "GA4 - Google tag (page view)" fired **once**. Navigate to the calculator and the TradingView page: once on each | One `page_view` per page; `page_location` has only the utm_* parameters | |
-| L3 | Attribution | Variables: `DLV - first_channel` = `other_referral` (utm_source=qa) | User properties `first_channel` / `last_channel` set | |
+| L3 | Attribution | On `sut_attribution`, Variables: `DLV - first_channel` and `DLV - last_channel` = `other_referral` in a **fresh** profile; in a browser first seen via ChatGPT: `ai_referral` / `other_referral`. `GA4 user properties` shows the same values (never `unknown` when the Data Layer has them) | User properties `first_channel` / `last_channel` set | |
 | L4 | GoHighLevel referrer ignored | Open the page from GoHighLevel's editor (View live page) | `last_channel` unchanged (not gohighlevel) | |
 | L5 | Calculator | Change the risk amount | `tool_use` then `calculation_complete` (calculator=position_size), each once | |
 | L6 | Free tool selected | On /free-tools click a card | `select_content` (content_id = tool id) | |
