@@ -14,8 +14,11 @@ def load_build():
     return mod
 
 
-def rendered():
+def rendered(embed=None):
+    """The sales page as configured, or with the on-page Whop checkout forced on/off."""
     cfg = json.loads((SITE / 'site.config.json').read_text())
+    if embed is not None:
+        cfg['embed_checkout'] = embed
     return cfg, *load_build().render(cfg)
 
 
@@ -52,9 +55,18 @@ def test_checkout_urls_are_whop_plans():
     assert cfg['checkout_url'] != cfg['checkout_url_annual']
 
 
-def test_embedded_checkout_mode():
+def test_live_config_uses_whops_hosted_checkout():
+    """Whop's embedded checkout answers "This checkout is no longer available" for
+    every plan on this store (checked 2026-11-26) while the hosted checkout works, so
+    the live page links to the hosted checkout until Whop re-enables embedding."""
     cfg, embed, _ = rendered()
-    assert cfg['embed_checkout'] == 'true'
+    assert cfg['embed_checkout'] == ''
+    assert '<div data-whop-checkout-plan-id=' not in embed and 'This checkout' not in embed
+    assert_links_match_plans(cfg, checkout_links(embed))
+
+
+def test_embedded_checkout_mode():
+    cfg, embed, _ = rendered(embed='true')
     build = load_build()
     # Loader script from Whop, loaded once, after the page's own script.
     assert embed.count(build.WHOP_LOADER) == 1

@@ -697,6 +697,16 @@
   .sut .sut-links-always a { white-space: nowrap; font-size: 13px; }
 }
 
+/* Hosted-checkout mode: what happens after Join (fills the checkout column) */
+.sut-after { border: 1px solid var(--line-2); border-radius: 14px; padding: 30px; background: var(--surface); }
+.sut-fx .sut-after { background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)), rgba(16,21,29,.74); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.sut-after h3 { margin: 14px 0 20px; }
+.sut-after ol { counter-reset: sut-after; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.sut-after li { counter-increment: sut-after; display: grid; grid-template-columns: 44px 1fr; gap: 2px 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.sut-after li::before { content: "0" counter(sut-after); grid-row: 1 / span 2; font: 600 13px/24px var(--mono); color: var(--accent); }
+.sut-after li b { color: var(--text); font-weight: 600; }
+.sut-after li span { color: var(--text-2); font-size: 15px; }
+
 </style>
 <div class="sut sut-fx" id="top" data-page="setup">
 <!-- StartUpTrading install guide (GHL path /setup). INDICATOR_SETUP_URL in Render

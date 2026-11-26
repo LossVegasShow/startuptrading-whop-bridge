@@ -86,7 +86,7 @@ def test_only_checkout_and_join_links_are_decorated(tmp_path):
 
 
 def test_page_script_runs_affiliate_capture_before_the_checkout_code():
-    _, embed, _ = rendered()
+    _, embed, _ = rendered(embed='true')
     script = embed.split('<script>\n', 1)[1].split('</script>', 1)[0]
     assert script.index('window.SUT_AFFILIATE = pick.code') < script.index('data-whop-checkout-affiliate-code')
     # The Whop loader comes after, so the attribute is set before the checkouts mount.
@@ -94,7 +94,7 @@ def test_page_script_runs_affiliate_capture_before_the_checkout_code():
 
 
 def test_both_plans_get_the_code_and_keep_their_return_url():
-    cfg, embed, _ = rendered()
+    cfg, embed, _ = rendered(embed='true')
     mounts = re.findall(r'<div data-whop-checkout-plan-id="([^"]+)"([^>]*)>', embed)
     assert {p for p, _ in mounts} == {'plan_qSXeS0xoDapGU', 'plan_B84PWlvXemyfX'}
     for _, attrs in mounts:
