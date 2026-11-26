@@ -28,10 +28,12 @@ INITIALIZATION_ALL_PAGES = '2147479573'   # GTM built-in trigger "Initialization
 # dataLayer event -> GA4 event name (one generic tag)
 GENERIC = {'free_tool_view': 'free_tool_view', 'tool_use': 'tool_use', 'calculation_complete': 'calculation_complete',
            'email_subscribe': 'generate_lead', 'checkout_view': 'begin_checkout', 'checkout_return': 'checkout_return',
-           'file_download': 'file_download'}
+           'file_download': 'file_download', 'community_join_click': 'community_join_click',
+           'community_join': 'join_group'}
 DLV = ['first_channel', 'last_channel', 'tool_id', 'source_page', 'interest', 'form_id', 'calculator', 'placement',
-       'destination', 'file_name', 'file_extension', 'link_url']
-EVENT_PARAMS = ['tool_id', 'source_page', 'interest', 'form_id', 'calculator', 'file_name', 'file_extension', 'link_url']
+       'destination', 'file_name', 'file_extension', 'link_url', 'group_id']
+EVENT_PARAMS = ['tool_id', 'source_page', 'interest', 'form_id', 'calculator', 'file_name', 'file_extension', 'link_url',
+                'placement', 'group_id']
 
 CLEAN_URL_JS = """function () {
   var raw = {{Page URL}};

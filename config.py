@@ -6,8 +6,14 @@ BUSINESS_ID = 'biz_a1txPozoELC3Yc'
 PRODUCT_ID = 'prod_Nr8ggb93WCyC1'
 PLANS = {
     'plan_qSXeS0xoDapGU': 'Monthly · $99',
-    'plan_B84PWLvXemyFX': 'Annual · $495'
+    'plan_B84PWlvXemyfX': 'Annual · $495'
 }
+# The free community product (Discord "Community" role only). Verified against the
+# Whop API: plan_Nzi6M0goKvcWY belongs to prod_QB1IxeSU30Qm6. It is a SEPARATE
+# product: licensing, activation emails and revenue only ever consider PRODUCT_ID +
+# PLANS, so community members never get indicator licenses or count as paid.
+COMMUNITY_PRODUCT_ID = 'prod_QB1IxeSU30Qm6'
+COMMUNITY_PLAN_ID = 'plan_Nzi6M0goKvcWY'
 # What the membership delivers comes from products.json (the single source of
 # truth, also used by the /setup page). The membership also
 # includes the Discord and the masterclass, which Whop grants directly.

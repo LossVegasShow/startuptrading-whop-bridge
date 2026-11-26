@@ -76,6 +76,8 @@ CREATE TABLE IF NOT EXISTS payments (
   checkout_origin TEXT, checkout_surface TEXT, checkout_configuration_id TEXT, paid_at TEXT, refunded_at TEXT,
   created_at TEXT, updated_at TEXT, last_source TEXT, received_at INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_payments_membership ON payments(membership_id);
+CREATE TABLE IF NOT EXISTS community_members (
+  membership_id TEXT PRIMARY KEY, whop_user_id TEXT, status TEXT, joined_at TEXT, updated_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS ga_clients (
   membership_id TEXT PRIMARY KEY, client_id TEXT NOT NULL, source TEXT NOT NULL, captured_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS ga_events_sent (

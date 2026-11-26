@@ -58,7 +58,7 @@ def test_corrupt_storage_is_ignored(tmp_path):
 def test_only_checkout_and_join_links_are_decorated(tmp_path):
     out = node_eval(tmp_path, """[
       sutAffDecorate('https://whop.com/checkout/plan_qSXeS0xoDapGU/', 'alice', 'startuptrading.com'),
-      sutAffDecorate('https://whop.com/checkout/plan_B84PWLvXemyFX/?utm_source=x', 'alice', 'startuptrading.com'),
+      sutAffDecorate('https://whop.com/checkout/plan_B84PWlvXemyfX/?utm_source=x', 'alice', 'startuptrading.com'),
       sutAffDecorate('https://startuptrading.com/join', 'alice', 'www.startuptrading.com'),
       sutAffDecorate('https://startuptrading.com/join#pricing', 'alice', 'startuptrading.com'),
       sutAffDecorate('https://whop.com/startuptrading/', 'alice', 'startuptrading.com'),
@@ -70,7 +70,7 @@ def test_only_checkout_and_join_links_are_decorated(tmp_path):
       sutAffDecorate('not a url', 'alice', 'startuptrading.com')
     ]""")
     assert out[0] == 'https://whop.com/checkout/plan_qSXeS0xoDapGU/?a=alice'
-    assert out[1] == 'https://whop.com/checkout/plan_B84PWLvXemyFX/?utm_source=x&a=alice'
+    assert out[1] == 'https://whop.com/checkout/plan_B84PWlvXemyfX/?utm_source=x&a=alice'
     assert out[2] == 'https://startuptrading.com/join?a=alice'
     assert out[3] == 'https://startuptrading.com/join?a=alice#pricing'
     assert out[4] == 'https://whop.com/startuptrading/?a=alice'
@@ -90,7 +90,7 @@ def test_page_script_runs_affiliate_capture_before_the_checkout_code():
 def test_both_plans_get_the_code_and_keep_their_return_url():
     cfg, embed, _ = rendered()
     mounts = re.findall(r'<div data-whop-checkout-plan-id="([^"]+)"([^>]*)>', embed)
-    assert {p for p, _ in mounts} == {'plan_qSXeS0xoDapGU', 'plan_B84PWLvXemyFX'}
+    assert {p for p, _ in mounts} == {'plan_qSXeS0xoDapGU', 'plan_B84PWlvXemyfX'}
     for _, attrs in mounts:
         assert f'data-whop-checkout-return-url="{cfg["thank_you_url"]}"' in attrs
     # The script sets the code on EVERY mount (a loop over all of them), nothing else.

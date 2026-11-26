@@ -75,6 +75,19 @@
 </section>
 
 <section class="card">
+  <h2>Free community (Discord)</h2>
+  <p class="muted">The free StartUpTrading Community product on Whop (prod_QB1IxeSU30Qm6). Separate from the paid membership: never licensed, never counted as a subscriber or revenue.</p>
+  <div class="mk-grid">
+    <div><span class="mk-tag ok">Verified</span><b>{{ community.joined }}</b><span>Joined (Whop)</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ community.upgraded }}</b><span>Upgraded to the paid membership</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>{{ '%s%%'|format(community.upgrade_rate) if community.upgrade_rate is not none else '—' }}</b><span>Community → paid</span></div>
+    <div><span class="mk-tag ok">Verified</span><b>${{ '%.2f'|format(community.upgraded_revenue) }}</b><span>Net revenue from upgraded members</span></div>
+    <div><span class="mk-tag {{ 'ok' if ga else 'na' }}">GA4</span><b>{{ '{:,.0f}'.format(ga.funnel.get('community_join_click', 0)) if ga else '—' }}</b><span>"Join the free Discord" clicks</span></div>
+    <div><span class="mk-tag {{ 'est' if ga else 'na' }}">GA4</span><b>{{ '{:,.0f}'.format(ga.funnel.get('join_group', 0)) if ga else '—' }}</b><span>Joins seen on our site (returned from Whop; by channel in GA4)</span></div>
+  </div>
+</section>
+
+<section class="card">
   <h2>Landing pages (first page seen)</h2>
   {% if data.landing_rows %}
   <div class="scroll"><table><tr><th>Landing page</th><th>Subscribers</th><th>Paying</th><th>Activated</th><th>Net revenue</th></tr>

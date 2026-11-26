@@ -187,7 +187,7 @@ the old address. It doesn't need GoHighLevel.
 - [ ] Every "Join" button opens the Whop checkout for the **monthly plan**
       (`plan_qSXeS0xoDapGU`) and shows $99/month.
 - [ ] In Pricing, switching to **Annual** changes the button to the annual
-      checkout (`plan_B84PWLvXemyFX`), which shows $495/year in Whop.
+      checkout (`plan_B84PWlvXemyfX`), which shows $495/year in Whop.
 - [ ] The embedded checkout loads in the Pricing section for **Monthly**, and
       switching to **Annual** shows the annual checkout ($495/year).
 - [ ] The nav, hero and final "Join" buttons scroll down to the checkout.

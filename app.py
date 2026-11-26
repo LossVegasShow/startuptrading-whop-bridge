@@ -844,13 +844,14 @@ async def admin_marketing(request:Request,start:str='',end:str='',basis:str='fir
         data=acquisition.report(cfg,db,start=s0,end=(e0+86400 if e0 else None),basis=basis,
                               channel=channel if channel in acquisition.CHANNELS else '',campaign=campaign[:120],
                               landing=landing[:120],affiliate=affiliate[:64],traffic=traffic if traffic in ('paid','organic') else '')
+        community=acquisition.community_report(db,start=s0,end=(e0+86400 if e0 else None))
     # GA4 (visitors, leads, funnel): only when connected, cached; never estimated.
     ga=None;ga_error='GA4 Data API not configured (GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_JSON)'
     if ga4_data.configured(cfg):
         try:ga=await ga4_data.cached(cfg,connect,start if s0 else '30daysAgo',end if e0 else 'today');ga_error=''
         except ga4_data.GA4Unavailable as exc:ga_error=str(exc)[:200]
         except Exception as exc:ga_error='GA4 request failed: '+type(exc).__name__
-    return page(request,'admin_marketing.html',data=data,channels=acquisition.CHANNELS,ga=ga,ga_error=ga_error,
+    return page(request,'admin_marketing.html',data=data,community=community,channels=acquisition.CHANNELS,ga=ga,ga_error=ga_error,
                 f={'start':start,'end':end,'basis':basis,'channel':channel,'campaign':campaign,'landing':landing,
                    'affiliate':affiliate,'traffic':traffic},ga4=cfg.ga4_property_url,
                 ga_mp=bool(cfg.ga4_measurement_id and cfg.ga4_api_secret))

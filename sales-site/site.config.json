@@ -1,6 +1,6 @@
 {
   "checkout_url": "https://whop.com/checkout/plan_qSXeS0xoDapGU/",
-  "checkout_url_annual": "https://whop.com/checkout/plan_B84PWLvXemyFX/",
+  "checkout_url_annual": "https://whop.com/checkout/plan_B84PWlvXemyfX/",
   "embed_checkout": "true",
   "whop_accent_color": "orange",
   "free_indicator_url": "https://startuptrading.com/indicators",
@@ -21,6 +21,7 @@
   "learn_url": "",
   "gtm_container_id": "GTM-ML2LKZ7C",
   "ga4_measurement_id": "G-S0PT1NK0FK",
+  "community_join_url": "https://whop.com/checkout/plan_Nzi6M0goKvcWY/",
   "ghl_subscribe_form_url": "https://api.leadconnectorhq.com/widget/form/sBZe4CvOR4NBkd0oioTZ",
   "og_image_url": "",
   "join_url": "https://startuptrading.com/join",
