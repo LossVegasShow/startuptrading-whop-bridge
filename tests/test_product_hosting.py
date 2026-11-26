@@ -122,3 +122,14 @@ def test_hero_image_is_served_and_cached(client):
     assert r.status_code == 200 and r.headers['content-type'] == 'image/webp'
     assert r.headers['cache-control'] == 'public, max-age=86400'
     assert c.get('/static/site.css').headers['cache-control'] == 'no-store'
+
+
+def test_sales_page_embeds_the_compressed_hero_image():
+    import json
+    from test_sales_site import SITE, load_build
+    cfg = json.loads((SITE / 'site.config.json').read_text())
+    embed = load_build().render(cfg, 'sales')[0]
+    assert '<img class="sut-hero-jack" src="data:image/webp;base64,' in embed
+    from pathlib import Path
+    size = (Path(__file__).resolve().parent.parent / 'static' / 'brand' / 'jack-hero.webp').stat().st_size
+    assert size < 25_000, size          # compressed; it ships inside the page HTML
