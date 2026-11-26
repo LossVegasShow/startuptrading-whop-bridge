@@ -293,6 +293,13 @@ NAV_HOME_ANCHORS = (('Technology', '#indicators'), ('Free Tools', None), ('Educa
                     ('Community', '#room'), ('About Jack', '#jack'))
 
 
+# Nav on the free pages while membership_open is off: (label, config key of the URL).
+NAV_FREE_PAGES = (('All Free Tools', 'free_tools_url'), ('Position Size Calculator', 'calculator_url'),
+                  ('TradingView Planner', 'tv_atr_page_url'), ('NinjaTrader Indicator', 'free_indicator_url'))
+# Which config URL each built page lives at, to mark the current nav item.
+PAGE_URL_KEYS = {'free_tools': 'free_tools_url', 'calculator': 'calculator_url', 'tv_atr': 'tv_atr_page_url'}
+
+
 def membership_open(cfg):
     return str(cfg.get('membership_open', '')).strip().lower() == 'true'
 
@@ -318,6 +325,18 @@ def nav_html(cfg, name):
                 links.append((label, sales + '#room', ''))
         elif show_sales:
             links.append((label, sales + anchor, ''))
+    if not show_sales:
+        # Membership closed: the free pages link to each other instead, so the nav
+        # still gets visitors around (and to the free community) without the offer.
+        links = [(label, cfg[key], '') for label, key in NAV_FREE_PAGES if cfg.get(key)]
+        if cfg.get('learn_url'):
+            links.append(('Education', cfg['learn_url'], ''))
+        if cfg.get('community_join_url') and name not in ('welcome', 'setup'):
+            links.append(('Free Discord', cfg['community_join_url'],
+                          ' target="_blank" rel="noopener" data-community-cta="nav"'))
+    here = PAGE_URL_KEYS.get(name)
+    links = [(label, href, attr + (' aria-current="page"' if here and href == cfg.get(here) else ''))
+             for label, href, attr in links]
     items = ''.join(f'<a href="{e(href)}"{attr}>{label}</a>' for label, href, attr in links)
     if on_sales:
         attr = '' if cfg.get('embed_checkout') else ' data-checkout'

@@ -66,6 +66,7 @@
 .sut-links { display: flex; gap: 26px; margin-left: auto; }
 .sut .sut-links a { color: var(--text-2); text-decoration: none; font-size: 14px; }
 .sut .sut-links a:hover { color: var(--text); }
+.sut .sut-links a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); padding-bottom: 4px; }
 
 /* Hero */
 .sut-hero { position: relative; padding: 84px 0 72px; border-bottom: 1px solid var(--line); isolation: isolate; }
@@ -297,8 +298,13 @@
   .sut-price-grid > .sut-price { max-width: none; }
   .sut-ind-flip .sut-ind-copy { order: 0; }
   .sut-portrait { max-width: 420px; }
-  .sut-links { display: none; }
+  /* Links move to a second, horizontally scrollable row instead of disappearing. */
+  .sut-nav-in { flex-wrap: wrap; height: auto; row-gap: 0; padding-top: 12px; }
   .sut-nav-in .sut-btn { margin-left: auto; }
+  .sut-links { order: 3; flex: 0 0 100%; margin: 0; gap: 22px; overflow-x: auto; white-space: nowrap;
+    padding: 12px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .sut-links::-webkit-scrollbar { display: none; }
+  .sut .sut-links a { flex: 0 0 auto; font-size: 13.5px; }
 }
 @media (max-width: 760px) {
   .sut-welcome { padding: 56px 0 52px; }
@@ -461,7 +467,7 @@
 <header class="sut-nav">
   <div class="sut-wrap sut-nav-in">
     <a class="sut-logo" href="https://startuptrading.com/" aria-label="StartUpTrading home"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="9" width="4" height="9" rx="1" fill="#fa7b39" opacity=".45"/><rect x="3.5" y="6" width="1" height="15" fill="#fa7b39" opacity=".45"/><rect x="9" y="5" width="4" height="10" rx="1" fill="#fa7b39" opacity=".7"/><rect x="10.5" y="2" width="1" height="16" fill="#fa7b39" opacity=".7"/><rect x="16" y="2" width="4" height="11" rx="1" fill="#fa7b39"/><rect x="17.5" y="0" width="1" height="16" fill="#fa7b39"/></svg>STARTUPTRADING</a>
-    <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/free-tools">Free Tools</a></nav>
+    <nav class="sut-links" aria-label="Main"><a href="https://startuptrading.com/free-tools">All Free Tools</a><a href="https://startuptrading.com/futures-position-size-calculator">Position Size Calculator</a><a href="https://startuptrading.com/tradingview/atr-position-size-planner" aria-current="page">TradingView Planner</a><a href="https://startuptrading.com/indicators">NinjaTrader Indicator</a><a href="https://whop.com/checkout/plan_Nzi6M0goKvcWY/" target="_blank" rel="noopener" data-community-cta="nav">Free Discord</a></nav>
     <a class="sut-btn sut-btn-sm" href="#subscribe">Get updates</a>
   </div>
 </header>

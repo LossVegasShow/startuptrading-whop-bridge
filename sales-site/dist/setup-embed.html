@@ -66,6 +66,7 @@
 .sut-links { display: flex; gap: 26px; margin-left: auto; }
 .sut .sut-links a { color: var(--text-2); text-decoration: none; font-size: 14px; }
 .sut .sut-links a:hover { color: var(--text); }
+.sut .sut-links a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); padding-bottom: 4px; }
 
 /* Hero */
 .sut-hero { position: relative; padding: 84px 0 72px; border-bottom: 1px solid var(--line); isolation: isolate; }
@@ -297,8 +298,13 @@
   .sut-price-grid > .sut-price { max-width: none; }
   .sut-ind-flip .sut-ind-copy { order: 0; }
   .sut-portrait { max-width: 420px; }
-  .sut-links { display: none; }
+  /* Links move to a second, horizontally scrollable row instead of disappearing. */
+  .sut-nav-in { flex-wrap: wrap; height: auto; row-gap: 0; padding-top: 12px; }
   .sut-nav-in .sut-btn { margin-left: auto; }
+  .sut-links { order: 3; flex: 0 0 100%; margin: 0; gap: 22px; overflow-x: auto; white-space: nowrap;
+    padding: 12px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .sut-links::-webkit-scrollbar { display: none; }
+  .sut .sut-links a { flex: 0 0 auto; font-size: 13.5px; }
 }
 @media (max-width: 760px) {
   .sut-welcome { padding: 56px 0 52px; }

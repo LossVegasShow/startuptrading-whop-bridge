@@ -177,7 +177,7 @@ const [htmlFile, outFile] = process.argv.slice(2); const html = fs.readFileSync(
       await p.evaluate(() => document.addEventListener('click', e => e.preventDefault(), true));
       await p.fill('#sut-size input[name=risk]', '750'); await p.waitForTimeout(100);
       await p.fill('#sut-prop input[name=dd]', '2500'); await p.waitForTimeout(100);
-      await p.click('a[data-community-cta]');
+      await p.click('a[data-community-cta=calculator]');
     }
     out[name] = await p.evaluate(() => dataLayer.filter(e => e && e.event && !/^gtm/.test(e.event)));
   }

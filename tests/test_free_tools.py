@@ -377,3 +377,16 @@ def test_form_space_reserved_only_until_sized():
     # Never clip the form by hiding its overflow.
     rule = re.search(r'\.sut-sub-form \{[^}]*\}', css).group(0)
     assert 'overflow' not in rule and 'scrolling' not in (SITE / 'build.py').read_text().split('def subscribe_html')[1].split('def membership_note_html')[0]
+
+
+def test_free_pages_nav_links_the_free_pages_while_closed():
+    for name, key in (('free_tools', 'free_tools_url'), ('calculator', 'calculator_url'), ('tv_atr', 'tv_atr_page_url')):
+        embed = page(name, membership_open='')
+        hrefs = dict((label, href) for href, label in nav(embed))
+        assert hrefs['All Free Tools'] == CFG['free_tools_url']
+        assert hrefs['Position Size Calculator'] == CFG['calculator_url']
+        assert hrefs['TradingView Planner'] == CFG['tv_atr_page_url']
+        assert hrefs['Free Discord'] == CFG['community_join_url']
+        header = embed.split('<header')[1].split('</header>')[0]
+        assert header.count('aria-current="page"') == 1
+        assert f'href="{CFG[key]}" aria-current="page"' in header, name
