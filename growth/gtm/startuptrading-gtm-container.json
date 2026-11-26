@@ -21,7 +21,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "24",
+        "tagId": "25",
         "name": "GA4 - Google tag (page view)",
         "type": "googtag",
         "fingerprint": "0",
@@ -71,6 +71,21 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
+                    "value": "content_group"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{Page type}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
                     "value": "user_properties"
                   },
                   {
@@ -84,8 +99,8 @@
           }
         ],
         "firingTriggerId": [
-          "18",
-          "19"
+          "19",
+          "20"
         ],
         "tagFiringOption": "ONCE_PER_LOAD",
         "monitoringMetadata": {
@@ -98,7 +113,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "25",
+        "tagId": "26",
         "name": "GA4 - SUT events",
         "type": "gaawe",
         "fingerprint": "0",
@@ -271,98 +286,6 @@
                     "value": "{{DLV - group_id}}"
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "type": "LIST",
-            "key": "userProperties",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "name",
-                    "value": "first_channel"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "value",
-                    "value": "{{DLV - first_channel}}"
-                  }
-                ]
-              },
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "name",
-                    "value": "last_channel"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "value",
-                    "value": "{{DLV - last_channel}}"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "firingTriggerId": [
-          "20"
-        ],
-        "tagFiringOption": "ONCE_PER_EVENT",
-        "monitoringMetadata": {
-          "type": "MAP"
-        },
-        "consentSettings": {
-          "consentStatus": "NOT_SET"
-        }
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "tagId": "26",
-        "name": "GA4 - select_content (free tool)",
-        "type": "gaawe",
-        "fingerprint": "0",
-        "parameter": [
-          {
-            "type": "BOOLEAN",
-            "key": "sendEcommerceData",
-            "value": "false"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "eventName",
-            "value": "select_content"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "measurementIdOverride",
-            "value": "{{GA4 measurement ID}}"
-          },
-          {
-            "type": "LIST",
-            "key": "eventSettingsTable",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "content_type"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "free_tool"
-                  }
-                ]
               },
               {
                 "type": "MAP",
@@ -370,12 +293,12 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "content_id"
+                    "value": "page_type"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{DLV - tool_id}}"
+                    "value": "{{Page type}}"
                   }
                 ]
               }
@@ -433,6 +356,128 @@
         "accountId": "0",
         "containerId": "0",
         "tagId": "27",
+        "name": "GA4 - select_content (free tool)",
+        "type": "gaawe",
+        "fingerprint": "0",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "sendEcommerceData",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "select_content"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{GA4 measurement ID}}"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "content_type"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "free_tool"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "content_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - tool_id}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "page_type"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{Page type}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "LIST",
+            "key": "userProperties",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "first_channel"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - first_channel}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "last_channel"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - last_channel}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "firingTriggerId": [
+          "22"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NOT_SET"
+        }
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "28",
         "name": "GA4 - select_promotion (membership CTA)",
         "type": "gaawe",
         "fingerprint": "0",
@@ -500,96 +545,19 @@
                     "value": "{{DLV - placement}}"
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "type": "LIST",
-            "key": "userProperties",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "name",
-                    "value": "first_channel"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "value",
-                    "value": "{{DLV - first_channel}}"
-                  }
-                ]
               },
               {
                 "type": "MAP",
                 "map": [
                   {
                     "type": "TEMPLATE",
-                    "key": "name",
-                    "value": "last_channel"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "value",
-                    "value": "{{DLV - last_channel}}"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "firingTriggerId": [
-          "22"
-        ],
-        "tagFiringOption": "ONCE_PER_EVENT",
-        "monitoringMetadata": {
-          "type": "MAP"
-        },
-        "consentSettings": {
-          "consentStatus": "NOT_SET"
-        }
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "tagId": "28",
-        "name": "GA4 - tradingview_click",
-        "type": "gaawe",
-        "fingerprint": "0",
-        "parameter": [
-          {
-            "type": "BOOLEAN",
-            "key": "sendEcommerceData",
-            "value": "false"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "eventName",
-            "value": "tradingview_click"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "measurementIdOverride",
-            "value": "{{GA4 measurement ID}}"
-          },
-          {
-            "type": "LIST",
-            "key": "eventSettingsTable",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "tool_id"
+                    "value": "page_type"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{DLV - tool_id}}"
+                    "value": "{{Page type}}"
                   }
                 ]
               }
@@ -642,13 +610,120 @@
         "consentSettings": {
           "consentStatus": "NOT_SET"
         }
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "29",
+        "name": "GA4 - tradingview_click",
+        "type": "gaawe",
+        "fingerprint": "0",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "sendEcommerceData",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "tradingview_click"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{GA4 measurement ID}}"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "tool_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - tool_id}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "page_type"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{Page type}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "LIST",
+            "key": "userProperties",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "first_channel"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - first_channel}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "last_channel"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - last_channel}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "firingTriggerId": [
+          "24"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NOT_SET"
+        }
       }
     ],
     "trigger": [
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "18",
+        "triggerId": "19",
         "name": "SUT - attribution (once per page)",
         "type": "CUSTOM_EVENT",
         "fingerprint": "0",
@@ -673,7 +748,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "19",
+        "triggerId": "20",
         "name": "Activation app - page load",
         "type": "PAGEVIEW",
         "fingerprint": "0",
@@ -698,7 +773,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "20",
+        "triggerId": "21",
         "name": "SUT - analytics events",
         "type": "CUSTOM_EVENT",
         "fingerprint": "0",
@@ -723,7 +798,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "21",
+        "triggerId": "22",
         "name": "SUT - free tool selected",
         "type": "CUSTOM_EVENT",
         "fingerprint": "0",
@@ -748,7 +823,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "22",
+        "triggerId": "23",
         "name": "SUT - membership CTA clicked",
         "type": "CUSTOM_EVENT",
         "fingerprint": "0",
@@ -773,7 +848,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "23",
+        "triggerId": "24",
         "name": "SUT - TradingView link clicked",
         "type": "CUSTOM_EVENT",
         "fingerprint": "0",
@@ -1188,6 +1263,22 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "16",
+        "name": "Page type",
+        "type": "jsm",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "javascript",
+            "value": "function () {\n  var host = {{Page Hostname}}, path = ({{Page Path}} || '/').replace(/\\/+$/, '') || '/';\n  if (host === 'activate.startuptrading.com') return 'activation';\n  if (path === '/' || path === '/join') return 'membership_sales';\n  if (path === '/free-tools') return 'free_tools_directory';\n  if (path === '/futures-position-size-calculator' || path.indexOf('/tradingview/') === 0) return 'free_tool';\n  if (path === '/welcome') return 'post_checkout';\n  if (path === '/setup') return 'member_setup';\n  return 'other';\n}"
+          }
+        ],
+        "fingerprint": "0",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "17",
         "name": "GA4 user properties",
         "type": "jsm",
         "parameter": [
@@ -1203,7 +1294,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "17",
+        "variableId": "18",
         "name": "GA4 event name",
         "type": "smm",
         "parameter": [

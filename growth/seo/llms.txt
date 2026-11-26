@@ -1,0 +1,36 @@
+# StartUpTrading
+
+> StartUpTrading is futures trader Jack Gleason's site. Jack trades futures live on NinjaTrader Live, NinjaTrader's YouTube show, several times a week, and builds the NinjaTrader 8 tools he trades with, built around ATR (Average True Range) position sizing. The homepage is the StartUpTrading membership: $99 a month or $495 a year for Jack's NinjaTrader 8 tools (licensed automatically), every new tool as it is released, a members-only trade room and masterclasses. There are also free tools, a free indicator and a free Discord community. Everything on the site is education, not investment advice.
+
+## Key facts
+
+- Founder: Jack Gleason. Trading since 2008, hosted his own tastytrade show from 2012, later traded at a proprietary firm and holds a Series 56 license.
+- Method: set the stop from ATR, then size the position so a fast market and a slow market risk the same dollars when the trade is wrong. Example: with a $180 risk budget on the Micro E-mini S&P (MES) at $5 a point and a 1.5 × ATR stop, that is 3 contracts when ATR is 8 points and 1 contract when ATR is 24 points.
+- Platform: NinjaTrader 8. Recommended market data: Kinetick.
+- The tools size the trade and place the stop. They are not trading signals.
+- Membership tools: SUT ATR Orders (sizes each trade from ATR and places the stop and target in NinjaTrader as you enter) and the StartupTrading Scanner (trend strength and direction across a watchlist). Licenses are issued to the member's NinjaTrader account after checkout at activate.startuptrading.com.
+- Perry, the second trader in the community, posts levels on the SPX, SPY, QQQ, ES and NQ charts: volume profile value zones (RTH and overnight), 30-minute poor structure, options positioning (call and put walls, 0-DTE clusters) and the One Day Expected Move (1-DEM).
+
+## Main pages
+
+- [StartUpTrading membership (home)](https://startuptrading.com/): the membership sales page. Jack's NinjaTrader 8 tools, how he trades them, what's included, pricing ($99/mo or $495/yr) and an FAQ.
+- [Free tools](https://startuptrading.com/free-tools): free futures trading tools from Jack. No signup needed.
+- [Futures Position Size Calculator](https://startuptrading.com/futures-position-size-calculator): free calculator for contracts from risk, stop and ATR, plus a prop firm drawdown calculator.
+- [TradingView ATR position size planner](https://startuptrading.com/tradingview/atr-position-size-planner): Jack's free TradingView indicator for futures position sizing from ATR and prop firm risk.
+- [Free ATR Headliner Indicator](https://startuptrading.com/indicators): free NinjaTrader indicator with the ATR Expansion Bar and a live risk calculator. Download link sent by email.
+- [Free StartUpTrading Discord community](https://whop.com/checkout/plan_Nzi6M0goKvcWY/): free to join through Whop. Help with the free tools, market talk and announcements. The live trade room and masterclasses are for members.
+
+## Video
+
+- [How to Master Position Sizing with ATR, featuring Jack Gleason](https://www.youtube.com/watch?v=LuD9XNZtANY): 54-minute NinjaTrader Live episode, Aug 28, 2026.
+- [Full 3-hour live ATR session](https://www.youtube.com/watch?v=QHIhR9nSMwk)
+- [NinjaTrader YouTube channel](https://www.youtube.com/channel/UCUXNA8JJOiMrqhB8NVNgClA): home of NinjaTrader Live, where Jack trades several times a week.
+- [Jack on TradingView](https://www.tradingview.com/u/Jack_Gleason/)
+
+## Legal
+
+- [Terms, privacy and disclosures](https://startuptrading.com/policies-terms): Terms of Service, Privacy Policy, Trading and Investment Risk Disclaimer, Live Trade Room Disclosure, Testimonial Disclosure.
+
+## Contact
+
+- contact@startuptrading.com

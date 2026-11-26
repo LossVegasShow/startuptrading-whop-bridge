@@ -73,7 +73,7 @@ across the four pillars. Most calls to action should be the free indicator; at m
 WRITER = """Role: Copywriter.
 Write the full content pack for one brief, as Jack, in the brand voice. YouTube copy should help search
 (name the market and the setup). The Shorts script needs a hook in the first 2 seconds. Calls to action
-link to https://startuptrading.com/indicators (free indicator) or https://startuptrading.com/join.
+link to https://startuptrading.com/indicators (free indicator) or https://startuptrading.com/ (the membership page).
 Follow every hard rule in the brand brief. End the email and the YouTube description with the risk line."""
 
 COMPLIANCE = """Role: Compliance Reviewer for futures marketing (CFTC, NFA Rule 2-29, FTC Endorsement Guides).

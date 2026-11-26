@@ -114,7 +114,9 @@ def test_sales_nav_has_every_item_and_anchors_exist():
 def test_free_pages_do_not_link_to_the_gated_offer():
     for name in ('free_tools', 'tv_atr', 'calculator'):
         embed = markup(page(name, membership_open=''))
-        assert CFG['sales_page_url'] not in embed, name
+        # The logo links to the homepage (which is the sales page), but nothing points at the offer.
+        for offer in ('#pricing', '#indicators', 'whop.com/checkout/plan_q', CFG['checkout_url_annual']):
+            assert offer not in embed, (name, offer)
         assert 'Become a Member' not in embed, name
 
 

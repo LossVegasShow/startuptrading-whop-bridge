@@ -215,7 +215,7 @@ so new buyers get reminders without a manual release.
 - [ ] Leave `ACTIVATION_REMINDERS_AUTO` unset or `false`.
 - [ ] Optional: `BREAKER_MAX_GRANTS_PER_HOUR`, `BREAKER_MAX_REVOCATIONS_PER_HOUR`,
       `BREAKER_MAX_FAILURES_PER_15MIN` (defaults 60 / 20 / 10).
-- [ ] `CHECKOUT_URL=https://startuptrading.com/join#pricing` (already set).
+- [ ] `CHECKOUT_URL=https://startuptrading.com/#pricing` (the homepage is the sales page; the old `/join#pricing` value still works).
 - [ ] After the test: `LICENSE_WRITES_ENABLED=false` until launch (done), and clear
       `ALLOWED_TEST_MEMBERSHIP` / `ALLOWED_TEST_EMAIL` when no longer testing.
 - [ ] Rotate `WHOP_API_KEY` (part of it appeared in a screenshot) and set the new
@@ -255,24 +255,24 @@ Setup:
       **Settings → Tracking code → Header** (site-wide), so `?a=` is captured on
       any startuptrading.com page, not only `/join`.
 - [ ] Publish the rebuilt `/join` (`ghl-embed.html`) and `/welcome` pages.
-- [ ] Tell affiliates to share **`https://startuptrading.com/join?a=THEIR_WHOP_USERNAME`**.
+- [ ] Tell affiliates to share **`https://startuptrading.com/?a=THEIR_WHOP_USERNAME`**.
       (A link to `whop.com/startuptrading?a=…` also attributes, but skips the /join page.)
 
 Tests. Use a fresh incognito window per test and a 100%-off, single-use promo code
 on a test Whop account. **Commission rates and prices are not changed by any of these.**
-- [ ] **A1 Monthly, direct:** open `startuptrading.com/join?a=AFFILIATE` and buy
+- [ ] **A1 Monthly, direct:** open `startuptrading.com/?a=AFFILIATE` and buy
       **monthly**. In Whop → Affiliates (or the membership's details), the sale is
       credited to AFFILIATE.
 - [ ] **A2 Annual, direct:** same link, buy **annual**. Credited to AFFILIATE.
       (Use a cheap test or refund the purchase, and don't change the annual price.)
 - [ ] **A3 Landing elsewhere:** open `startuptrading.com/?a=AFFILIATE` (Home), click
       **Join**, buy. Credited (needs the GHL tracking code above).
-- [ ] **A4 Return visit:** open `startuptrading.com/join?a=AFFILIATE`, close the tab,
-      come back to `startuptrading.com/join` with no `?a=` in the same browser
+- [ ] **A4 Return visit:** open `startuptrading.com/?a=AFFILIATE`, close the tab,
+      come back to `startuptrading.com/` with no `?a=` in the same browser
       within 30 days, buy. Credited.
 - [ ] **A5 Latest affiliate wins:** visit with `?a=AFF_ONE`, then `?a=AFF_TWO`, buy.
       Credited to AFF_TWO.
-- [ ] **A6 No affiliate:** fresh browser, `startuptrading.com/join`, buy. No affiliate credited.
+- [ ] **A6 No affiliate:** fresh browser, `startuptrading.com/`, buy. No affiliate credited.
 - [ ] **A7 Nothing else changed**, for at least one of A1–A5:
   - the browser lands on `startuptrading.com/welcome` after paying
   - `/admin-test/member-lookup` shows the new membership as `eligible`

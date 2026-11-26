@@ -220,7 +220,7 @@ browser window throughout.
 
 | # | Action | Expected | Pass |
 |---|---|---|---|
-| C1 | Buy through `startuptrading.com/join` with the 100%-off code (monthly) | Whop checkout completes; browser lands on `/welcome` | |
+| C1 | Buy through `startuptrading.com/` (the homepage) with the 100%-off code (monthly) | Whop checkout completes; browser lands on `/welcome` | |
 | C2 | Check the Whop email inbox | Whop receipt. Whop shows Discord and masterclass access | |
 | C3 | `/welcome` → **Activate my trading tools** → **Sign in with Whop** | Sign-in succeeds and the activation page shows the membership. `/admin` lists the new `mem_…` | |
 | C4 | Enter the code sent to the Whop email | Verified | |

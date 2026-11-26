@@ -1,4 +1,4 @@
-"""Whop affiliate attribution on startuptrading.com/join (sales-site/src/affiliate.js).
+"""Whop affiliate attribution on the startuptrading.com homepage (the sales page; /join still works) (sales-site/src/affiliate.js).
 
 Affiliates send customers to startuptrading.com/join?a=CODE. The code must reach
 BOTH embedded checkouts (monthly and annual) and every Whop checkout link, survive
@@ -67,7 +67,10 @@ def test_only_checkout_and_join_links_are_decorated(tmp_path):
       sutAffDecorate('https://activate.startuptrading.com/', 'alice', 'startuptrading.com'),
       sutAffDecorate('https://example.com/checkout/x', 'alice', 'startuptrading.com'),
       sutAffDecorate('https://whop.com/checkout/plan_qSXeS0xoDapGU/', '', 'startuptrading.com'),
-      sutAffDecorate('not a url', 'alice', 'startuptrading.com')
+      sutAffDecorate('not a url', 'alice', 'startuptrading.com'),
+      sutAffDecorate('https://startuptrading.com/', 'alice', 'startuptrading.com'),
+      sutAffDecorate('https://startuptrading.com/#pricing', 'alice', 'startuptrading.com'),
+      sutAffDecorate('https://startuptrading.com/free-tools', 'alice', 'startuptrading.com')
     ]""")
     assert out[0] == 'https://whop.com/checkout/plan_qSXeS0xoDapGU/?a=alice'
     assert out[1] == 'https://whop.com/checkout/plan_B84PWlvXemyfX/?utm_source=x&a=alice'
@@ -75,8 +78,11 @@ def test_only_checkout_and_join_links_are_decorated(tmp_path):
     assert out[3] == 'https://startuptrading.com/join?a=alice#pricing'
     assert out[4] == 'https://whop.com/startuptrading/?a=alice'
     assert out[5].endswith('?a=bob')                           # an explicit affiliate is never replaced
-    assert out[6:] == ['https://startuptrading.com/indicators', 'https://activate.startuptrading.com/',
-                       'https://example.com/checkout/x', 'https://whop.com/checkout/plan_qSXeS0xoDapGU/', 'not a url']
+    assert out[6:11] == ['https://startuptrading.com/indicators', 'https://activate.startuptrading.com/',
+                         'https://example.com/checkout/x', 'https://whop.com/checkout/plan_qSXeS0xoDapGU/', 'not a url']
+    # The homepage is the sales page, so links to it carry the affiliate too (/join is kept for old links).
+    assert out[11:] == ['https://startuptrading.com/?a=alice', 'https://startuptrading.com/?a=alice#pricing',
+                        'https://startuptrading.com/free-tools']
 
 
 def test_page_script_runs_affiliate_capture_before_the_checkout_code():
