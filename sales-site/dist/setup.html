@@ -652,11 +652,68 @@
   .sut .sut-frame-bar em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 }
 
+/* ═══ Visual layer, site-wide ═══════════════════════════════════════════════ */
+/* Glass cards with a lift on hover: free tools, calculator, related links, member pages */
+.sut-fx .sut-tool, .sut-fx .sut-calc-card, .sut-fx .sut-related a, .sut-fx .sut-next > li, .sut-fx .sut-help > div,
+.sut-fx .sut-downloads li, .sut-fx .sut-calc-cta, .sut-fx .sut-checkout {
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)), rgba(16,21,29,.74);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+.sut-fx .sut-tool, .sut-fx .sut-related a { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.sut-fx .sut-tool:hover, .sut-fx .sut-related a:hover { transform: translateY(-3px); border-color: rgba(250,123,57,.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -28px rgba(250,123,57,.45); }
+.sut-fx .sut-next > li.is-current { background: linear-gradient(90deg, var(--accent-soft), transparent 60%), rgba(16,21,29,.74); }
+.sut-fx .sut-calc-out { background: linear-gradient(180deg, rgba(250,123,57,.16), rgba(250,123,57,.05)); box-shadow: 0 18px 40px -26px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-out b { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent-2); }
+.sut-fx .sut-filter[aria-pressed="true"] { box-shadow: 0 0 0 3px rgba(250,123,57,.12), 0 8px 20px -12px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Text-only heroes (free tools, calculator, TradingView, member pages): chart on the right */
+.sut-fx .sut-welcome, .sut-fx .sut-calc-hero { position: relative; isolation: isolate; overflow: hidden; }
+.sut-fx .sut-calc-hero { padding-bottom: 56px; }
+.sut-fx .sut-welcome .sut-hero-fx, .sut-fx .sut-calc-hero .sut-hero-fx {
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); }
+
+/* Tall chart window (TradingView page) */
+.sut .sut-frame-tall { aspect-ratio: 4 / 5; }
+
+/* NinjaTrader menu illustration (/setup) */
+.sut-menu-mock { margin-top: 18px; max-width: 520px; }
+.sut-menu-bar { display: flex; gap: 2px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--bg-2); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-bar span { padding: 5px 10px; border-radius: 6px; }
+.sut-menu-bar .is-open { background: var(--surface-2); color: var(--text); }
+.sut-menu-drop { position: relative; display: grid; width: 230px; margin: 0 0 18px 60px; padding: 6px; border: 1px solid var(--line-2); border-top: 0;
+  border-radius: 0 0 10px 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-drop > span { position: relative; display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 6px; }
+.sut-menu-drop .is-hot { background: var(--accent-soft); color: var(--text); box-shadow: inset 2px 0 0 var(--accent); }
+.sut-menu-drop i { font-style: normal; color: var(--accent); }
+.sut-menu-sub { position: absolute; left: calc(100% + 6px); top: -6px; display: grid; width: 200px; padding: 6px; border: 1px solid var(--line-2);
+  border-radius: 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font-weight: 500; }
+.sut-menu-sub em { font-style: normal; padding: 7px 10px; border-radius: 6px; color: var(--text-2); }
+.sut-menu-sub em.is-hot { color: var(--accent-ink); background: var(--accent); box-shadow: 0 6px 18px -8px rgba(250,123,57,.8); }
+.sut-js .sut-menu-sub em.is-hot { animation: sut-pulse-hot 2.6s ease-in-out infinite; }
+@keyframes sut-pulse-hot { 50% { box-shadow: 0 0 0 4px rgba(250,123,57,.2), 0 6px 18px -8px rgba(250,123,57,.8); } }
+.sut-next .sut-frame { margin-top: 18px; }
+@media (max-width: 760px) {
+  .sut-menu-drop { margin-left: 8px; width: 170px; font-size: 12px; }
+  .sut-menu-sub { left: 40px; top: 100%; width: 180px; }
+  .sut-menu-drop { margin-bottom: 92px; }
+  .sut-menu-bar span:nth-child(n+4) { display: none; }
+}
+/* Steps on member pages: let illustration windows shrink instead of widening the column. */
+.sut-next > li > div { min-width: 0; }
+.sut-next .sut-frame { max-width: 100%; }
+.sut-win .sut-frame-bar { min-width: 0; }
+.sut-win .sut-frame-bar em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) {
+  .sut .sut-links-always { gap: 14px; }
+  .sut .sut-links-always a { white-space: nowrap; font-size: 13px; }
+}
+
 </style>
-<div class="sut" id="top" data-page="setup">
+<div class="sut sut-fx" id="top" data-page="setup">
 <!-- StartUpTrading install guide (GHL path /setup). INDICATOR_SETUP_URL in Render
      points here, so the "your tools are ready" email links to this page.
-     Built by sales-site/build.py; edit src/, not dist/. Boxes with class "sut-ph"
+     Built by sales-site/build.py; edit src/, not dist/. Chart and menu windows are labelled illustrations; boxes with class "sut-ph"
      are placeholders for screenshots. Products, files and NinjaTrader names come
      from ../products.json. -->
 
@@ -671,8 +728,10 @@
     </nav>
   </div>
 </header>
+<div class="sut-tape" aria-label="Futures contract specifications"><div class="sut-tape-label">Contract specs</div><div class="sut-tape-track"><ul><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul><ul aria-hidden="true"><li><b>ES</b><span>E-mini S&amp;P 500</span><em>tick 0.25 = $12.50</em><em>$50/pt</em></li><li><b>MES</b><span>Micro E-mini S&amp;P 500</span><em>tick 0.25 = $1.25</em><em>$5/pt</em></li><li><b>NQ</b><span>E-mini Nasdaq-100</span><em>tick 0.25 = $5.00</em><em>$20/pt</em></li><li><b>MNQ</b><span>Micro E-mini Nasdaq-100</span><em>tick 0.25 = $0.50</em><em>$2/pt</em></li><li><b>YM</b><span>E-mini Dow</span><em>tick 1 = $5.00</em><em>$5/pt</em></li><li><b>MYM</b><span>Micro E-mini Dow</span><em>tick 1 = $0.50</em><em>$0.50/pt</em></li><li><b>RTY</b><span>E-mini Russell 2000</span><em>tick 0.10 = $5.00</em><em>$50/pt</em></li><li><b>M2K</b><span>Micro E-mini Russell 2000</span><em>tick 0.10 = $0.50</em><em>$5/pt</em></li><li><b>CL</b><span>Crude Oil</span><em>tick 0.01 = $10.00</em><em>$1,000/pt</em></li><li><b>MCL</b><span>Micro Crude Oil</span><em>tick 0.01 = $1.00</em><em>$100/pt</em></li><li><b>GC</b><span>Gold</span><em>tick 0.10 = $10.00</em><em>$100/pt</em></li><li><b>MGC</b><span>Micro Gold</span><em>tick 0.10 = $1.00</em><em>$10/pt</em></li></ul></div></div>
 
 <section class="sut-hero sut-welcome">
+  <canvas class="sut-hero-fx" aria-hidden="true"></canvas>
   <div class="sut-wrap sut-welcome-in">
     <p class="sut-eyebrow"><span class="sut-live"></span>Install guide</p>
     <h1>Set up your tools.<br><span class="sut-dim">About 5 minutes.</span></h1>
@@ -710,7 +769,15 @@
         <div>
           <h3>Import into NinjaTrader</h3>
           <p>In the NinjaTrader Control Center, open <b>Tools → Import → NinjaScript Add-On…</b>, choose the first .zip and click <b>OK</b>. Repeat for the second file, then restart NinjaTrader.</p>
-          <div class="sut-ph sut-ph-text"><strong>Screenshot: the Import menu</strong><small>Optional: Control Center → Tools → Import → NinjaScript Add-On.</small></div>
+          <figure class="sut-frame sut-win sut-menu-mock" aria-label="Illustration: NinjaTrader Control Center, Tools menu, Import, NinjaScript Add-On">
+            <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · Control Center</em><i class="sut-win-tag">Illustration</i></div>
+            <div class="sut-menu-bar"><span>New</span><span class="is-open">Tools</span><span>Workspaces</span><span>Connections</span><span>Help</span></div>
+            <div class="sut-menu-drop">
+              <span>Account Data</span><span>Historical Data</span><span>Database Management</span>
+              <span class="is-hot">Import <i>▸</i><b class="sut-menu-sub"><em class="is-hot">NinjaScript Add-On…</em><em>Basket Orders…</em></b></span>
+              <span>Export</span><span>Options</span>
+            </div>
+          </figure>
         </div>
       </li>
       <li>
@@ -719,7 +786,10 @@
           <h3>Add them to a chart</h3>
           <p>Open a chart (for example ES or NQ), then:</p>
           <ul class="sut-list-plain"><li><b>ATR Order Automation</b>: right-click the chart, choose <b>Strategies…</b>, open the <b>StartupTrading</b> folder and add <b>SUT ATR Orders</b>.</li><li><b>Trend Scanner &amp; Market Selector</b>: right-click the chart, choose <b>Indicators…</b>, open the <b>StartupTrading</b> folder and add <b>StartupTrading Scanner</b>.</li></ul>
-          <div class="sut-ph sut-ph-text"><strong>Screenshot: both tools on a chart</strong><small>Jack: confirm where each tool appears in NinjaTrader and add a screenshot.</small></div>
+          <figure class="sut-frame sut-win">
+            <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · ES · Chart</em><i class="sut-win-tag">Illustration</i></div>
+            <div class="sut-frame-body"><canvas class="sut-tool-fx" data-fx-chart="bracket" data-market="ES" data-micro="MES" data-pv="50" data-risk="500" role="img" aria-label="Illustration: an ES chart with ATR-based entry, stop and target brackets"></canvas><svg class="sut-candles" viewBox="0 0 640 300" preserveAspectRatio="none" aria-hidden="true"><line class="dn" x1="5.0" x2="5.0" y1="261.6" y2="270.2"/><rect class="dn" x="2.2" y="266.3" width="5.6" height="1.8"/><line class="dn" x1="15.0" x2="15.0" y1="259.6" y2="273.0"/><rect class="dn" x="12.2" y="268.1" width="5.6" height="2.9"/><line class="up" x1="25.0" x2="25.0" y1="243.9" y2="280.5"/><rect class="up" x="22.2" y="247.8" width="5.6" height="23.2"/><line class="up" x1="35.0" x2="35.0" y1="236.8" y2="249.5"/><rect class="up" x="32.2" y="240.4" width="5.6" height="7.4"/><line class="dn" x1="45.0" x2="45.0" y1="232.6" y2="272.7"/><rect class="dn" x="42.2" y="240.4" width="5.6" height="27.6"/><line class="up" x1="55.0" x2="55.0" y1="240.5" y2="284.0"/><rect class="up" x="52.2" y="256.0" width="5.6" height="12.0"/><line class="dn" x1="65.0" x2="65.0" y1="251.7" y2="272.3"/><rect class="dn" x="62.2" y="256.0" width="5.6" height="13.5"/><line class="up" x1="75.0" x2="75.0" y1="262.7" y2="275.3"/><rect class="up" x="72.2" y="267.4" width="5.6" height="2.1"/><line class="up" x1="85.0" x2="85.0" y1="255.3" y2="273.5"/><rect class="up" x="82.2" y="258.9" width="5.6" height="8.5"/><line class="up" x1="95.0" x2="95.0" y1="219.5" y2="269.9"/><rect class="up" x="92.2" y="224.6" width="5.6" height="34.3"/><line class="dn" x1="105.0" x2="105.0" y1="217.8" y2="236.3"/><rect class="dn" x="102.2" y="224.6" width="5.6" height="8.5"/><line class="up" x1="115.0" x2="115.0" y1="226.4" y2="235.4"/><rect class="up" x="112.2" y="232.2" width="5.6" height="1.0"/><line class="dn" x1="125.0" x2="125.0" y1="223.4" y2="242.3"/><rect class="dn" x="122.2" y="232.2" width="5.6" height="5.3"/><line class="up" x1="135.0" x2="135.0" y1="204.9" y2="239.8"/><rect class="up" x="132.2" y="212.3" width="5.6" height="25.2"/><line class="up" x1="145.0" x2="145.0" y1="188.0" y2="212.8"/><rect class="up" x="142.2" y="201.6" width="5.6" height="10.7"/><line class="up" x1="155.0" x2="155.0" y1="156.4" y2="204.6"/><rect class="up" x="152.2" y="174.9" width="5.6" height="26.7"/><line class="up" x1="165.0" x2="165.0" y1="166.5" y2="179.4"/><rect class="up" x="162.2" y="173.9" width="5.6" height="1.0"/><line class="up" x1="175.0" x2="175.0" y1="158.8" y2="181.5"/><rect class="up" x="172.2" y="172.2" width="5.6" height="1.7"/><line class="up" x1="185.0" x2="185.0" y1="148.4" y2="185.4"/><rect class="up" x="182.2" y="157.1" width="5.6" height="15.1"/><line class="up" x1="195.0" x2="195.0" y1="146.5" y2="169.0"/><rect class="up" x="192.2" y="147.6" width="5.6" height="9.5"/><line class="up" x1="205.0" x2="205.0" y1="127.9" y2="151.8"/><rect class="up" x="202.2" y="133.5" width="5.6" height="14.1"/><line class="dn" x1="215.0" x2="215.0" y1="124.6" y2="158.6"/><rect class="dn" x="212.2" y="133.5" width="5.6" height="20.3"/><line class="up" x1="225.0" x2="225.0" y1="108.7" y2="167.1"/><rect class="up" x="222.2" y="127.3" width="5.6" height="26.5"/><line class="up" x1="235.0" x2="235.0" y1="106.8" y2="132.6"/><rect class="up" x="232.2" y="120.1" width="5.6" height="7.2"/><line class="dn" x1="245.0" x2="245.0" y1="97.0" y2="155.3"/><rect class="dn" x="242.2" y="120.1" width="5.6" height="31.9"/><line class="dn" x1="255.0" x2="255.0" y1="141.7" y2="171.6"/><rect class="dn" x="252.2" y="152.0" width="5.6" height="10.6"/><line class="up" x1="265.0" x2="265.0" y1="138.1" y2="164.9"/><rect class="up" x="262.2" y="139.6" width="5.6" height="23.0"/><line class="up" x1="275.0" x2="275.0" y1="114.2" y2="145.2"/><rect class="up" x="272.2" y="128.8" width="5.6" height="10.8"/><line class="up" x1="285.0" x2="285.0" y1="111.4" y2="143.1"/><rect class="up" x="282.2" y="116.4" width="5.6" height="12.4"/><line class="up" x1="295.0" x2="295.0" y1="81.3" y2="121.3"/><rect class="up" x="292.2" y="90.1" width="5.6" height="26.3"/><line class="dn" x1="305.0" x2="305.0" y1="84.3" y2="131.1"/><rect class="dn" x="302.2" y="90.1" width="5.6" height="33.3"/><line class="dn" x1="315.0" x2="315.0" y1="121.7" y2="163.0"/><rect class="dn" x="312.2" y="123.4" width="5.6" height="30.3"/><line class="dn" x1="325.0" x2="325.0" y1="138.9" y2="179.9"/><rect class="dn" x="322.2" y="153.7" width="5.6" height="21.1"/><line class="up" x1="335.0" x2="335.0" y1="171.7" y2="180.8"/><rect class="up" x="332.2" y="174.7" width="5.6" height="1.0"/><line class="up" x1="345.0" x2="345.0" y1="159.1" y2="180.8"/><rect class="up" x="342.2" y="169.6" width="5.6" height="5.1"/><line class="dn" x1="355.0" x2="355.0" y1="160.1" y2="174.6"/><rect class="dn" x="352.2" y="169.6" width="5.6" height="4.8"/><line class="dn" x1="365.0" x2="365.0" y1="165.7" y2="201.1"/><rect class="dn" x="362.2" y="174.4" width="5.6" height="13.2"/><line class="dn" x1="375.0" x2="375.0" y1="175.0" y2="194.2"/><rect class="dn" x="372.2" y="187.6" width="5.6" height="5.3"/><line class="up" x1="385.0" x2="385.0" y1="190.1" y2="205.8"/><rect class="up" x="382.2" y="192.8" width="5.6" height="1.0"/><line class="dn" x1="395.0" x2="395.0" y1="181.2" y2="220.3"/><rect class="dn" x="392.2" y="192.8" width="5.6" height="15.9"/><line class="dn" x1="405.0" x2="405.0" y1="202.9" y2="230.6"/><rect class="dn" x="402.2" y="208.7" width="5.6" height="11.6"/><line class="up" x1="415.0" x2="415.0" y1="198.5" y2="221.6"/><rect class="up" x="412.2" y="201.7" width="5.6" height="18.6"/><line class="up" x1="425.0" x2="425.0" y1="190.8" y2="203.3"/><rect class="up" x="422.2" y="196.0" width="5.6" height="5.7"/><line class="up" x1="435.0" x2="435.0" y1="182.9" y2="196.0"/><rect class="up" x="432.2" y="188.1" width="5.6" height="7.9"/><line class="up" x1="445.0" x2="445.0" y1="166.1" y2="206.5"/><rect class="up" x="442.2" y="171.2" width="5.6" height="16.9"/><line class="up" x1="455.0" x2="455.0" y1="158.5" y2="174.7"/><rect class="up" x="452.2" y="162.4" width="5.6" height="8.8"/><line class="up" x1="465.0" x2="465.0" y1="151.3" y2="165.5"/><rect class="up" x="462.2" y="159.8" width="5.6" height="2.6"/><line class="up" x1="475.0" x2="475.0" y1="133.1" y2="183.3"/><rect class="up" x="472.2" y="149.9" width="5.6" height="9.9"/><line class="dn" x1="485.0" x2="485.0" y1="147.6" y2="171.2"/><rect class="dn" x="482.2" y="149.9" width="5.6" height="17.7"/><line class="up" x1="495.0" x2="495.0" y1="156.4" y2="173.6"/><rect class="up" x="492.2" y="160.4" width="5.6" height="7.2"/><line class="up" x1="505.0" x2="505.0" y1="147.6" y2="182.6"/><rect class="up" x="502.2" y="152.3" width="5.6" height="8.1"/><line class="up" x1="515.0" x2="515.0" y1="137.9" y2="153.3"/><rect class="up" x="512.2" y="143.0" width="5.6" height="9.3"/><line class="dn" x1="525.0" x2="525.0" y1="142.4" y2="169.2"/><rect class="dn" x="522.2" y="143.0" width="5.6" height="1.2"/><line class="dn" x1="535.0" x2="535.0" y1="135.0" y2="161.0"/><rect class="dn" x="532.2" y="144.2" width="5.6" height="6.1"/><line class="up" x1="545.0" x2="545.0" y1="139.9" y2="158.1"/><rect class="up" x="542.2" y="148.7" width="5.6" height="1.6"/><line class="up" x1="555.0" x2="555.0" y1="102.9" y2="151.9"/><rect class="up" x="552.2" y="118.5" width="5.6" height="30.2"/><line class="dn" x1="565.0" x2="565.0" y1="112.8" y2="131.9"/><rect class="dn" x="562.2" y="118.5" width="5.6" height="3.4"/><line class="dn" x1="575.0" x2="575.0" y1="111.9" y2="181.4"/><rect class="dn" x="572.2" y="121.9" width="5.6" height="46.2"/><line class="up" x1="585.0" x2="585.0" y1="139.1" y2="169.8"/><rect class="up" x="582.2" y="152.8" width="5.6" height="15.3"/><line class="up" x1="595.0" x2="595.0" y1="126.7" y2="154.5"/><rect class="up" x="592.2" y="128.0" width="5.6" height="24.8"/><line class="up" x1="605.0" x2="605.0" y1="109.3" y2="128.8"/><rect class="up" x="602.2" y="110.6" width="5.6" height="17.4"/><line class="up" x1="615.0" x2="615.0" y1="70.0" y2="113.3"/><rect class="up" x="612.2" y="79.6" width="5.6" height="31.0"/><line class="up" x1="625.0" x2="625.0" y1="16.0" y2="88.0"/><rect class="up" x="622.2" y="26.5" width="5.6" height="53.1"/><line class="dn" x1="635.0" x2="635.0" y1="25.3" y2="35.0"/><rect class="dn" x="632.2" y="26.5" width="5.6" height="2.0"/></svg></div>
+          </figure>
         </div>
       </li>
     </ol>
@@ -1445,6 +1515,306 @@ function sutSizerHeight(data, iframeId) {
       Array.prototype.forEach.call(empties, function (p) { p.hidden = !(shown === 0 && p.getAttribute('data-empty-for') === key); });
     });
   }
+})();
+
+(function () {
+  // Visual layer for the sales page (design_fx). Decorative only: nothing here
+  // touches checkout, attribution or tracking. Everything degrades to a complete
+  // static page without JavaScript or with reduced motion.
+  var root = document.querySelector('.sut.sut-fx');
+  if (!root) return;
+  root.classList.add('sut-js');
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var small = !!(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
+
+  // ── Scroll reveal ────────────────────────────────────────────────────────
+  // Common blocks on every page fade in as they scroll into view. Only blocks that
+  // start below the fold are animated, so nothing visible on load ever flickers.
+  var AUTO = '.sut-section .sut-head, .sut-tool, .sut-calc-card, .sut-calc-cta, .sut-frame, .sut-next > li, ' +
+             '.sut-related li, .sut-faq, .sut-steps, .sut-list, .sut-sub, .sut-help > div, .sut-calc-table-wrap, .sut-calc-how';
+  var fold = window.innerHeight || 800, autos = root.querySelectorAll(AUTO);
+  for (var au = 0; au < autos.length; au++) {
+    if (!autos[au].hasAttribute('data-reveal') && autos[au].getBoundingClientRect().top > fold) autos[au].setAttribute('data-reveal', '');
+  }
+  var reveals = root.querySelectorAll('[data-reveal]');
+  if (reduce || !('IntersectionObserver' in window)) {
+    for (var r = 0; r < reveals.length; r++) reveals[r].classList.add('is-in');
+  } else {
+    var ro = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); ro.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    for (var q = 0; q < reveals.length; q++) ro.observe(reveals[q]);
+  }
+
+  // Demo videos (when real captures are configured): play only while visible.
+  var vids = root.querySelectorAll('video[data-autoplay]');
+  if (vids.length && 'IntersectionObserver' in window && !reduce) {
+    var vo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { if (v.preload === 'none') v.preload = 'auto'; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        else v.pause();
+      });
+    }, { threshold: 0.35 });
+    for (var vi = 0; vi < vids.length; vi++) vo.observe(vids[vi]);
+  }
+
+  // ── Interactive ATR sizing demo ──────────────────────────────────────────
+  var demo = root.querySelector('[data-atr-demo]');
+  if (demo) {
+    var k = function (n) { return demo.querySelector('[data-k="' + n + '"]'); };
+    var o = function (n) { return demo.querySelector('[data-o="' + n + '"]'); };
+    var money = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+    var update = function () {
+      var risk = Number(k('risk').value), pv = Number(k('pv').value), atr = Number(k('atr').value);
+      var stop = 1.5 * atr, per = stop * pv, n = Math.floor(risk / per + 1e-9);
+      o('atr').textContent = atr.toFixed(2);
+      o('stop').textContent = stop.toFixed(2) + ' pts';
+      o('per').textContent = money(per);
+      o('n').textContent = String(n);
+      o('used').textContent = money(n * per);
+      var blocks = '';
+      for (var b = 0; b < Math.min(n, 24); b++) blocks += '<i></i>';
+      if (n > 24) blocks += '<em>+' + (n - 24) + '</em>';
+      o('blocks').innerHTML = blocks;
+      o('note').textContent = n === 0
+        ? 'One contract would risk ' + money(per) + ', more than your ' + money(risk) + ' budget. Skip the trade or size down to a micro.'
+        : 'Rounded down, so a loss never costs more than ' + money(risk) + '. Example only, not a recommendation.';
+      demo.classList.toggle('is-zero', n === 0);
+      var pct = (atr - Number(k('atr').min)) / (Number(k('atr').max) - Number(k('atr').min)) * 100;
+      k('atr').style.setProperty('--fill', pct + '%');
+    };
+    demo.addEventListener('input', update);
+    demo.addEventListener('change', update);
+    update();
+  }
+
+  // ── Market chart engine (hero backdrop + tool illustration) ──────────────
+  // Generated, not real market data: a random walk with changing volatility,
+  // so ATR genuinely widens and narrows and the band "breathes".
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var tick = function (v) { return Math.round(v * 4) / 4; };
+
+  function Market(seed, start) {
+    this.r = rng(seed); this.vol = 1; this.c = [];
+    var p = start;
+    for (var i = 0; i < 140; i++) { this.c.push(this.bar(p)); p = this.c[this.c.length - 1].c; }
+    this.calc();
+  }
+  Market.prototype.bar = function (p) {
+    var r = this.r;
+    this.vol = Math.max(0.45, Math.min(2.4, this.vol + (r() - 0.5) * 0.22));
+    var o = p, c = tick(o + (r() - 0.5) * 7 * this.vol + (r() - 0.47) * 1.2);
+    return { o: o, c: c, h: tick(Math.max(o, c) + r() * 3 * this.vol), l: tick(Math.min(o, c) - r() * 3 * this.vol),
+             v: (0.4 + r()) * this.vol, ticks: 0, len: 5 + Math.floor(r() * 5) };
+  };
+  Market.prototype.calc = function () {
+    var c = this.c, atr = null, ema = null, a = 2 / 21;
+    for (var i = 0; i < c.length; i++) {
+      var b = c[i], pc = i ? c[i - 1].c : b.o;
+      var tr = Math.max(b.h - b.l, Math.abs(b.h - pc), Math.abs(b.l - pc));
+      atr = atr === null ? tr : (atr * 13 + tr) / 14;
+      ema = ema === null ? b.c : ema + a * (b.c - ema);
+      b.atr = atr; b.ema = ema;
+    }
+  };
+  // One update of the forming candle; returns true when a new candle opened.
+  Market.prototype.step = function () {
+    var b = this.c[this.c.length - 1], r = this.r;
+    b.c = tick(b.c + (r() - 0.5) * 2.4 * this.vol);
+    b.h = Math.max(b.h, b.c); b.l = Math.min(b.l, b.c); b.v += r() * 0.15 * this.vol;
+    var opened = false;
+    if (++b.ticks >= b.len) {
+      var nb = this.bar(b.c); nb.h = Math.max(nb.o, nb.c); nb.l = Math.min(nb.o, nb.c); nb.c = nb.o; nb.v = 0.1;
+      this.c.push(nb); if (this.c.length > 220) this.c.shift(); opened = true;
+    }
+    this.calc();
+    return opened;
+  };
+
+  var COL = { up: '61,220,151', dn: '255,107,107', acc: '250,123,57', txt: '179,188,201', mut: '123,134,152' };
+  var rgba = function (c, a) { return 'rgba(' + c + ',' + a + ')'; };
+
+  function Chart(canvas, opts) {
+    this.cv = canvas; this.ctx = canvas.getContext('2d'); this.o = opts;
+    this.m = new Market(opts.seed, opts.start); this.shift = 0; this.mn = null; this.mx = null;
+    this.visible = true; this.last = 0; this.lastTick = 0;
+    this.resize();
+  }
+  Chart.prototype.resize = function () {
+    var dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+    var w = this.cv.clientWidth, h = this.cv.clientHeight;
+    if (!w || !h) return;
+    this.d = dpr; this.cv.width = Math.round(w * dpr); this.cv.height = Math.round(h * dpr);
+    this.draw();
+  };
+  Chart.prototype.draw = function () {
+    var x = this.ctx, o = this.o, d = this.d || 1, W = this.cv.width, H = this.cv.height;
+    if (!W || !H) return;
+    x.clearRect(0, 0, W, H);
+    var cw = o.cw * d, axis = o.axis ? 58 * d : 0, plotR = W - axis - o.gap * cw;
+    var n = Math.min(this.m.c.length, Math.ceil(plotR / cw) + 2), vis = this.m.c.slice(-n);
+    var lo = Infinity, hi = -Infinity;
+    for (var i = 0; i < vis.length; i++) {
+      var b = vis[i]; lo = Math.min(lo, b.l, b.ema - 2 * b.atr); hi = Math.max(hi, b.h, b.ema + 2 * b.atr);
+    }
+    var pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+    if (this.mn === null) { this.mn = lo; this.mx = hi; }
+    this.mn += (lo - this.mn) * 0.06; this.mx += (hi - this.mx) * 0.06;
+    var mn = this.mn, mx = this.mx, top = H * o.top, bot = H * o.bottom;
+    var Y = function (v) { return top + (1 - (v - mn) / (mx - mn)) * (bot - top); };
+    var X = function (idx) { return plotR - (vis.length - 1 - idx + 0.5 - this.shift) * cw; }.bind(this);
+
+    // Horizontal grid and price axis
+    x.font = (10.5 * d) + 'px "Geist Mono", ui-monospace, monospace'; x.textBaseline = 'middle';
+    var stepP = Math.pow(10, Math.floor(Math.log10((mx - mn) / 4))); if ((mx - mn) / stepP > 8) stepP *= 2.5;
+    for (var g = Math.ceil(mn / stepP) * stepP; g < mx; g += stepP) {
+      var gy = Math.round(Y(g)) + 0.5;
+      x.fillStyle = rgba('255,255,255', 0.035); x.fillRect(0, gy, W - axis, d);
+      if (axis) { x.fillStyle = rgba(COL.mut, 0.55); x.fillText(g.toFixed(2), W - axis + 10 * d, gy); }
+    }
+
+    // Volume profile (right edge of the plot)
+    if (o.profile) {
+      var rows = 30, prof = [], max = 0, pw = (W - axis) * 0.13;
+      for (var pr = 0; pr < rows; pr++) prof.push(0);
+      for (var vi = 0; vi < vis.length; vi++) {
+        var bb = vis[vi], idx = Math.floor((bb.c - mn) / (mx - mn) * rows);
+        if (idx >= 0 && idx < rows) { prof[idx] += bb.v; max = Math.max(max, prof[idx]); }
+      }
+      var rh = (bot - top) / rows, poc = prof.indexOf(max);
+      for (var p2 = 0; p2 < rows; p2++) {
+        if (!prof[p2]) continue;
+        var bw = prof[p2] / max * pw, by = bot - (p2 + 1) * rh;
+        x.fillStyle = p2 === poc ? rgba(COL.acc, 0.22) : rgba('255,255,255', 0.045);
+        x.fillRect(W - axis - bw, by + rh * 0.15, bw, rh * 0.7);
+      }
+    }
+
+    // ATR band (EMA 20 ± 2 × ATR 14)
+    var up = [], dn = [];
+    for (var j = 0; j < vis.length; j++) {
+      var cx = X(j); up.push([cx, Y(vis[j].ema + 2 * vis[j].atr)]); dn.push([cx, Y(vis[j].ema - 2 * vis[j].atr)]);
+    }
+    x.beginPath();
+    up.forEach(function (pt, i2) { i2 ? x.lineTo(pt[0], pt[1]) : x.moveTo(pt[0], pt[1]); });
+    for (var k2 = dn.length - 1; k2 >= 0; k2--) x.lineTo(dn[k2][0], dn[k2][1]);
+    x.closePath();
+    var grad = x.createLinearGradient(0, top, 0, bot);
+    grad.addColorStop(0, rgba(COL.acc, 0.09)); grad.addColorStop(0.5, rgba(COL.acc, 0.035)); grad.addColorStop(1, rgba(COL.acc, 0.09));
+    x.fillStyle = grad; x.fill();
+    x.lineWidth = 1 * d; x.strokeStyle = rgba(COL.acc, 0.32);
+    [up, dn].forEach(function (line) {
+      x.beginPath(); line.forEach(function (pt, i3) { i3 ? x.lineTo(pt[0], pt[1]) : x.moveTo(pt[0], pt[1]); }); x.stroke();
+    });
+
+    // Candles
+    var body = Math.max(2 * d, cw * 0.56);
+    for (var c = 0; c < vis.length; c++) {
+      var k3 = vis[c], kx = X(c), isUp = k3.c >= k3.o, col = isUp ? COL.up : COL.dn;
+      var a = o.candleAlpha * (c === vis.length - 1 ? 1.4 : 1);
+      x.fillStyle = rgba(col, a); x.fillRect(Math.round(kx) - d * 0.5, Y(k3.h), d, Math.max(d, Y(k3.l) - Y(k3.h)));
+      var y0 = Y(Math.max(k3.o, k3.c)), y1 = Y(Math.min(k3.o, k3.c));
+      x.fillRect(Math.round(kx - body / 2), y0, Math.round(body), Math.max(d, y1 - y0));
+    }
+
+    // EMA line with a soft glow
+    x.save(); x.shadowColor = rgba(COL.acc, 0.7); x.shadowBlur = 10 * d;
+    x.beginPath();
+    for (var e = 0; e < vis.length; e++) { var ey = Y(vis[e].ema), ex = X(e); e ? x.lineTo(ex, ey) : x.moveTo(ex, ey); }
+    x.lineWidth = 1.6 * d; x.strokeStyle = rgba(COL.acc, 0.85); x.stroke(); x.restore();
+
+    var lastB = vis[vis.length - 1], ly = Y(lastB.c), lup = lastB.c >= lastB.o;
+    // Order brackets (tool illustration): entry at the last close, stop 1.5 × ATR.
+    if (o.bracket) {
+      var atr = lastB.atr, stopD = Math.max(0.25, tick(1.5 * atr)), entry = lastB.c;
+      var stop = entry - stopD, target = entry + 2 * stopD, n2 = Math.floor(o.risk / (stopD * o.pv));
+      var x0 = X(vis.length - 1) - cw * 0.5, x1 = W - axis;
+      x.fillStyle = rgba(COL.dn, 0.07); x.fillRect(x0, Y(entry), x1 - x0, Y(stop) - Y(entry));
+      x.fillStyle = rgba(COL.up, 0.06); x.fillRect(x0, Y(target), x1 - x0, Y(entry) - Y(target));
+      [[target, COL.up, 'TARGET  2R'], [entry, COL.txt, 'ENTRY  ' + n2 + ' × ' + o.market], [stop, COL.dn, 'STOP  1.5 × ATR']].forEach(function (row) {
+        var yy = Math.round(Y(row[0])) + 0.5;
+        x.setLineDash([4 * d, 4 * d]); x.strokeStyle = rgba(row[1], 0.75); x.lineWidth = d;
+        x.beginPath(); x.moveTo(x0, yy); x.lineTo(x1, yy); x.stroke(); x.setLineDash([]);
+        x.fillStyle = rgba(row[1], 0.95); x.fillText(row[2], x0 + 8 * d, yy + (row[0] === stop ? 10 : -9) * d);
+      });
+      x.fillStyle = rgba(COL.mut, 0.9);
+      x.fillText('RISK $' + o.risk + '   ATR(14) ' + atr.toFixed(2) + '   STOP ' + stopD.toFixed(2) + ' pts', 14 * d, H - 14 * d);
+      if (o.panel) {
+        // The planner's size panel (top left of the plot): same arithmetic as the script.
+        var micro = Math.floor(o.risk / (stopD * o.pv / 10)), pwid = 196 * d, ph = 118 * d, px = 14 * d, py = 14 * d;
+        x.fillStyle = 'rgba(11,14,20,.88)'; x.strokeStyle = rgba(COL.acc, 0.45); x.lineWidth = d;
+        x.beginPath(); if (x.roundRect) x.roundRect(px, py, pwid, ph, 8 * d); else x.rect(px, py, pwid, ph); x.fill(); x.stroke();
+        var rowsP = [['RISK PLANNER', o.market + ' · fixed $', COL.mut, COL.mut],
+                     ['MAX SIZE', n2 + ' ' + o.market, COL.mut, n2 ? COL.acc : COL.dn],
+                     ['MICRO', micro + ' ' + o.micro, COL.mut, COL.txt],
+                     ['RISK BUDGET', '$' + o.risk, COL.mut, COL.txt],
+                     ['STOP RISK', '$' + (n2 * stopD * o.pv).toFixed(0), COL.mut, COL.txt]];
+        rowsP.forEach(function (rw, ri) {
+          var yy = py + (ri * 21 + 20) * d;
+          x.fillStyle = rgba(rw[2], 0.95); x.fillText(rw[0], px + 12 * d, yy);
+          x.fillStyle = rgba(rw[3], 1); x.textAlign = 'right'; x.fillText(rw[1], px + pwid - 12 * d, yy); x.textAlign = 'left';
+        });
+      }
+    }
+
+    // Last-price line and tag
+    x.setLineDash([2 * d, 3 * d]); x.strokeStyle = rgba(lup ? COL.up : COL.dn, 0.45); x.lineWidth = d;
+    x.beginPath(); x.moveTo(X(vis.length - 1), Math.round(ly) + 0.5); x.lineTo(W - axis, Math.round(ly) + 0.5); x.stroke(); x.setLineDash([]);
+    if (axis) {
+      x.fillStyle = rgba(lup ? COL.up : COL.dn, 0.9);
+      x.fillRect(W - axis + 2 * d, ly - 9 * d, axis - 4 * d, 18 * d);
+      x.fillStyle = '#07090d'; x.fillText(lastB.c.toFixed(2), W - axis + 9 * d, ly);
+    }
+  };
+  Chart.prototype.frame = function (now) {
+    if (!this.visible || document.hidden) return;
+    if (now - this.lastTick > this.o.tickMs) {
+      this.lastTick = now;
+      if (this.m.step()) this.shift = 1;
+    }
+    this.shift = Math.max(0, this.shift - 0.06);
+    if (now - this.last >= 1000 / this.o.fps) { this.last = now; this.draw(); }
+  };
+
+  var charts = [];
+  function mount(el, opts) {
+    if (!el || !el.getContext) return;
+    var ch = new Chart(el, opts); charts.push(ch);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { ch.visible = es[0].isIntersecting; }, { threshold: 0 }).observe(el);
+    }
+    if ('ResizeObserver' in window) new ResizeObserver(function () { ch.resize(); }).observe(el);
+    else window.addEventListener('resize', function () { ch.resize(); });
+  }
+
+  function start() {
+    mount(root.querySelector('.sut-hero-fx'), {
+      seed: 20260, start: 5284, cw: small ? 11 : 13, gap: small ? 1 : 4, axis: !small, profile: !small,
+      top: small ? 0.08 : 0.12, bottom: small ? 0.92 : 0.86, candleAlpha: small ? 0.3 : 0.42, fps: small ? 20 : 30, tickMs: 650
+    });
+    var tool = root.querySelectorAll('canvas[data-fx-chart="bracket"]');
+    for (var t = 0; t < tool.length; t++) {
+      var ds = tool[t].dataset, panel = ds.panel === 'true';
+      mount(tool[t], { seed: 2067 + t, start: 5310, cw: small ? 6 : 8, gap: small ? 14 : 17, axis: true, profile: false, bracket: true,
+        risk: Number(ds.risk || 180), pv: Number(ds.pv || 5), market: ds.market || 'MES', micro: ds.micro || 'MES', panel: panel,
+        top: panel ? 0.34 : 0.2, bottom: 0.9, candleAlpha: 0.6, fps: 24, tickMs: 700 });
+    }
+    root.classList.add('sut-fx-on');
+    if (reduce) return;                     // one still frame, no animation
+    var loop = function (now) { for (var i = 0; i < charts.length; i++) charts[i].frame(now); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  }
+  // After the page (and Jack's portrait) has loaded, so the effect never delays it.
+  var go = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 60); })(start, { timeout: 800 }); };
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
 })();
 
 </script>

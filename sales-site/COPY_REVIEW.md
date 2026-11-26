@@ -69,3 +69,7 @@ products.json, the existing page). Please confirm or correct:
 - **ATR demo**: the math is the page's own example ($180, MES, 1.5 × ATR stop: 3 contracts at ATR 8,
   1 at ATR 24). Labelled "Example only, not a recommendation."
 - **Contract-spec ticker**: CME tick sizes and values (ES, MES, NQ, MNQ, YM, MYM, RTY, M2K, CL, MCL, GC, MGC).
+- **Site-wide (2026-11-26):** the same visual layer now runs on every page. New labelled illustrations:
+  the TradingView planner on an ES chart (size panel, entry/stop/2R lines, arithmetic as in the script),
+  the NinjaTrader Control Center Tools → Import → NinjaScript Add-On menu (/setup), and an ES chart with
+  ATR brackets (/setup step 4). Replace with real screenshots whenever Jack has them.

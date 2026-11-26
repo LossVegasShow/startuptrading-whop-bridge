@@ -1,7 +1,7 @@
 <div class="sut" id="top" data-page="tv_atr" data-tool-id="atr-position-size-planner">
 <!-- Companion page for the free TradingView script (GHL path /tradingview/atr-position-size-planner).
      The "Open on TradingView" link appears only once tv_atr_script_url is set in site.config.json.
-     Screenshot boxes (class "sut-ph") are placeholders. Built by sales-site/build.py; edit src/, not dist/. -->
+     The chart window is a labelled illustration drawn by fx.js. Built by sales-site/build.py; edit src/, not dist/. -->
 
 {{nav}}
 
@@ -60,7 +60,10 @@
         <li><b>Planning levels</b><span>Entry, stop and an R-multiple target, as clean lines or with prices and estimated risk. Shaded zones when you plan one side. Drawings only: no orders are placed.</span></li>
         <li><b>Your settings, your way</b><span>Adjustable text size, compact or full panel, costs per contract, higher-timeframe or closed-bar ATR, and alerts when the size changes or volatility expands.</span></li>
       </ul>
-      <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Screenshot: the planner on an ES chart</strong><small>Panel top right, stop levels drawn. Add once the script is published.</small></div></figure>
+      <figure class="sut-frame sut-win">
+        <div class="sut-frame-bar"><span></span><span></span><span></span><em>TradingView · ES1! · 5m · Futures Risk Planner</em><i class="sut-win-tag">Illustration</i></div>
+        <div class="sut-frame-body sut-frame-tall"><canvas class="sut-tool-fx" data-fx-chart="bracket" data-market="ES" data-micro="MES" data-pv="50" data-risk="500" data-panel="true" role="img" aria-label="Illustration: the planner on an ES chart, with the stop 1.5 ATR from entry, a 2R target and the size panel"></canvas>{{candles}}</div>
+      </figure>
     </div>
   </div>
 </section>

@@ -637,3 +637,60 @@
   .sut-cred-list > div { grid-template-columns: 84px 1fr; }
   .sut .sut-frame-bar em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 }
+
+/* ═══ Visual layer, site-wide ═══════════════════════════════════════════════ */
+/* Glass cards with a lift on hover: free tools, calculator, related links, member pages */
+.sut-fx .sut-tool, .sut-fx .sut-calc-card, .sut-fx .sut-related a, .sut-fx .sut-next > li, .sut-fx .sut-help > div,
+.sut-fx .sut-downloads li, .sut-fx .sut-calc-cta, .sut-fx .sut-checkout {
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)), rgba(16,21,29,.74);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+.sut-fx .sut-tool, .sut-fx .sut-related a { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.sut-fx .sut-tool:hover, .sut-fx .sut-related a:hover { transform: translateY(-3px); border-color: rgba(250,123,57,.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -28px rgba(250,123,57,.45); }
+.sut-fx .sut-next > li.is-current { background: linear-gradient(90deg, var(--accent-soft), transparent 60%), rgba(16,21,29,.74); }
+.sut-fx .sut-calc-out { background: linear-gradient(180deg, rgba(250,123,57,.16), rgba(250,123,57,.05)); box-shadow: 0 18px 40px -26px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-out b { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent-2); }
+.sut-fx .sut-filter[aria-pressed="true"] { box-shadow: 0 0 0 3px rgba(250,123,57,.12), 0 8px 20px -12px rgba(250,123,57,.6); }
+.sut-fx .sut-calc-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Text-only heroes (free tools, calculator, TradingView, member pages): chart on the right */
+.sut-fx .sut-welcome, .sut-fx .sut-calc-hero { position: relative; isolation: isolate; overflow: hidden; }
+.sut-fx .sut-calc-hero { padding-bottom: 56px; }
+.sut-fx .sut-welcome .sut-hero-fx, .sut-fx .sut-calc-hero .sut-hero-fx {
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); mask-image: linear-gradient(90deg, transparent 30%, rgba(0,0,0,.4) 55%, #000 80%); }
+
+/* Tall chart window (TradingView page) */
+.sut .sut-frame-tall { aspect-ratio: 4 / 5; }
+
+/* NinjaTrader menu illustration (/setup) */
+.sut-menu-mock { margin-top: 18px; max-width: 520px; }
+.sut-menu-bar { display: flex; gap: 2px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--bg-2); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-bar span { padding: 5px 10px; border-radius: 6px; }
+.sut-menu-bar .is-open { background: var(--surface-2); color: var(--text); }
+.sut-menu-drop { position: relative; display: grid; width: 230px; margin: 0 0 18px 60px; padding: 6px; border: 1px solid var(--line-2); border-top: 0;
+  border-radius: 0 0 10px 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font: 500 13px var(--sans); color: var(--text-2); }
+.sut-menu-drop > span { position: relative; display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 6px; }
+.sut-menu-drop .is-hot { background: var(--accent-soft); color: var(--text); box-shadow: inset 2px 0 0 var(--accent); }
+.sut-menu-drop i { font-style: normal; color: var(--accent); }
+.sut-menu-sub { position: absolute; left: calc(100% + 6px); top: -6px; display: grid; width: 200px; padding: 6px; border: 1px solid var(--line-2);
+  border-radius: 10px; background: var(--surface); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); font-weight: 500; }
+.sut-menu-sub em { font-style: normal; padding: 7px 10px; border-radius: 6px; color: var(--text-2); }
+.sut-menu-sub em.is-hot { color: var(--accent-ink); background: var(--accent); box-shadow: 0 6px 18px -8px rgba(250,123,57,.8); }
+.sut-js .sut-menu-sub em.is-hot { animation: sut-pulse-hot 2.6s ease-in-out infinite; }
+@keyframes sut-pulse-hot { 50% { box-shadow: 0 0 0 4px rgba(250,123,57,.2), 0 6px 18px -8px rgba(250,123,57,.8); } }
+.sut-next .sut-frame { margin-top: 18px; }
+@media (max-width: 760px) {
+  .sut-menu-drop { margin-left: 8px; width: 170px; font-size: 12px; }
+  .sut-menu-sub { left: 40px; top: 100%; width: 180px; }
+  .sut-menu-drop { margin-bottom: 92px; }
+  .sut-menu-bar span:nth-child(n+4) { display: none; }
+}
+/* Steps on member pages: let illustration windows shrink instead of widening the column. */
+.sut-next > li > div { min-width: 0; }
+.sut-next .sut-frame { max-width: 100%; }
+.sut-win .sut-frame-bar { min-width: 0; }
+.sut-win .sut-frame-bar em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) {
+  .sut .sut-links-always { gap: 14px; }
+  .sut .sut-links-always a { white-space: nowrap; font-size: 13px; }
+}
