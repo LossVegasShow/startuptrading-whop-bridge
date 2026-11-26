@@ -52,3 +52,20 @@ placeholder box instead.
   appear in the footer. These are expected on any page that takes payment.
 - **YouTube channel URL:** add it to `site.config.json` to show the
   "Watch Jack trade on YouTube" link.
+
+## Visual upgrade (2026-11-26): new copy for Jack's sign-off
+
+Placeholders were replaced with content built only from facts already on record (llms.txt,
+products.json, the existing page). Please confirm or correct:
+
+- **Bio + credential card** (#jack): traded since 2008; own tastytrade show from 2012; traded at a
+  proprietary firm; Series 56; trades on NinjaTrader Live several times a week; the ATR rule.
+- **Channel preview** (#room): channel names `trade-room`, `masterclasses`, `chart-reviews`,
+  `tool-releases` (members) and `free-tools-help`, `market-talk` (free). Rename to match the real server.
+- **Tool windows**: labelled "Illustration". The scanner values are examples, not readings. Swap in real
+  captures by setting `scanner_media_url` / `atr_media_url` (MP4/WebM loop or an image) in site.config.json.
+- **"Inside the membership"** replaces the member-quote placeholders. Real, permissioned quotes can go
+  back in later; none were invented.
+- **ATR demo**: the math is the page's own example ($180, MES, 1.5 × ATR stop: 3 contracts at ATR 8,
+  1 at ATR 24). Labelled "Example only, not a recommendation."
+- **Contract-spec ticker**: CME tick sizes and values (ES, MES, NQ, MNQ, YM, MYM, RTY, M2K, CL, MCL, GC, MGC).

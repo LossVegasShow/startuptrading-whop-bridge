@@ -1,11 +1,15 @@
-<div class="sut" id="top">
+<div class="sut<!--if:design_fx--> sut-fx<!--endif:design_fx-->" id="top">
 <!-- StartUpTrading sales page. Built by sales-site/build.py; edit src/, not dist/.
-     Placeholder frames (class "sut-ph") must be replaced with real assets before launch.
-     See sales-site/COPY_REVIEW.md for every claim that needs Jack's sign-off. -->
+     Tool frames are labelled illustrations until real captures are set
+     (scanner_media_url / atr_media_url). See sales-site/COPY_REVIEW.md for every
+     claim that needs Jack's sign-off. -->
 
 {{nav}}
 
+{{tape}}
+
 <section class="sut-hero">
+  <!--if:design_fx--><canvas class="sut-hero-fx" aria-hidden="true"></canvas><!--endif:design_fx-->
   <div class="sut-wrap sut-hero-grid">
     <div class="sut-hero-copy">
       <p class="sut-eyebrow"><span class="sut-live"></span>NinjaTrader 8 tools · Trade room · Masterclasses</p>
@@ -18,16 +22,22 @@
       <ul class="sut-assure">
         <li>Cancel anytime</li><li>Secure checkout by Whop</li><li>No NinjaTrader password needed</li>
       </ul>
+      <div class="sut-platforms" aria-label="Platforms">
+        <span class="sut-plat"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13V3h2v8h10v2zM6 9l2.5-3 2 2L14 4v3l-3.5 4-2-2L6 12z"/></svg>Native NinjaTrader&nbsp;8 tools</span>
+        <span class="sut-plat"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5zm0 2.3L4 6.1v3.8l4 2.3 4-2.3V6.1z"/></svg>Licensed automatically</span>
+        <span class="sut-plat"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12v2H2zm0 3h8v2H2zm0 3h12v2H2z"/></svg>Free tools on TradingView</span>
+      </div>
       <!--if:community_join_url--><p class="sut-hero-community">Not ready to join? <a href="{{community_join_url}}" target="_blank" rel="noopener" data-community-cta="hero">Join our free Discord community <span aria-hidden="true">↗</span></a></p><!--endif:community_join_url-->
     </div>
 
     <figure class="sut-hero-portrait">
+      <span class="sut-hero-glow" aria-hidden="true"></span>
       <!--if:jack_hero_url--><img class="sut-hero-jack" src="{{jack_hero_src}}" alt="Jack Gleason" width="541" height="630" fetchpriority="high"><!--endif:jack_hero_url-->
     </figure>
   </div>
 </section>
 
-<section class="sut-strip" aria-label="What's included">
+<section class="sut-strip" aria-label="What's included" data-reveal>
   <div class="sut-wrap sut-strip-in">
     <div><b>02</b><span>Pro NinjaTrader&nbsp;8 tools today</span></div>
     <div><b>+</b><span>Every new tool, included</span></div>
@@ -51,7 +61,20 @@
         <p>Market analysis that reads trend strength and direction across your whole watchlist, so you spend the session on developing opportunities, not on the chart you happened to open.</p>
         <ul class="sut-ticks"><li>Trend direction and strength per market</li><li>Scans your whole watchlist</li><li>Bullish, neutral and bearish split for the session</li></ul>
       </div>
-      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>Trend Scanner screenshot</strong><small>1600×1000 chart capture, annotated</small></div></figure>
+      <figure class="sut-frame sut-win" data-reveal>
+        <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · StartupTrading Scanner</em><i class="sut-win-tag">Illustration</i></div>
+        <!--if:scanner_media_url-->{{scanner_media}}<!--endif:scanner_media_url--><!--ifnot:scanner_media_url-->
+        <div class="sut-scan">
+          <div class="sut-scan-head"><span>Market</span><span>Direction</span><span>Trend strength</span></div>
+          <div class="sut-scan-row"><b>ES</b><em class="is-bull">Bullish</em><span class="sut-meter" style="--v:72%"><i></i></span><span class="sut-scan-n">72</span></div>
+          <div class="sut-scan-row"><b>NQ</b><em class="is-bull">Bullish</em><span class="sut-meter" style="--v:81%"><i></i></span><span class="sut-scan-n">81</span></div>
+          <div class="sut-scan-row"><b>CL</b><em class="is-bear">Bearish</em><span class="sut-meter is-bear" style="--v:64%"><i></i></span><span class="sut-scan-n">64</span></div>
+          <div class="sut-scan-row"><b>GC</b><em class="is-flat">Neutral</em><span class="sut-meter is-flat" style="--v:34%"><i></i></span><span class="sut-scan-n">34</span></div>
+          <div class="sut-scan-row"><b>RTY</b><em class="is-bear">Bearish</em><span class="sut-meter is-bear" style="--v:55%"><i></i></span><span class="sut-scan-n">55</span></div>
+          <div class="sut-scan-row"><b>YM</b><em class="is-bull">Bullish</em><span class="sut-meter" style="--v:47%"><i></i></span><span class="sut-scan-n">47</span></div>
+          <div class="sut-scan-foot"><span>Session split</span><span class="sut-split"><i class="is-bull" style="flex:3"></i><i class="is-flat" style="flex:1"></i><i class="is-bear" style="flex:2"></i></span><span>3 · 1 · 2</span></div>
+        </div><!--endifnot:scanner_media_url-->
+      </figure>
     </article>
 
     <article class="sut-ind sut-ind-flip">
@@ -61,8 +84,38 @@
         <p>ATR Order Automation sets your position size from your dollar risk and the market's current ATR, then places your stop and target in NinjaTrader as you enter. Two contracts on a quiet day and two on a fast day stop being the same mistake.</p>
         <ul class="sut-ticks"><li>Contracts set from your dollar risk</li><li>Stop and target placed automatically</li><li>Same dollar risk in fast and slow markets</li></ul>
       </div>
-      <figure class="sut-frame"><div class="sut-ph sut-ph-shot"><strong>ATR Order Automation screenshot</strong><small>Show the order panel with ATR-based brackets</small></div></figure>
+      <figure class="sut-frame sut-win" data-reveal>
+        <div class="sut-frame-bar"><span></span><span></span><span></span><em>NinjaTrader 8 · MES · SUT ATR Orders</em><i class="sut-win-tag">Illustration</i></div>
+        <!--if:atr_media_url-->{{atr_media}}<!--endif:atr_media_url--><!--ifnot:atr_media_url-->
+        <div class="sut-frame-body"><canvas class="sut-tool-fx" data-fx-chart="bracket" aria-label="Illustration: a long entry on MES with the stop 1.5 ATR below and the target at 2R, sized to $180 risk" role="img"></canvas>{{candles}}</div><!--endifnot:atr_media_url-->
+      </figure>
     </article>
+
+    <div class="sut-demo" data-atr-demo data-reveal>
+      <div class="sut-demo-copy">
+        <p class="sut-eyebrow">Try the method</p>
+        <h3>Same risk. Fast market or slow.</h3>
+        <p>Set your risk and drag ATR. The stop sits 1.5&nbsp;×&nbsp;ATR away and the contracts adjust, so a losing trade costs the same in a quiet market and a fast one. ATR Order Automation does this math on every entry.</p>
+      </div>
+      <div class="sut-demo-panel">
+        <div class="sut-demo-ctl">
+          <label>Risk per trade
+            <select data-k="risk"><option value="180" selected>$180</option><option value="300">$300</option><option value="500">$500</option><option value="1000">$1,000</option></select></label>
+          <label>Market
+            <select data-k="pv"><option value="5" selected>MES · $5/pt</option><option value="2">MNQ · $2/pt</option><option value="50">ES · $50/pt</option><option value="20">NQ · $20/pt</option></select></label>
+        </div>
+        <label class="sut-demo-range"><span>ATR <output data-o="atr">8.00</output> pts</span>
+          <input type="range" min="2" max="40" step="0.25" value="8" data-k="atr" aria-label="ATR in points"></label>
+        <div class="sut-demo-out">
+          <div><span>Stop</span><b data-o="stop">12.00 pts</b></div>
+          <div><span>Risk / contract</span><b data-o="per">$60</b></div>
+          <div class="is-key"><span>Contracts</span><b data-o="n">3</b></div>
+          <div><span>Risk used</span><b data-o="used">$180</b></div>
+        </div>
+        <div class="sut-demo-blocks" data-o="blocks" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p class="sut-demo-note" data-o="note">Rounded down, so a loss never costs more than $180. Example only, not a recommendation.</p>
+      </div>
+    </div>
 
     <div class="sut-head sut-grow">
       <p class="sut-eyebrow">Always evolving</p>
@@ -86,19 +139,44 @@
         <li><b>Discord tools, in development</b><span>Custom bots and utilities for your daily workflow, released to members as they're ready.</span></li>
       </ul>
     </div>
-    <figure class="sut-frame"><div class="sut-ph sut-ph-tall"><strong>Discord screenshot</strong><small>A real (anonymised) channel view: Jack's chart call + member replies</small></div></figure>
+    <figure class="sut-frame sut-win sut-server" data-reveal>
+      <div class="sut-frame-bar"><span></span><span></span><span></span><em>{{discord_name}}</em><i class="sut-win-tag">Channel preview</i></div>
+      <div class="sut-server-body">
+        <p class="sut-server-group">Members only</p>
+        <ul>
+          <li><b># trade-room</b><span>Jack's live reads and screen share during the session</span><i class="sut-lockchip">Members</i></li>
+          <li><b># masterclasses</b><span>Methodology, market structure and strategy sessions</span><i class="sut-lockchip">Members</i></li>
+          <li><b># chart-reviews</b><span>Post your chart, talk it through with traders on the same tools</span><i class="sut-lockchip">Members</i></li>
+          <li><b># tool-releases</b><span>New tools, updates and how to use them</span><i class="sut-lockchip">Members</i></li>
+        </ul>
+        <p class="sut-server-group">Free community</p>
+        <ul>
+          <li><b># free-tools-help</b><span>Questions about the free indicator and calculators</span><i class="sut-openchip">Free</i></li>
+          <li><b># market-talk</b><span>General futures discussion and announcements</span><i class="sut-openchip">Free</i></li>
+        </ul>
+      </div>
+    </figure>
   </div>
 </section>
 
 <section class="sut-section" id="jack">
   <div class="sut-wrap sut-jack">
-    <figure class="sut-frame sut-portrait"><div class="sut-ph sut-ph-portrait"><strong>Photo of Jack</strong><small>At his actual trading desk. No stock photos.</small></div></figure>
+    <figure class="sut-frame sut-cred" data-reveal>
+      <div class="sut-cred-top"><span class="sut-mono-badge" aria-hidden="true">JG</span><div><b>Jack Gleason</b><span>Futures trader · Tool builder</span></div></div>
+      <dl class="sut-cred-list">
+        <div><dt>2008</dt><dd>Started trading</dd></div>
+        <div><dt>2012</dt><dd>Hosted his own show on tastytrade</dd></div>
+        <div><dt>Prop</dt><dd>Traded at a proprietary trading firm</dd></div>
+        <div><dt>Series 56</dt><dd>Licensed</dd></div>
+        <div><dt>Live</dt><dd>Trades on NinjaTrader Live, several times a week</dd></div>
+      </dl>
+    </figure>
     <div>
       <p class="sut-eyebrow">03 · Who's behind it</p>
       <h2>Built by traders, for traders.</h2>
-      <div class="sut-ph sut-ph-text">
-        <strong>Jack's bio goes here</strong>
-        <small>3–4 sentences in Jack's voice: how long he's traded, what he trades, why he built these indicators, and where people can watch him (YouTube). Verified facts only.</small>
+      <div class="sut-bio" data-reveal>
+        <p>Jack Gleason has traded since 2008. He hosted his own show on tastytrade from 2012, later traded at a proprietary firm, and holds a Series 56 license. Today he trades futures live on NinjaTrader Live, NinjaTrader's YouTube show, several times a week.</p>
+        <p>Everything he builds starts with one rule: set the stop from ATR, then size the position so a fast market and a slow market risk the same dollars when the trade is wrong. The StartUpTrading tools are the ones he built to do that in his own account, and members get each new one as he releases it.</p>
       </div>
       <!--if:youtube_url--><p class="sut-yt"><a href="{{youtube_url}}" target="_blank" rel="noopener">Watch Jack trade on YouTube <span aria-hidden="true">↗</span></a></p><!--endif:youtube_url-->
     </div>
@@ -112,7 +190,7 @@
       <h2>Join once. Grow with it.</h2>
       <p class="sut-lead">Tools, education and community in one membership, connected straight to your NinjaTrader. About three minutes from checkout to charts.</p>
     </div>
-    <ol class="sut-steps">
+    <ol class="sut-steps" data-reveal>
       <li><span>STEP 01</span><h3>Join on Whop</h3><p>Secure checkout. Your members-only Discord channels and masterclass access are granted automatically.</p></li>
       <li><span>STEP 02</span><h3>Connect NinjaTrader</h3><p>Sign in on our activation page and confirm your NinjaTrader email with a 6-digit code. No account? Create a free one in two minutes.</p></li>
       <li><span>STEP 03</span><h3>Add them to a chart</h3><p>Your tools are licensed to your account. Follow the install guide and add them to a chart. New tools arrive the same way.</p></li>
@@ -134,7 +212,7 @@
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-m" checked>
       <input class="sut-bill-in" type="radio" name="sut-billing" id="sut-bill-y">
 
-      <div class="sut-price">
+      <div class="sut-price" data-reveal>
         <div class="sut-toggle" role="group" aria-label="Billing period">
           <label for="sut-bill-m" class="sut-toggle-m">Monthly</label>
           <label for="sut-bill-y" class="sut-toggle-y">Annual <em>Save {{annual_savings_pct}}%</em></label>
@@ -193,7 +271,7 @@
     </div>
 
     <!--if:free_indicator_url-->
-    <aside class="sut-free" aria-labelledby="free-title">
+    <aside class="sut-free" aria-labelledby="free-title" data-reveal>
       <div class="sut-free-copy">
         <p class="sut-eyebrow muted">Not ready yet?</p>
         <h3 id="free-title">Start with Jack's free {{free_indicator_name}}.</h3>
@@ -225,13 +303,13 @@
 <section class="sut-section sut-alt" id="voices">
   <div class="sut-wrap">
     <div class="sut-head">
-      <p class="sut-eyebrow">06 · From members</p>
-      <h2>What members say.</h2>
+      <p class="sut-eyebrow">06 · Inside the membership</p>
+      <h2>Built into your trading day.</h2>
     </div>
-    <div class="sut-quotes">
-      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Real, permissioned quote with first name + how long they've been a member. No trading results or earnings figures.</small></div>
-      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Ideally about a specific indicator or the Discord.</small></div>
-      <div class="sut-ph sut-ph-quote"><strong>Member quote</strong><small>Remove this whole section if real quotes aren't available yet.</small></div>
+    <div class="sut-quotes sut-day">
+      <div class="sut-card" data-reveal><span class="sut-card-k">Before the open</span><h3>Pick the market.</h3><p>The Trend Scanner ranks your watchlist by trend strength and direction, so you start on what's moving.</p></div>
+      <div class="sut-card" data-reveal><span class="sut-card-k">On the entry</span><h3>Risk set for you.</h3><p>ATR Order Automation sizes the position from your dollar risk and places the stop and target as you enter.</p></div>
+      <div class="sut-card" data-reveal><span class="sut-card-k">After the close</span><h3>Learn the why.</h3><p>The trade room, chart reviews and Jack's masterclasses on the methodology behind the tools.</p></div>
     </div>
   </div>
 </section>
@@ -243,7 +321,7 @@
       <h2>Before you join.</h2>
       <p class="sut-lead">Something else? Email <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
     </div>
-    <div class="sut-faq">
+    <div class="sut-faq" data-reveal>
       <details><summary>What do I need to use the tools?</summary><p>NinjaTrader 8 on a Windows computer and a NinjaTrader account. The account is free to create if you don't have one yet.</p></details>
       <details><summary>I already have NinjaTrader. Does that work?</summary><p>Yes. After you join, you enter the email on your existing NinjaTrader account and the tools are licensed to it. It can be different from the email you use on Whop.</p></details>
       <details><summary>How fast do I get access?</summary><p>Discord and masterclass access are granted at checkout. Your tools are licensed as soon as you confirm your NinjaTrader email on the activation page, which takes about three minutes.</p></details>
@@ -260,7 +338,7 @@
 </section>
 
 <section class="sut-final">
-  <div class="sut-wrap sut-final-in">
+  <div class="sut-wrap sut-final-in" data-reveal>
     <h2>Trade with Jack's tools.</h2>
     <p class="sut-lead">${{price_monthly}}/month or ${{price_annual}}/year. Every new tool included. Cancel anytime.</p>
     <a class="sut-btn sut-btn-lg" href="{{cta_href}}"{{cta_attr}} data-member-cta="final">Join StartUpTrading <span class="sut-arrow" aria-hidden="true">→</span></a>

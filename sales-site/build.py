@@ -103,6 +103,36 @@ def candles(seed=7, n=64, w=640, h=300):
             + ''.join(out) + '</svg>')
 
 
+# CME contract specifications for the ticker tape: (symbol, name, tick size, tick value, $ per point).
+CONTRACTS = (('ES', 'E-mini S&P 500', '0.25', '12.50', '50'), ('MES', 'Micro E-mini S&P 500', '0.25', '1.25', '5'),
+             ('NQ', 'E-mini Nasdaq-100', '0.25', '5.00', '20'), ('MNQ', 'Micro E-mini Nasdaq-100', '0.25', '0.50', '2'),
+             ('YM', 'E-mini Dow', '1', '5.00', '5'), ('MYM', 'Micro E-mini Dow', '1', '0.50', '0.50'),
+             ('RTY', 'E-mini Russell 2000', '0.10', '5.00', '50'), ('M2K', 'Micro E-mini Russell 2000', '0.10', '0.50', '5'),
+             ('CL', 'Crude Oil', '0.01', '10.00', '1,000'), ('MCL', 'Micro Crude Oil', '0.01', '1.00', '100'),
+             ('GC', 'Gold', '0.10', '10.00', '100'), ('MGC', 'Micro Gold', '0.10', '1.00', '10'))
+
+
+def tape_html():
+    """Scrolling strip of contract specs (static facts, not prices). The second copy
+    exists only to make the loop seamless and is hidden from screen readers."""
+    items = ''.join(f'<li><b>{s}</b><span>{html.escape(n)}</span><em>tick {t} = ${v}</em><em>${p}/pt</em></li>'
+                    for s, n, t, v, p in CONTRACTS)
+    return ('<div class="sut-tape" aria-label="Futures contract specifications"><div class="sut-tape-label">Contract specs</div>'
+            f'<div class="sut-tape-track"><ul>{items}</ul><ul aria-hidden="true">{items}</ul></div></div>')
+
+
+def media_html(url, label):
+    """A real tool capture for a demo frame: a muted looping video (played only while
+    on screen, see fx.js) or an image. Empty when no capture is configured."""
+    if not url:
+        return ''
+    u = html.escape(url, quote=True)
+    if re.search(r'\.(mp4|webm)(\?|$)', url, re.I):
+        return (f'<video class="sut-media" src="{u}" muted loop playsinline preload="none" data-autoplay '
+                f'aria-label="{html.escape(label, quote=True)}"></video>')
+    return f'<img class="sut-media" src="{u}" alt="{html.escape(label, quote=True)}" loading="lazy" decoding="async">'
+
+
 def render(cfg, name='sales'):
     template, _, _, title, description = PAGES[name]
     page = (SRC / template).read_text()
@@ -110,8 +140,11 @@ def render(cfg, name='sales'):
     page = re.sub(r'<!--include:([\w.-]+\.html)-->', lambda m: (SRC / m.group(1)).read_text(), page)
     css = (SRC / 'styles.css').read_text()
     # affiliate.js runs first: it sets window.SUT_AFFILIATE for app.js.
-    js = '\n'.join((SRC / f).read_text() for f in ('affiliate.js', 'tracking.js', 'app.js'))
+    # fx.js (the visual layer) is only for the sales page, and only when design_fx is on.
+    fx_on = name == 'sales' and str(cfg.get('design_fx', '')).lower() == 'true'
+    js = '\n'.join((SRC / f).read_text() for f in ('affiliate.js', 'tracking.js', 'app.js') + (('fx.js',) if fx_on else ()))
     cfg = dict(cfg)
+    cfg['design_fx'] = 'true' if fx_on else ''
     # Plan IDs come from the checkout URLs so there is a single source of truth.
     for url_key, plan_key in (('checkout_url', 'plan_monthly'), ('checkout_url_annual', 'plan_annual')):
         m = re.search(r'(plan_[A-Za-z0-9]+)', cfg.get(url_key, ''))
@@ -125,6 +158,9 @@ def render(cfg, name='sales'):
     cfg['cta_href'] = '#checkout' if embed_on else cfg['checkout_url']
     values = {k: html.escape(str(v), quote=True) for k, v in cfg.items()}
     values['candles'] = candles()
+    values['tape'] = tape_html()
+    values['scanner_media'] = media_html(cfg.get('scanner_media_url', ''), 'Trend Scanner & Market Selector in NinjaTrader 8')
+    values['atr_media'] = media_html(cfg.get('atr_media_url', ''), 'ATR Order Automation placing ATR-based brackets in NinjaTrader 8')
     values['nav'] = nav_html(cfg, name)
     values['tool_filters'], values['tool_cards'] = directory_html(cfg)
     values['subscribe'] = subscribe_html(cfg, name)
