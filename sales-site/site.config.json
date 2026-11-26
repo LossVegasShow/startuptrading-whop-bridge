@@ -11,7 +11,7 @@
   "setup_url": "https://startuptrading.com/setup",
   "site_url": "https://startuptrading.com",
   "sales_page_url": "https://startuptrading.com/",
-  "membership_open": "",
+  "membership_open": "true",
   "free_tools_url": "https://startuptrading.com/free-tools",
   "tv_atr_page_url": "https://startuptrading.com/tradingview/atr-position-size-planner",
   "tv_atr_script_url": "https://www.tradingview.com/script/ZBt4abLo-Futures-Position-Size-Calculator-ATR-Prop-Firm-Risk/",

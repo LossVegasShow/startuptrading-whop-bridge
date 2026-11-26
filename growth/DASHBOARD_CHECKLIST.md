@@ -1,10 +1,11 @@
 # Remaining dashboard tasks (one list)
 
 Updated 2026-11-26. Everything in code is done and merged; these are the clicks left.
-`membership_open`, held reminders and promotional campaigns stay **off** throughout.
+`membership_open` is **on** (2026-11-26, after the live acceptance tests passed). Held reminders and promotional campaigns stay **off**.
 
-## Decide first
-- [ ] **Purchasing is reachable now.** The homepage carries the live Whop checkout and licensing is `all_members`. If you want purchasing closed until the acceptance test passes, set the GHL default page back to **Home** (everything works either way; `/join` serves the same page).
+## Membership launch
+- [x] Live acceptance tests passed; `membership_open` on.
+- [ ] Re-paste the three free-page embeds (now with membership CTAs): `/free-tools` ← `dist/free-tools-embed.html`, `/futures-position-size-calculator` ← `dist/calculator-embed.html`, `/tradingview/atr-position-size-planner` ← `dist/tradingview-atr-planner-embed.html`. Save → Publish.
 
 ## GA4 (analytics.google.com, property 565901572)
 - [ ] **Root cause of the missing `content_group`:** Admin → Data streams → *startuptrading.com* → **Configure tag settings** → *Show all* → **Ignore duplicate instances of on-page configuration** → **Off**. With it on, the property's gtag.js configures itself on load and sends its own page_view (raw URL incl. `gtm_debug`, no content group, no user properties), discarding the configuration from GTM. Tell me when it's off: I'll re-fetch the tag and re-run the network check (it changes within minutes).
@@ -31,7 +32,7 @@ Updated 2026-11-26. Everything in code is done and merged; these are the clicks 
 
 ## Activation app (activate.startuptrading.com)
 - [ ] `/admin/products` → upload `SUT_ATR_Orders_2026.zip` and `StartupTrading_Tools_Scanner_2026.zip`; both must show **verified**.
-- [ ] Run the live acceptance purchase test (PRODUCTION_LICENSING.md, sections C and A). When it passes, tell me and I'll turn `membership_open` on.
+- [x] Live acceptance purchase test passed.
 
 ## Jack
 - [ ] Sign off the sales page copy; send real screenshots for the tools section.
