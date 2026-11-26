@@ -473,3 +473,19 @@ stopped annual buyers being recognised for licensing.
 
 All references now use the canonical ID, and plan matching ignores letter case.
 Monthly (`plan_qSXeS0xoDapGU`) was already correct.
+
+## 13. Troubleshooting: page_view without content_group / with gtm_debug in page_location
+
+Diagnosed 2026-11-26 against live network hits. The GTM container is correct (published
+v5 has `content_group`, `page_location` and `user_properties` on the Google tag, and the
+variables resolve to `membership_sales` and the cleaned URL). The cause is the GA4 stream
+setting **Ignore duplicate instances of on-page configuration**: with it on, Google serves
+this property a gtag.js that configures itself on load and sends a default page_view
+(raw `document.location`, no content group, no user properties) and ignores the
+configuration from GTM. Proof: the same `gtag('config', …, {page_location, content_group})`
+snippet sends both parameters with a different measurement ID and drops them with
+G-S0PT1NK0FK; event-level parameters arrive either way.
+
+Fix: turn the setting off (growth/DASHBOARD_CHECKLIST.md). The container also sends
+`content_group`, `page_type` and the clean `page_location` on every GA4 event, so events
+are classified regardless.
