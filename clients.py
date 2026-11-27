@@ -6,6 +6,9 @@ from config import Config, BUSINESS_ID, PRODUCT_ID, PLANS
 
 class IntegrationError(Exception): pass
 
+class NotFoundError(IntegrationError):
+    '''Whop answered 404: the record doesn't exist for this company's API key.'''
+
 def parse_utc(s):
     if not s: return None
     try: return dt.datetime.fromisoformat(str(s).replace('Z','+00:00')).astimezone(dt.timezone.utc)
@@ -323,6 +326,7 @@ class WhopClient:
         async with httpx.AsyncClient(timeout=18) as client:
             r = await client.get(f'https://api.whop.com/api/v1/memberships/{membership_id}',
                 headers={'Authorization':f'Bearer {self.cfg.whop_api_key}','Api-Version-Date':self.cfg.whop_api_version})
+        if r.status_code == 404: raise NotFoundError('Whop membership lookup HTTP 404')
         if r.status_code != 200: raise IntegrationError(f'Whop membership lookup HTTP {r.status_code}')
         data=r.json()
         return normalize_membership(data.get('data',data) if isinstance(data,dict) else data)

@@ -4,7 +4,7 @@ Webhook is only a trigger. Identity, plan, entitlement and buyer contact are obt
 from a fresh authenticated Whop API lookup. No NinjaTrader license is created here.
 '''
 import time
-from clients import IntegrationError, membership_entitlement, membership_plan_id
+from clients import IntegrationError, NotFoundError, membership_entitlement, membership_plan_id
 from config import BUSINESS_ID, PRODUCT_ID, PLANS
 import acquisition
 from store import connect, request_crm_sync, audit
@@ -141,6 +141,23 @@ async def import_membership(cfg,whop, membership_id, *, verified_membership=None
         request_crm_sync(db,cid)
     return {'state':action,'customer_id':cid}
 
+
+# A membership Whop reports as not found is retried for a day (a brand-new
+# membership can briefly 404), then closed if it was never one of our customers.
+NOT_FOUND_GRACE=24*3600
+
+def failed_event_state(cfg,event,exc,now=None):
+    '''State for a webhook event whose handling raised: 'retry', or 'not_found'
+    once Whop has said 404 for a day about a membership we never had. A known
+    customer's membership disappearing stays 'retry' so it keeps alerting.'''
+    now=time.time() if now is None else now
+    if isinstance(exc,NotFoundError) and now-int(event.get('received_at') or now)>=NOT_FOUND_GRACE:
+        with connect(cfg) as db:
+            known=db.execute('SELECT 1 FROM customers WHERE membership_id=?',(event.get('object_id') or '',)).fetchone()
+            if not known:
+                audit(db,None,'webhook_not_found',f"{event.get('event_type')} {event.get('object_id')}: closed after 24h of Whop 404s")
+                return 'not_found'
+    return 'retry'
 
 async def handle_queued_event(cfg,whop,engine,event):
     '''Handle a durable signed event; errors propagate for scheduled retry.''' 

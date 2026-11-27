@@ -70,11 +70,12 @@ def find_issues(db, cfg, now=None):
                                  f'{r["membership_id"]}: {have}/{len(INDICATORS)} indicators active', r['id']))
 
     # 4. Webhook events that failed or couldn't be matched to a membership.
-    for r in db.execute("""SELECT webhook_id, event_type, state, last_error FROM webhook_events
+    for r in db.execute("""SELECT webhook_id, event_type, object_id, state, last_error FROM webhook_events
             WHERE state IN ('retry','needs_mapping') ORDER BY received_at DESC LIMIT 50"""):
         issues.append(_issue(f'webhook:{r["webhook_id"]}', MEDIUM,
                              'Whop event needs mapping' if r['state'] == 'needs_mapping' else 'Whop event failing',
-                             f'{r["event_type"]}' + (f': {r["last_error"][:120]}' if r['last_error'] else '')))
+                             f'{r["event_type"]}' + (f' {r["object_id"]}' if r['object_id'] else '')
+                             + (f': {r["last_error"][:120]}' if r['last_error'] else '')))
 
     # 5. Events stuck in the queue: the background worker may not be running.
     stuck = db.execute("SELECT COUNT(*) AS n FROM webhook_events WHERE state='queued' AND received_at<?",
