@@ -202,7 +202,7 @@ def render_markdown(r):
         lines += [f"## {n}. {p['trend']}", '', f"**{SPEED_LABEL[p['speed']]}** · status: **{i['status']}**"
                   + (' · found by search' if p['found_by_search'] else ''), '',
                   f"- What happened: {p['what_happened']}" + (f" ([source]({p['source_url']}))" if p['source_url'] else ''),
-                  f"- Why it's viral: {p['why_viral']}", f"- Trading twist: {p['bridge'] or "none (pure humor)"}",
+                  f"- Why it's viral: {p['why_viral']}", f"- Trading twist: {p['bridge'] or 'none (pure humor)'}",
                   f"- Safety: {p['safety_note']}", '']
         _hits(lines, i['rule_hits'])
         lines += ['**X / Threads**', '', posts['x_post'], '', '**Instagram / TikTok caption**', '',
