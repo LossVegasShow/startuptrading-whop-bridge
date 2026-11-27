@@ -10,7 +10,7 @@ Each run:
 
 Nothing is posted automatically. The alert goes to a phone-friendly Discord or Slack channel
 (TREND_ALERT_WEBHOOK) so one person can approve and post within minutes. See
-growth/TREND_JACKING_PLAYBOOK.md for the approval rules.
+growth/AWARENESS_FIRST_PLAN.md §11 for the approval rules.
 
 The AI is only called when there is something new, and at most --max-ai-runs times a day, so a
 radar that runs every 30 minutes stays cheap on quiet days.
@@ -191,7 +191,7 @@ def render_markdown(r):
     live = [i for i in r['items'] if i['status'] != SKIPPED]
     lines = [f"# Trend desk: {r['time']}", '',
              f"{len(live)} trend posts and {len(r['moment_takes'])} moment takes drafted. Nothing has been posted. "
-             'Approve, tweak and post, following the playbook (growth/TREND_JACKING_PLAYBOOK.md).', '',
+             'Approve, tweak and post, following the playbook (growth/AWARENESS_FIRST_PLAN.md §11).', '',
              f"Feeds: {r['signals']} signals, {r['dropped']['blocked']} dropped as sensitive, "
              f"{r['dropped']['seen']} already seen, {len(r['candidates'])} shortlisted. AI: {r['ai']}.", '']
     if r['feed_errors']:
@@ -202,7 +202,7 @@ def render_markdown(r):
         lines += [f"## {n}. {p['trend']}", '', f"**{SPEED_LABEL[p['speed']]}** · status: **{i['status']}**"
                   + (' · found by search' if p['found_by_search'] else ''), '',
                   f"- What happened: {p['what_happened']}" + (f" ([source]({p['source_url']}))" if p['source_url'] else ''),
-                  f"- Why it's viral: {p['why_viral']}", f"- Trader bridge: {p['bridge']}",
+                  f"- Why it's viral: {p['why_viral']}", f"- Trading twist: {p['bridge'] or "none (pure humor)"}",
                   f"- Safety: {p['safety_note']}", '']
         _hits(lines, i['rule_hits'])
         lines += ['**X / Threads**', '', posts['x_post'], '', '**Instagram / TikTok caption**', '',

@@ -35,13 +35,13 @@ profit and guarantee words.
 
 A separate job, **trend-radar**, runs every 30 minutes from 6 am to 11 pm ET. It
 reads Google Trends, Reddit and Wikipedia's most-read list, drops anything
-sensitive, verifies the rest with web search, and drafts two-layer jokes
-(funny to anyone, with a twist traders feel) for whatever is hot right now. It
+sensitive, verifies the rest with web search, and drafts jokes for whatever
+is hot right now: funny to anyone, with a trading twist only when it lands. It
 also carries a calendar of known moments, from Black Friday to FOMC days, with
 ready-to-post lines (`moments.py`). Ready drafts go to a phone-friendly
 Discord or Slack channel so one person can approve and post within the hour.
 Strategy, approval rules and the no-go list are in
-[`growth/TREND_JACKING_PLAYBOOK.md`](../growth/TREND_JACKING_PLAYBOOK.md).
+[`growth/AWARENESS_FIRST_PLAN.md` §11](../growth/AWARENESS_FIRST_PLAN.md).
 
 ```bash
 python -m marketing.trend_desk --calendar 30   # the next 30 days of moments, no key needed

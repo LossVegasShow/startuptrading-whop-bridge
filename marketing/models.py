@@ -117,7 +117,7 @@ SpeedTier = Literal['post_now', 'post_today', 'watch', 'skip']
 
 class TrendPost(BaseModel):
     x_post: str = Field(description='Under 190 characters (the risk line is added after). Names the trend in the '
-                                    'first five words. Two layers: funny to anyone, then a twist traders feel.')
+                                    'first five words. Funny to anyone; a trading twist only if it makes the joke better.')
     threads_caption: str = Field(description='Instagram/Threads/TikTok caption, under 300 characters, same joke.')
     short_hook: str = Field(description='On-screen text for the first 2 seconds of a vertical video, under 60 chars.')
     short_script: str = Field(description='A 10 to 20 second piece Jack can film on his phone in one take.')
@@ -131,10 +131,10 @@ class TrendPick(BaseModel):
     what_happened: str = Field(description='One or two factual sentences, verified by search.')
     source_url: str = Field(description='A credible page confirming what happened. Empty only for speed=skip.')
     why_viral: str = Field(description='Why it is spreading and how long it will likely stay hot.')
-    bridge: str = Field(description='The trading idea the joke lands on (FOMO, sizing, stops, patience...).')
-    speed: SpeedTier = Field(description='post_now: peaking, safe, strong bridge, post within 60 minutes. '
-                                         'post_today: rising, good bridge. watch: may get big. '
-                                         'skip: unsafe or no clean bridge.')
+    bridge: str = Field(description='The trading twist, if one truly improves the joke. Empty for pure humor.')
+    speed: SpeedTier = Field(description='post_now: peaking, safe, strong joke, post within 60 minutes. '
+                                         'post_today: rising, good joke. watch: may get big. '
+                                         'skip: unsafe or not funny enough.')
     found_by_search: bool = Field(description='True if this came from your own search, not the candidate list.')
     safety_note: str = Field(description='Any sensitivity, and why it is safe (or why skipped).')
     posts: Optional[TrendPost] = Field(default=None, description='Null when speed is skip.')

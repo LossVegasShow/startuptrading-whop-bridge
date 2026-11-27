@@ -7,6 +7,10 @@ This plan replaces the tool-first emphasis of `FLAGSHIP_POSITIONING.md` §8 and 
 engine; collaborations are the primary growth engine; visitor harvesting is §3.
 The SEO, tool pages and Risk Lab remain, at a smaller share.
 
+> **🔖 Come back to this: the trend desk (§11) is a first version.** Still to do: research the
+> funny personalities that define the sarcastic voice, then finish the open items in §11.7.
+> Until then, the desk drafts in a placeholder voice.
+
 ---
 
 ## 0. Decisions
@@ -18,6 +22,7 @@ The SEO, tool pages and Risk Lab remain, at a smaller share.
 | "20 Years at the Screens" | ⏳ **Open.** Jack's stated start is 2008 (about 18 years). Use it only if Jack confirms 20 years; otherwise "From the Screens" or "Since 2008" |
 | AI video pipeline | ✅ **Retargeted as Jack's visual engine** (§1). The AI-voiced episode 001 is **on hold** (`"hold": true` in `video/uploads/001-how-many-contracts.json`) so nothing publishes to your channel in the meantime |
 | Collaborations | ✅ **The primary growth engine** (§2) |
+| Trend desk (real-time humor) | ⏳ **Built, voice still open** (§11). Broad humor for anyone; the trading angle only when it really lands. A sarcastic voice comes once you've researched reference personalities (§11.7) |
 
 ## 1. Channel and AI automation setup
 
@@ -441,3 +446,173 @@ check of current guest policies.
   substantial risk of loss."
 - **Website, licensing, checkout, affiliate attribution and launch gates are
   unchanged.** Promotion waits for Gate 2.
+
+---
+
+## 11. Trend-jacking: the real-time humor desk
+
+> **🔖 Status: first version. Come back and develop it further** (open items in §11.7, starting
+> with the voice).
+
+**Goal:** whenever the internet is talking about something, StartUpTrading has one of the
+funniest takes on it, posted while it's still hot. **The audience is everyone, not just
+traders.** The job is a laugh and a share from anyone who scrolls past. A trading angle goes
+in only when it really nails the joke; otherwise the post is just funny. This feeds the
+discovery bucket (§4): reach first, recognition second, no selling.
+
+**The engine:** the trend desk (`marketing/trend_desk.py`, the `trend-radar` workflow).
+- It watches the feeds every 30 minutes, 6 am to 11 pm ET.
+- It drafts posts and sends them to a phone alert.
+- **A person approves every post.** Nothing posts automatically.
+
+### 11.1 Three lanes
+
+| Lane | What | Timing | Source |
+|---|---|---|---|
+| **Calendar** | Known moments: Black Friday, the Super Bowl, Valentine's Day, Halloween, Christmas, New Year, plus market days (Fed decisions, jobs reports, expiry, the futures roll, clock changes) | Drafted 1–4 days early, refreshed on the day | `marketing/moments.py`: dates plus hand-written lines |
+| **Live viral** | Whatever blows up today: a meme, a sports moment, a product launch, a celebrity moment, a weird news story | **Post within 60 minutes** of the alert | Google Trends, Reddit, Wikipedia most-read, plus AI web search for X, TikTok and Instagram |
+| **Market-moving** | Viral stories that move markets: a surprise Fed comment, a stock jumping 20%, an exchange outage | Within 30 minutes, after checking 2 credible sources | Same feeds; the desk tags these "caution" and writes a market-only angle |
+
+**Rough weekly mix:** 3 calendar posts, 3–5 live-viral posts, and market-moving posts only when
+they happen.
+
+### 11.2 The 60-minute clock
+
+Viral moments peak in hours. Being third to the joke is fine; being a day late isn't.
+
+| Minute | Who | What |
+|---|---|---|
+| 0 | Radar | The alert lands: the trend, why it's viral, a ready post |
+| 0–10 | Approver | Run the five-second filter (§11.3). If any answer is wrong, skip it. No debate |
+| 10–20 | Approver | Pick or tweak the best line and post it. Drop the reply line under the 2–3 biggest posts about the trend |
+| 20–60 | Jack (optional) | Film a 10–20 s short on his phone in one take, with captions on |
+| Next day | Approver | Log it in `growth/trends-log.csv` (§11.6) |
+
+**One approver.** Name one person, plus a backup, who can approve without asking anyone. A post
+that needs a meeting is already late.
+
+### 11.3 The five-second filter
+
+Every answer must be **yes**:
+1. **Is it light?** Nobody died or got hurt, and it isn't a disaster, a crime, war, an illness,
+   politics or religion.
+2. **Is the joke about the situation, not a person?** Never laugh at someone who went viral by
+   accident.
+3. **Would a stranger laugh?** Anyone, not only traders.
+4. **Is it on brand?** It's something Jack would actually say. The trading angle is optional.
+5. **Is it rule-clean?** No profits, P&L, income, win rates, guarantees or trade calls.
+
+When in doubt, skip it. Missing a trend costs nothing; a bad joke about the wrong story costs
+months.
+
+### 11.4 How the jokes work
+
+**Funny first.** The joke has to work on its own, for anyone. Add a trading twist only when it
+makes the joke *better*, not when it just makes it on-topic. A forced trading twist kills the
+joke, so drop it.
+
+| Formula | Pattern | Example |
+|---|---|---|
+| **The reframe** | "[Trend] is just [emotion] with [mundane detail]." | "Black Friday is just FOMO with a parking problem." |
+| **The missing feature** | "[Thing] has [safety feature]. [Other thing] does not." | "The Super Bowl has a two-minute warning. NQ does not." |
+| **The honest version** | Say the quiet part out loud | "Best April Fools' joke in trading: 'I'll just hold it until it comes back.'" |
+| **Same energy** | "[Viral behaviour] has the same energy as [relatable habit]." | "'Add to cart' has the same energy as 'add to a losing position.'" |
+| **The rule** | "[Trend] rule: [funny truth]." | "If a deal needs a countdown timer to convince you, it isn't a deal." |
+| **The calm adult** | Everyone's panicking; Jack gives the one useful thing | For market-moving stories only |
+
+**Voice:** a **placeholder** until the voice research is done (§11.7). For now: dry, deadpan
+and self-aware. Laugh at the situation, at universal habits and at ourselves. At most one emoji
+and one hashtag.
+
+**Visuals:**
+- Jack's face reacting, with the hook as on-screen text, is best.
+- An original graphic is next best.
+- Never use a company's logo, someone else's footage or a celebrity's photo.
+- To use a meme format, recreate it with Jack in it.
+
+**Platforms:**
+- **X / Threads:** post the line, then reply under the biggest posts about the trend. Those
+  replies often reach more people than the post itself.
+- **TikTok / Reels / Shorts:** the hook in the first 2 seconds, the trend's sound added in the
+  platform's own editor, captions on.
+- **Instagram Stories:** a text card. It's the fastest format to make.
+- **TradingView:** never. Ideas there are education only.
+- **Links:** none in trend posts. The profile link does the work.
+
+### 11.5 The no-go list
+
+Blocked automatically (`compliance.BLOCKED_TOPICS`), and never posted by hand:
+- deaths, disasters, violence, war, terrorism
+- illness, crimes with victims, missing people
+- anything involving minors
+- sexual content
+
+**Caution:** politics, tariffs, shutdowns, layoffs, outages, hacks. These get a market-impact
+angle only: no joke at anyone's expense and no side taken.
+
+**Market rumours:** never repeat one as fact. Two credible sources, or it waits.
+
+**Remembrance days:** Memorial Day and Juneteenth get a markets-closed notice only.
+
+Sarcasm aims at situations, never at people (§10: no mocking individuals).
+
+### 11.6 Measurement
+
+Log one row per trend post in `growth/trends-log.csv`: date, lane, trend, platform, minutes from
+alert to post, impressions, engagements, follows, profile clicks.
+
+**First 30 days:**
+- 15 trend posts
+- a median of 45 minutes or less from alert to post for live-viral posts
+- 2 posts at 3× the account's median impressions or more
+
+Compare posts with a trading twist against pure-humor posts on **followers per 1,000 views**
+(§9). The result decides how often the twist goes in.
+
+### 11.7 Open items: come back to these
+
+- [ ] **Voice research (you):** pick 3–5 funny personalities whose sarcasm fits. For each, note
+  what to borrow: rhythm, deadpan, self-deprecation, sentence length. Note what to avoid.
+- [ ] **Write the voice into the system:**
+  - turn the research into a "Humor voice" block in `marketing/brand_brief.md`, with 5–10
+    example lines;
+  - update the desk's instructions (`TREND_JOCKEY` in `marketing/agents.py`).
+  - Describe the style; don't imitate a named person.
+- [ ] **Rewrite the calendar lines** in `marketing/moments.py` in the new voice, and add
+  pure-humor lines alongside the trading ones.
+- [ ] **Decide the risk line on pure-humor posts.** The brand brief puts the risk line on every
+  post; §10 asks for it in descriptions. A non-trading joke with a risk disclaimer reads oddly.
+  Agree a rule with compliance before changing `trend_desk.check_pick`.
+- [ ] **Name the approver and backup,** and switch on phone alerts (§11.8).
+- [ ] **Review after 30 days** (§11.6): keep the formulas behind the outliers and drop the rest.
+
+### 11.8 Setup (about 15 minutes)
+
+1. **The API key:** `ANTHROPIC_API_KEY` is already a repository secret (`marketing-weekly`
+   uses it).
+2. **Phone alerts:**
+   - Create a private Discord channel. Open Edit channel → Integrations → Webhooks.
+   - Add the webhook URL as the repository secret **`TREND_ALERT_WEBHOOK`**. A Slack incoming
+     webhook works too.
+   - Turn on push notifications for that channel on the approver's phone.
+3. **First run:** Actions → **trend-radar** → Run workflow, with "dry run" ticked, to check the
+   feeds. After that the schedule takes over.
+4. **Cost:** the AI runs only when a trend is new, at most 16 times a day, with up to 6 web
+   searches each. Check the first day's cost in the Anthropic console and lower
+   `--max-ai-runs` if needed.
+
+**Day to day:**
+- The alert is the queue.
+- Full drafts are on the run page (Actions → trend-radar → latest run).
+- For the calendar, run `python -m marketing.trend_desk --calendar 30`.
+
+### 11.9 Coming up
+
+| Date | Moment | Example line |
+|---|---|---|
+| Mon Nov 30 | Cyber Monday | "If a deal needs a countdown timer to convince you, it isn't a deal." |
+| Fri Dec 4 | Jobs report (confirm on bls.gov) | "Jobs report at 8:30. The only job I have at 8:29 is not having a position." |
+| Wed Dec 9 | Fed decision, 2:00 pm ET | "The market spends six hours pretending it doesn't care, then six seconds proving it does." |
+| Dec 24–25 | Christmas | "All I want for Christmas is a stop loss I actually respect." |
+| Dec 31 | New Year's Eve | "New Year's resolutions last about two weeks." |
+| Sun Feb 14, 2027 | **Super Bowl on Valentine's Day** | Two culture moments on one day: plan early |

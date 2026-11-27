@@ -1,7 +1,7 @@
 name: trend-radar
 
-# The real-time trend desk (growth/TREND_JACKING_PLAYBOOK.md). Every 30 minutes, 6 am to 11 pm ET,
-# it checks what the internet is talking about and drafts trader-focused posts for anything new.
+# The real-time trend desk (growth/AWARENESS_FIRST_PLAN.md §11). Every 30 minutes, 6 am to 11 pm ET,
+# it checks what the internet is talking about and drafts funny posts for anything new.
 # It never posts. Ready drafts go to the TREND_ALERT_WEBHOOK channel (Discord or Slack) for a
 # person to approve. The AI is only called when something is new, at most 16 times a day.
 on:
