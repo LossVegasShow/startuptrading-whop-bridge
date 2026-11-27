@@ -31,6 +31,24 @@ Two more desks run in the same job:
 Pitches and captions go through the same phrase rules, including Spanish
 profit and guarantee words.
 
+### The trend desk (real time)
+
+A separate job, **trend-radar**, runs every 30 minutes from 6 am to 11 pm ET. It
+reads Google Trends, Reddit and Wikipedia's most-read list, drops anything
+sensitive, verifies the rest with web search, and drafts two-layer jokes
+(funny to anyone, with a twist traders feel) for whatever is hot right now. It
+also carries a calendar of known moments, from Black Friday to FOMC days, with
+ready-to-post lines (`moments.py`). Ready drafts go to a phone-friendly
+Discord or Slack channel so one person can approve and post within the hour.
+Strategy, approval rules and the no-go list are in
+[`growth/TREND_JACKING_PLAYBOOK.md`](../growth/TREND_JACKING_PLAYBOOK.md).
+
+```bash
+python -m marketing.trend_desk --calendar 30   # the next 30 days of moments, no key needed
+python -m marketing.trend_desk --dry-run       # feeds + calendar, no AI
+python -m marketing.trend_desk                 # a full run
+```
+
 All agents share one source of truth: **`brand_brief.md`**. When Jack changes
 a fact there, the next run uses it. Anything not in that file can't be stated
 as fact.
@@ -40,6 +58,9 @@ as fact.
 1. Create an API key at console.anthropic.com (Settings → API keys). Add it to
    this GitHub repository: **Settings → Secrets and variables → Actions → New
    repository secret**, name `ANTHROPIC_API_KEY`.
+   For trend alerts on your phone, add `TREND_ALERT_WEBHOOK` too: a Discord
+   channel webhook (Channel settings → Integrations → Webhooks) or a Slack
+   incoming-webhook URL.
 2. Have Jack confirm the facts in `brand_brief.md`, especially the
    `[TO CONFIRM WITH JACK]` line.
 3. Run it once by hand: **Actions → marketing-weekly → Run workflow**.
@@ -84,6 +105,10 @@ One run makes about 15–20 model calls (more when there are several transcripts
 `claude-opus-5-5`, with the brand brief cached across calls. Check the real
 cost of the first run in the Anthropic console (Usage) and lower `--briefs`
 if it's more than you want.
+
+The trend desk calls the AI only when a trend is new, at most 16 times a day
+(`--max-ai-runs`), with up to 6 web searches each. Check its cost in the console
+after the first day and lower the cap if you need to.
 
 ## Changing the rules
 

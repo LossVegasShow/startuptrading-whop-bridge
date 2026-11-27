@@ -1,0 +1,61 @@
+name: trend-radar
+
+# The real-time trend desk (growth/TREND_JACKING_PLAYBOOK.md). Every 30 minutes, 6 am to 11 pm ET,
+# it checks what the internet is talking about and drafts trader-focused posts for anything new.
+# It never posts. Ready drafts go to the TREND_ALERT_WEBHOOK channel (Discord or Slack) for a
+# person to approve. The AI is only called when something is new, at most 16 times a day.
+on:
+  schedule:
+    - cron: '7,37 11-23 * * *'   # 6:07 am to 6:37 pm ET (winter), 7:07 am to 7:37 pm ET (summer)
+    - cron: '7,37 0-3 * * *'     # through 10:37 pm ET (winter), 11:37 pm ET (summer)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Feeds and calendar only (no AI)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trend-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r marketing/requirements.txt
+      # The seen-topics memory lives in the Actions cache, so the same trend isn't drafted twice.
+      - uses: actions/cache@v4
+        with:
+          path: marketing/out/trend_state.json
+          key: trend-state-${{ github.run_id }}
+          restore-keys: trend-state-
+      - name: Check the API key secret is set
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY secret is not set. Running feeds and calendar only."
+            echo "DRY=--dry-run" >> "$GITHUB_ENV"
+          fi
+      - name: Run the trend desk
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TREND_ALERT_WEBHOOK: ${{ secrets.TREND_ALERT_WEBHOOK }}
+        run: python -m marketing.trend_desk ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} $DRY
+      - name: Show the queue on the run page
+        run: cat marketing/out/trends/latest.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trend-desk-${{ github.run_number }}
+          path: marketing/out/trends/
+          retention-days: 14

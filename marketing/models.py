@@ -1,5 +1,5 @@
 """Structured outputs exchanged between the marketing agents."""
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -108,3 +108,45 @@ class Clip(BaseModel):
 
 class ClipList(BaseModel):
     clips: List[Clip]
+
+
+# ---- Trend desk (real-time) ------------------------------------------------
+
+SpeedTier = Literal['post_now', 'post_today', 'watch', 'skip']
+
+
+class TrendPost(BaseModel):
+    x_post: str = Field(description='Under 190 characters (the risk line is added after). Names the trend in the '
+                                    'first five words. Two layers: funny to anyone, then a twist traders feel.')
+    threads_caption: str = Field(description='Instagram/Threads/TikTok caption, under 300 characters, same joke.')
+    short_hook: str = Field(description='On-screen text for the first 2 seconds of a vertical video, under 60 chars.')
+    short_script: str = Field(description='A 10 to 20 second piece Jack can film on his phone in one take.')
+    visual: str = Field(description='What the image or video shows. Prefer Jack reacting on camera or an original '
+                                    'chart graphic. Never a company logo or someone else\'s footage.')
+    reply_line: str = Field(description='A one-line reply to drop under the biggest posts about this trend.')
+
+
+class TrendPick(BaseModel):
+    trend: str = Field(description='The trend as people are searching it.')
+    what_happened: str = Field(description='One or two factual sentences, verified by search.')
+    source_url: str = Field(description='A credible page confirming what happened. Empty only for speed=skip.')
+    why_viral: str = Field(description='Why it is spreading and how long it will likely stay hot.')
+    bridge: str = Field(description='The trading idea the joke lands on (FOMO, sizing, stops, patience...).')
+    speed: SpeedTier = Field(description='post_now: peaking, safe, strong bridge, post within 60 minutes. '
+                                         'post_today: rising, good bridge. watch: may get big. '
+                                         'skip: unsafe or no clean bridge.')
+    found_by_search: bool = Field(description='True if this came from your own search, not the candidate list.')
+    safety_note: str = Field(description='Any sensitivity, and why it is safe (or why skipped).')
+    posts: Optional[TrendPost] = Field(default=None, description='Null when speed is skip.')
+
+
+class MomentTake(BaseModel):
+    moment_id: str
+    x_post: str = Field(description='Under 190 characters. Better than the seed lines and different from them.')
+    short_hook: str
+    short_script: str = Field(description='10 to 20 seconds, one take.')
+
+
+class TrendRadar(BaseModel):
+    picks: List[TrendPick] = Field(description='Most urgent first.')
+    moment_takes: List[MomentTake]

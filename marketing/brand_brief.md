@@ -62,6 +62,16 @@ Plain, direct, a working trader talking to another trader. Short sentences.
 Specific (name the market, the time, the setup). No hype, no emojis in emails,
 at most one emoji in a short-form post. First person when writing as Jack.
 
+## Humor (trend desk and short-form)
+
+Dry, self-aware, a working trader laughing at the market and at our own habits.
+The two-layer joke: it's funny to someone who has never traded, and the twist
+lands on something every trader has done (FOMO, revenge trading, moving the
+stop, oversizing, "it'll come back"). Punch at the market, at habits and at
+ourselves, never at a person, a group, a competitor or a victim. No jokes about
+deaths, disasters, violence, illness, war, partisan politics or religion.
+Remembrance days (Memorial Day, Juneteenth) get a markets-closed notice only.
+
 ## Hard rules (compliance)
 
 - Never claim or imply profits, income, win rates, or that anyone will make

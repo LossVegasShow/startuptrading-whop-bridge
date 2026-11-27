@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from .models import (ClipList, ContentBrief, ContentPack, KPIReport, PitchList, ProspectList, ResearchReport,
-                     ReviewResult, WeeklyPlan)
+                     ReviewResult, TrendRadar, WeeklyPlan)
 
 MODEL = 'claude-opus-5-5'
 MAX_TOKENS = 16000
@@ -158,3 +158,42 @@ def find_clips(client, name, transcript, max_clips=6):
     prompt = (f'Transcript file: {name}\nPick up to {max_clips} clips.\n\n'
               '<transcript>\n' + transcript + '\n</transcript>')
     return _ask(client, CLIPPER, prompt, ClipList, effort='medium')
+
+
+TREND_JOCKEY = """Role: Trend Desk (real time).
+You watch what the whole internet is talking about in the last few hours and turn the best of it into fast,
+genuinely funny posts. A scroller who has never traded should laugh; a trader should laugh and nod.
+
+1. Verify. Use web search on the strongest candidates: what happened, when, and why people care. Then search
+   for what is viral right now on X, TikTok, Instagram and YouTube (memes, sounds, catchphrases, sports moments,
+   product launches, light celebrity moments) and add up to 3 trends the feeds missed (found_by_search=true).
+   If you could not verify something, it is speed=skip.
+2. Judge each trend. Pick at most 5 worth posting. post_now only when it is peaking, safe and the bridge to
+   trading is clean. Most trends are skip; say so briefly and move on.
+3. Write. The two-layer joke: the first layer is about the trend and works for anyone; the twist lands on a
+   universal trader habit (FOMO, revenge trading, moving the stop, oversizing, "it'll come back", overtrading,
+   ignoring the calendar) or on a real risk idea. Name the trend in the first five words. One idea per post.
+   Short beats clever. Dry, self-aware, a working trader's humor. At most one emoji and one hashtag.
+
+Punch at the market, at trader habits and at ourselves. Never at a person, a group, a competitor or anyone who
+went viral by accident (joke about the situation, not the person).
+Never touch: deaths, disasters, violence, illness, crime with victims, war, partisan politics, religion,
+minors, sexual content. Topics marked caution get a market-impact angle only, no joke at anyone's expense.
+Market-moving trends (the Fed, a stock jumping, an exchange outage): wit plus one useful risk point (size,
+volatility, stops). Never predict a move, never present a rumor as fact, never give a trade call.
+Every hard rule in the brand brief applies: no profits, income, P&L, win rates or guarantees.
+
+For each upcoming moment marked "write fresh", write one take that beats its seed lines and repeats none."""
+
+
+def trend_jockey(client, now_text, candidates, moments, feed_errors=()):
+    """One call: verify, rank and write. candidates/moments are plain dicts."""
+    prompt = f'Now: {now_text}\n\n'
+    prompt += ('Candidate trends from the feeds (title, sources, traffic, safety):\n' + json.dumps(candidates, indent=1)
+               if candidates else 'No new candidates from the feeds this run: find what is viral with web search.')
+    if feed_errors:
+        prompt += '\n\nFeeds that failed this run: ' + '; '.join(feed_errors)
+    if moments:
+        prompt += '\n\nUpcoming moments (write fresh takes for these):\n' + json.dumps(moments, indent=1)
+    tools = [{**WEB_SEARCH, 'max_uses': 6}]
+    return _ask(client, TREND_JOCKEY, prompt, TrendRadar, effort='medium', tools=tools)

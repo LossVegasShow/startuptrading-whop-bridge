@@ -74,3 +74,32 @@ def with_risk_line(text, short=False, spanish=False):
 def check_pack(fields):
     """Check a dict of {field name: text}. Returns {field: [hits]} for fields with hits."""
     return {name: hits for name, text in fields.items() if (hits := check_text(text))}
+
+
+# ---- Trend desk: topic safety ----------------------------------------------
+# Trend-jacking a tragedy is the fastest way to lose an audience. A topic that hits
+# BLOCKED is dropped before any AI sees it; CAUTION topics may only get a market-impact
+# angle (never a joke about the people involved). Word boundaries keep "crash" (a market
+# word) allowed while "plane crash" is blocked. False positives are fine: skipping a
+# trend costs nothing.
+BLOCKED_TOPICS = re.compile(
+    r'\b(?:dies|died|dead|death|deaths|killed|killing|kills|murder\w*|shooting|shooter|gunman|stabb\w*|'
+    r'massacre|terror\w*|bomb\w*|hostage\w*|war|invasion|airstrikes?|missiles?|genocide|'
+    r'earthquake|hurricane|tornado|wildfires?|floods?|flooding|tsunami|evacuat\w*|'
+    r'plane crash|car crash|derail\w*|collapse[sd]? (?:bridge|building)|'
+    r'overdose|suicide|cancer|funeral|obituary|memorial service|passed away|rip|victims?|injured|'
+    r'abuse|assault\w*|rape|kidnap\w*|missing (?:child|girl|boy|teen)|amber alert|trafficking|'
+    r'arrested|indicted|lawsuit over death)\b', re.IGNORECASE)
+CAUTION_TOPICS = re.compile(
+    r'\b(?:election\w*|ballot\w*|impeach\w*|democrats?|republicans?|gop|senate|congress|supreme court|'
+    r'president\w*|white house|tariffs?|sanctions?|shutdown|protest\w*|immigration|abortion|religio\w*|'
+    r'layoffs?|recall|outage|hack(?:ed)?|breach)\b', re.IGNORECASE)
+
+
+def topic_safety(text):
+    """'blocked', 'caution' or 'ok' for a trend title or summary."""
+    if BLOCKED_TOPICS.search(text or ''):
+        return 'blocked'
+    if CAUTION_TOPICS.search(text or ''):
+        return 'caution'
+    return 'ok'
