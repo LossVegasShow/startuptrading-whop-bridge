@@ -26,7 +26,7 @@ import returning_member
 import attention
 import alerts
 import lifecycle_emails
-from purchaser_intake import handle_queued_event, import_membership
+from purchaser_intake import handle_queued_event, import_membership, failed_event_state
 from security import verify_webhook,hash_token,require_admin
 import customer_errors
 import email_templates
@@ -153,9 +153,10 @@ async def event_worker():
                         db.execute('UPDATE webhook_events SET state=?,last_error=NULL WHERE webhook_id=?',
                                    (state,event['webhook_id']))
                 except Exception as exc:
+                    failed=failed_event_state(cfg,event,exc)
                     with connect(cfg) as db:
                         db.execute('UPDATE webhook_events SET state=?,last_error=? WHERE webhook_id=?',
-                                   ('retry',str(exc)[:130],event['webhook_id']))
+                                   (failed,str(exc)[:130],event['webhook_id']))
             with connect(cfg) as db:
                 ids=[r['id'] for r in db.execute('SELECT id FROM customers ORDER BY updated_at ASC LIMIT 100').fetchall()]
             for cid in ids:
@@ -970,8 +971,9 @@ async def handle_events(request:Request):
                 db.execute('UPDATE webhook_events SET state=?,last_error=NULL WHERE webhook_id=?',
                            (state,item['webhook_id']))
         except Exception as exc:
+            failed=failed_event_state(cfg,item,exc)
             with connect(cfg) as db:
                 db.execute('UPDATE webhook_events SET state=?,last_error=? WHERE webhook_id=?',
-                           ('retry',str(exc)[:130],item['webhook_id']))
+                           (failed,str(exc)[:130],item['webhook_id']))
         outcomes.append(item['webhook_id'])
     return page(request,'result.html',result={'processed_events':len(outcomes),'unmapped_payment_events':'Review webhook events if object IDs do not match membership IDs'})
