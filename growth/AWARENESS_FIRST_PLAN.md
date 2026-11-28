@@ -441,3 +441,151 @@ check of current guest policies.
   substantial risk of loss."
 - **Website, licensing, checkout, affiliate attribution and launch gates are
   unchanged.** Promotion waits for Gate 2.
+
+---
+
+## 11. Signal listening: find traders asking for help, and help them in public
+
+Added 2026-11-28. **The idea:** traders describe the exact problems Jack's tools solve
+in public every day ("how many contracts should I trade?", "blew my eval on the trailing
+drawdown", "my stop keeps getting hit on NQ"). Instead of cold outreach, we find those
+posts quickly and answer them well, in public, as Jack. Help comes first. A link appears
+only when a free tool genuinely answers the question.
+
+**What's automated and what isn't:**
+- **Automated:** finding the posts, sorting them, drafting the reply, the compliance
+  check, and a daily digest.
+- **A person decides and posts:** every reply, from Jack's own account.
+- **Same rule as the rest of the marketing system:** nothing is ever posted
+  automatically.
+
+### 11.1 Why public replies, not automated DMs
+
+| | Public reply as Jack | Automated cold DMs |
+|---|---|---|
+| Reach | The asker, everyone who reads the thread later, and search engines | One person |
+| Trust | Visible expertise. Others can see the answer is good | Reads as spam; people screenshot it |
+| Platform risk | Fine within each community's rules | Against X and Reddit rules on automated or unsolicited messaging; account limits or bans |
+| Compounding | Threads rank on Google and in AI answers for months | None |
+
+DMs are only for continuing a conversation **the other person started**: they replied,
+asked, or DMed first.
+
+### 11.2 The Listening desk (a new desk in `marketing/`)
+
+```
+Sources ──► Signal filter ──► Claude: classify ──► Claude: draft reply ──► compliance.py ──► Daily digest ──► Jack posts
+(APIs)      (keywords)        (topic, intent,      (Jack's voice,          (phrase rules,      (Discord bot,       (own account,
+                               fit, sensitivity)    brand_brief.md)         no advice)          top 10 + drafts)    edits freely)
+```
+
+**Sources** (official APIs only; no scraping, no logged-in bots):
+
+| Source | Where | Access |
+|---|---|---|
+| Reddit | r/FuturesTrading, r/Daytrading, r/NinjaTrader, r/Trading, prop-firm subreddits | Reddit Data API. **Check Reddit's terms for commercial use first; approval may be needed** |
+| YouTube comments | NinjaTrader Live episodes (Jack's own appearances first), prop-firm and futures-education channels | YouTube Data API (comment threads), quota-limited |
+| X | Keyword searches on the same signals | X API search needs a paid tier. Until then, saved searches checked by hand in the digest |
+| Jack's own channels | Comments and replies on his videos and TradingView scripts | Already his; reply to every question within a day |
+| Forums (NinjaTrader forum, futures.io, TradingView comments) | Manual only: no API, and their rules limit promotion | Listed in the digest as "check by hand" |
+
+Never collect from private Discords or groups, and never store more than the post's
+public link, text and handle. Delete digest data after 30 days.
+
+**Signals** (starting keywords; the weekly review tunes them):
+- **Sizing:** "how many contracts", "position size", "risk per trade", "MES or ES", "micro vs mini"
+- **Stops:** "ATR stop", "stop too tight", "keep getting stopped out", "stop loss NQ"
+- **Prop firms:** "trailing drawdown", "failed my eval", "daily loss limit", "funded account rules"
+- **Platform:** "NinjaTrader ATM strategy", "NinjaTrader position size", "TradingView position size indicator"
+
+**Classification** (Claude, one call per post), scoring each post on:
+- **Topic:** sizing, stops, prop rules, platform or other.
+- **Intent:** asking for help, discussing, venting, or selling.
+- **Fit:** does a free tool or a short answer fully solve it?
+- **Sensitivity:** see 11.3.
+
+Only *asking for help* with a fit of 4–5 out of 5 reaches the digest.
+
+**Drafting:** Claude writes a reply in Jack's voice from `brand_brief.md`:
+- It answers the question in the reply itself, with the arithmetic where it helps.
+- It links a free tool only if the tool does exactly what was asked. The link carries
+  tracking: `?utm_source=reddit|youtube|x&utm_medium=reply&utm_campaign=listening&utm_content=<topic>`.
+- It says who's replying when there's a link: "I built this calculator".
+- It **never** mentions the paid membership.
+
+**Compliance:** the existing phrase rules apply. In addition, every draft is checked for
+two things, and fails if either is present:
+- **No individualised advice:** nothing like "you should trade 2 MNQ".
+- **No performance claims.**
+
+**Digest:** each morning, at most 10 threads, sent by the Discord bot that already posts
+the attention alerts. Each item has:
+- the link, a one-line summary and the draft reply;
+- the platform's self-promotion rule for that community;
+- a "skip" button.
+
+### 11.3 Who we never pitch
+
+The sensitivity score excludes, or reduces to a link-free general answer:
+- posts about **large losses, debt, borrowing to trade, or wanting to "win it back"**;
+- signs of distress or gambling-like behaviour;
+- anyone who appears to be under 18.
+
+People in that situation get, at most, a kind public answer about risk limits. Never a
+product link, never a DM. That's partly ethics. It's also practical: pitching a trading
+product to someone who just lost money is the fastest way to be called a predator in
+public, and to attract a regulator's attention.
+
+### 11.4 Daily limits and etiquette
+
+- At most **5 replies a day per platform**, and never more than 1 per community per day.
+- Never reply twice to the same person in 30 days unless they reply first.
+- Follow each subreddit's self-promotion rules; many forbid links entirely. There, the
+  reply is the answer with no link, and the profile does the rest.
+- **No other accounts:** no sockpuppets, no "I had the same problem and this tool fixed
+  it", no friends posting on Jack's behalf, no undisclosed affiliates. Only Jack's own
+  disclosed account.
+- Replies are written as Jack and approved by Jack. If someone else on the team posts,
+  the profile says so.
+
+### 11.5 The bigger payoff: a "pain-point index"
+
+Every classified post, including the ones we never reply to, is counted by topic. Each
+week the index shows which problems are most common, and feeds:
+1. **Content:** the top 3 problems become that week's Shorts and the Strategist's theme.
+   It answers the question "what should Jack make next?" with data instead of guesses.
+2. **`/learn` pages:** recurring questions become answer pages with the calculator built
+   in, so search engines and AI answer engines send those people to us without anyone
+   replying at all.
+3. **Product:** recurring requests become the next free tool or member tool.
+
+### 11.6 How it fits the funnel and how we measure it
+
+The flow: a public answer, then the free tool (no sign-up), then the optional email
+sign-up or the free Discord. The membership is offered later, through the normal pages
+and emails, never in the reply.
+
+| Metric | Source |
+|---|---|
+| Replies posted / skipped | Digest log |
+| Upvotes and replies per answer | Platform |
+| Sessions, tool use, sign-ups from `utm_campaign=listening` | GA4 (already tracked by channel) |
+| Members whose first touch was `listening` | `/admin/marketing` attribution |
+| Top problems this week | Pain-point index |
+
+**Go or stop after 30 days:** keep it only if listening replies drive at least as many
+email sign-ups per hour of Jack's time as making short videos, and draw no community
+complaints or removals.
+
+### 11.7 Before building
+
+1. **Jack's time:** about 20 minutes a day to read the digest, edit and post. Without
+   that, it's only the pain-point index (still useful).
+2. **Compliance check:** confirm with an NFA compliance contact that public educational
+   replies from Jack (Series 56) fit NFA Rule 2-29, and keep the digest log as the record.
+3. **API access:** Reddit Data API terms for commercial use; whether an X API paid tier
+   is worth it after month 1; a YouTube Data API key.
+4. **Build order:**
+   - first YouTube comments and Jack's own channels (lowest risk, highest fit);
+   - then Reddit, once its API terms are confirmed;
+   - then X.
