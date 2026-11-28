@@ -589,3 +589,38 @@ complaints or removals.
    - first YouTube comments and Jack's own channels (lowest risk, highest fit);
    - then Reddit, once its API terms are confirmed;
    - then X.
+
+### 11.8 Competitor complaints as a buying signal (adapted from the "1-star review" cold-email tactic)
+
+**The source tactic:** scrape competitors' 1- and 2-star reviews, find each reviewer's
+email, and cold-email them within 72 hours. **We don't do it as written:**
+- **The recipients are individuals.** Retail traders, not businesses: the EU, UK and
+  Canada require consent for marketing email to individuals.
+- **Scraping:** Trustpilot's and LinkedIn's terms prohibit scraping their reviewers and
+  profiles.
+- **Who's reviewing:** many reviewers of trading products just lost money (§11.3).
+- **Jack's registration:** Series 56 means NFA rules on public communications apply.
+- **The economics:** a sales-call model doesn't fit a $99 subscription.
+
+**What we keep:** a complaint about a competitor shows someone already buys this kind of
+product, is unhappy, and is shopping now. We meet that intent where people show it
+themselves.
+
+| Version | How | Permission basis |
+|---|---|---|
+| **1. Complaint map** (insight, not outreach) | Monthly, read the public 1–3★ reviews of the top trade rooms and NinjaTrader indicator vendors (Trustpilot, Whop, Reddit "is X legit?" threads). By hand or with the Listening desk; text only, no reviewer data kept. Tally the complaints: hype or signal-selling, repainting, upsells, hard cancellation, licensing hassle, no real education | Reading public reviews; no contact |
+| **2. Answer the complaints on our own pages** | Each top complaint becomes proof on the site or the FAQ, **only where true and in the brand brief:** "No tiers, no upsells", "Cancel anytime in Whop", "Licensed automatically", "Tools, not signals". Add a "What we don't do" block, and a `/switching` page for traders leaving another room. **No competitor names**, nothing we can't prove | Our own site |
+| **3. Intercept the search, not the person** | Paid search on intent phrases such as "trading room alternative", "best NinjaTrader position size indicator" and "[category] review", sending people to `/switching` or the free tools. Bidding on competitor names is a later, legal-reviewed decision (trademark rules on ad text) | The person searched |
+| **4. Be the helpful voice in public complaint threads** | When someone asks on Reddit "is X worth it?" or "alternatives to X?", Jack answers through the Listening desk (11.2): honest criteria for judging any trade room or tool, with a disclosure, and no attacks on the competitor | They asked publicly |
+| **5. Do the same for our own unhappy users** | Whop cancellation (`subscription_cancel` is already tracked): a one-question exit survey email, a personal reply from Jack to every answer, and fixes fed back into the product. Reply publicly to every StartUpTrading review on Whop or Trustpilot within 48 hours | They're our customers |
+
+**Measure:**
+- **`/switching` and the paid-search campaigns:** conversions tagged
+  `utm_campaign=switching`.
+- **Cancellation:** churn rate before and after the exit-survey loop.
+
+**Never:**
+- build lists of reviewers or look up their emails or profiles;
+- message someone because they reviewed a competitor;
+- name competitors in comparisons;
+- use "I was about to switch to X" style testimonials we can't verify.
